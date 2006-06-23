@@ -1,6 +1,9 @@
 Premake Changelog
 -----------------
 
+3.2 (in progress)
+* Turn off edit-and-continue in release builds with symbols
+
 3.1
 * Added support for Visual Studio 2005
 * Added support for Windows resources to GNU make target

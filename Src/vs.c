@@ -365,9 +365,15 @@ int vs_write_cpp()
 			runtime = (debug) ? 3 : 2;
 
 		if (prj_has_flag("no-symbols"))
+		{
 			symbols = 0;
+		}
 		else
-			symbols = prj_has_flag("managed") ? 3 : 4;
+		{
+			/* If optimizations are enabled, edit-and-continue won't work. 
+			 * Have to fall back to regular pdb in this case */
+			symbols = (optimization != 0 || prj_has_flag("managed")) ? 3 : 4;
+		}
 
 		tag_open("Configuration");
 		tag_attr("Name=\"%s|Win32\"", prj_get_cfgname());
