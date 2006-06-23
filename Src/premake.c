@@ -194,6 +194,12 @@ int onCommand(const char* cmd, const char* arg)
 {
 	if (matches(cmd, "target"))
 	{
+		if (prj_get_numpackages() == 0)
+		{
+			printf("** No packages defined\n");
+			return 0;
+		}
+
 		if (matches(arg, "gnu"))
 		{
 			return gnu_generate();
