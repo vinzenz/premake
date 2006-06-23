@@ -1,0 +1,27 @@
+Move website and svn back to sf.net
+
+Feature ideas in email from Philip Taylor
+
+Remove package type from Makefile header
+
+Remove Package.Kind from unit test framework classes
+
+Can identify other windows compilers with __CYGWIN32__ and __MINGW32__
+
+Test again with more recent MonoDevelop. 
+
+Reimplement packaging scripts for all projects using Premake. Add a new 'build' 
+action that will launch the toolset to complete the build. So I can do something
+like:
+
+  dobuild("vs2003", "Release")
+
+When a package links to a sibling package, the sibling's target is added to the list
+of libraries to link. However, only the target name is added, not the path. This 
+usually works because the targets are all put in the same place. If I link to a lib
+that is kept in the package area (package.target = package.path.."/bin") I don't
+think linking will work.
+
+Test that paths in GNU LDDEPS variable are set properly when the package is in a
+subdirectory under the project.
+

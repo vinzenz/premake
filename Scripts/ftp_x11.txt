@@ -1,0 +1,8 @@
+user anonymous jason379@users.sourceforge.net
+cd incoming
+bin
+prompt
+mput premake-src-*.zip
+mput premake-linux-*.tar.gz
+quit
+
