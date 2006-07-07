@@ -45,21 +45,19 @@ static const char* listResourceBuildSteps(const char* name);
 int gnu_cs()
 {
 	const char* kind;
-	const char* extension;
 	const char* csc;
 	const char* resgen;
 	int i;
 
 	/* Figure out what I'm building */
+	prj_select_config(0);
 	kind = prj_get_kind();
 	if (prj_is_kind("dll") || prj_is_kind("aspnet"))
 	{
-		extension = ".dll";
 		kind = "library";
 	}
 	else if (prj_is_kind("winexe") || prj_is_kind("exe"))
 	{
-		extension = ".exe";
 	}
 	else
 	{
