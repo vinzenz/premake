@@ -167,6 +167,14 @@ namespace Premake.Tests.Vs2003.Cpp
 		}
 
 		[Test]
+		public void Test_StaticRuntime()
+		{
+			_script.Append("package.buildflags = { 'static-runtime' }");
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "static-runtime" };
+			_expects.Package[0].Config[1].BuildFlags = new string[] { "static-runtime", "optimize", "no-symbols" };
+		}
+
+		[Test]
 		public void Test_Unicode()
 		{
 			_script.Append("package.buildflags = { 'unicode' }");

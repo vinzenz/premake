@@ -449,7 +449,7 @@ namespace Premake.Tests.Gnu
 					case "/warnaserror":
 						buildFlags.Add("fatal-warnings");
 						break;
-					case "/o":
+					case "/optimize":
 						buildFlags.Add("optimize");
 						break;
 					case "/unsafe":
