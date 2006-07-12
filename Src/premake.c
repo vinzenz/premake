@@ -22,6 +22,7 @@
 #include "script.h"
 #include "Lua/lua.h"
 
+#include "cb.h"
 #include "gnu.h"
 #include "sharpdev.h"
 #include "vs6.h"
@@ -200,6 +201,10 @@ int onCommand(const char* cmd, const char* arg)
 			return 0;
 		}
 
+		if (matches(arg, "cb"))
+		{
+			return cb_generate();
+		}
 		if (matches(arg, "gnu"))
 		{
 			return gnu_generate();
@@ -291,6 +296,7 @@ void showUsage()
 	puts("      windows   Microsoft Windows");
 	puts("");
 	puts(" --target name     Generate input files for the specified toolset; one of:");
+	puts("      cb        Code::Blocks Studio");
 	puts("      gnu       GNU Makefile for POSIX, MinGW, and Cygwin");
 	puts("      monodev   MonoDevelop");
 	puts("      sharpdev  ICSharpCode SharpDevelop");

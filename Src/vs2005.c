@@ -25,7 +25,7 @@
 static int vs2005_write_solution();
 static const char* list_aspnet_refs(const char* name);
 
-int vs2005_generate(int target)
+int vs2005_generate()
 {
 	int p;
 
