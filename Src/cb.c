@@ -19,11 +19,41 @@
 #include "premake.h"
 #include "cb.h"
 
+static int writeWorkspace();
+
 int cb_generate()
 {
 	int i;
 
 	puts("Generating Code::Blocks workspace and project files:");
+
+	if (!writeWorkspace())
+		return 0;
+
+	for (i = 0; i < prj_get_numpackages(); ++i)
+	{
+		prj_select_package(i);
+		printf("...%s\n", prj_get_pkgname());
+
+		if (prj_is_lang("c++") || prj_is_lang("c"))
+		{
+			if (!cb_cpp())
+				return 0;
+		}
+		else
+		{
+			printf("** Error: unsupported language '%s'\n", prj_get_language());
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+
+static int writeWorkspace()
+{
+	int i;
 
 	if (!io_openfile(path_join(prj_get_path(), prj_get_name(), "workspace")))
 		return 0;
@@ -33,6 +63,17 @@ int cb_generate()
 	io_print("<CodeBlocks_workspace_file>\n");
 	io_print("\t<Workspace title=\"%s\">\n", prj_get_name());
 
+	for (i = 0; i < prj_get_numpackages(); ++i)
+	{
+		prj_select_package(i);
+
+		io_print("\t\t<Project filename=\"%s.cbp\"", prj_get_pkgname());
+		if (i == 0) io_print(" active=\"1\"");
+		io_print("/>\n");
+	}
+
+	io_print("\t</Workspace>\n");
+	io_print("</CodeBlocks_workspace_file>\n");
 	io_closefile();
 	return 1;
 }
