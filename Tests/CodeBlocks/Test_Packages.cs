@@ -35,29 +35,11 @@ namespace Premake.Tests.CodeBlocks
 			_expects.Package[0].Name = "MyPackage";
 			Run();
 		}
-
-		[Test]
-		public void Test_C()
-		{
-			_script.Replace("c++", "c");
-			_expects.Package[0].Language = "c++";
-			Run();
-		}
-
 		[Test]
 		public void Test_Cpp()
 		{
 			_expects.Package[0].Language = "c++";
 			Run();
 		}
-
-		[Test]
-		public void Test_Cs()
-		{
-			_script.Replace("c++", "c#");
-			_expects.Package[0].Language = "c#";
-			Run();
-		}
-
 	}
 }

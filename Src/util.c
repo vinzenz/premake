@@ -31,8 +31,13 @@ static char buffer[8192];
 
 
 /************************************************************************
- * Checks a pattern against the end of a string
+ * Checks a pattern against the start or end of a string
  ***********************************************************************/
+
+int startsWith(const char* haystack, const char* needle)
+{
+	return (strncmp(haystack, needle, strlen(needle)) == 0);
+}
 
 int endsWith(const char* haystack, const char* needle)
 {

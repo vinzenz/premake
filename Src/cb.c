@@ -16,6 +16,7 @@
  **********************************************************************/
 
 #include <stdio.h>
+#include <string.h>
 #include "premake.h"
 #include "cb.h"
 
@@ -65,9 +66,13 @@ static int writeWorkspace()
 
 	for (i = 0; i < prj_get_numpackages(); ++i)
 	{
-		prj_select_package(i);
+		const char* filename;
 
-		io_print("\t\t<Project filename=\"%s.cbp\"", prj_get_pkgname());
+		prj_select_package(i);
+	
+		filename = prj_get_pkgfilename("cbp");
+		if (startsWith(filename, "./")) filename += 2;
+		io_print("\t\t<Project filename=\"%s\"", filename);
 		if (i == 0) io_print(" active=\"1\"");
 		io_print("/>\n");
 	}

@@ -61,8 +61,28 @@ namespace Premake.Tests.CodeBlocks
 			Match("\t\t<Option compiler=\"gcc\" />");
 			Match("\t\t<Build>");
 
+			package.Language = "c++";
+
+			while (!Match("\t\t</Build>", true))
+			{
+				Configuration config = new Configuration();
+				package.Config.Add(config);
+
+				string[] matches = Regex("\t\t\t<Target title=\"(.+?)\">");
+				config.Name = matches[0];
+
+				matches = Regex("\t\t\t\t<Option output=\"(.+?)\" />");
+				config.OutDir = Path.GetDirectoryName(matches[0]);
+				config.OutFile = Path.GetFileName(matches[0]);
+
+			}
+
+			if (project.Configuration.Count == 0)
+			{
+				foreach (Configuration config in package.Config)
+					project.Configuration.Add(config.Name);
+			}
 		}
 		#endregion
-
 	}
 }
