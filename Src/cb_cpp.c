@@ -40,10 +40,28 @@ int cb_cpp()
 
 	for (i = 0; i < prj_get_numconfigs(); ++i)
 	{
+		int kindCode;
+
 		prj_select_config(i);
 
 		io_print("\t\t\t<Target title=\"%s\">\n", prj_get_cfgname());
-		io_print("\t\t\t\t<Option output=\"%s\" />\n", prj_get_outdir());
+		io_print("\t\t\t\t<Option output=\"%s\" />\n", prj_get_target());
+		io_print("\t\t\t\t<Option object_output=\"%s\" />\n", prj_get_objdir());
+
+		if (prj_is_kind("winexe")) 
+			kindCode = 0;
+		else if (prj_is_kind("exe"))    
+			kindCode = 1;
+		else if (prj_is_kind("lib"))    
+			kindCode = 2;
+		else if (prj_is_kind("dll"))    
+			kindCode = 3;
+		else
+		{
+			printf("** Unsupported project kind %s\n", prj_get_kind());
+			return 0;
+		}
+		io_print("\t\t\t\t<Option type=\"%d\" />\n", kindCode);
 	}
 
 	io_print("\t\t</Build>\n");

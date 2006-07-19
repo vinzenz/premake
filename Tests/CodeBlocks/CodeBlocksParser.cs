@@ -75,6 +75,38 @@ namespace Premake.Tests.CodeBlocks
 				config.OutDir = Path.GetDirectoryName(matches[0]);
 				config.OutFile = Path.GetFileName(matches[0]);
 
+				matches = Regex("\t\t\t\t<Option object_output=\"(.+?)\" />");
+				config.ObjDir = matches[0];
+
+				matches = Regex("\t\t\t\t<Option type=\"([0-9])\" />");
+				switch (matches[0])
+				{
+				case "0":
+					config.Kind = "winexe";
+					break;
+				case "1":
+					config.Kind = "exe";
+					break;
+				case "2":
+					config.Kind = "lib";
+					break;
+				case "3":
+					config.Kind = "dll";
+					break;
+				default:
+					throw new FormatException("Unknown configuration type " + matches[0]);
+				}
+
+				if (config.Kind == "lib")
+				{
+					config.BinDir = "";
+					config.LibDir = config.OutDir;
+				}
+				else
+				{
+					config.BinDir = config.OutDir;
+					config.LibDir = "";
+				}
 			}
 
 			if (project.Configuration.Count == 0)
