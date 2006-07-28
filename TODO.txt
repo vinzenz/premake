@@ -1,12 +1,10 @@
-Move website and svn back to sf.net
+CB: enable all flags, see what goes into linker section
+
+CB: try a C project (instead of C++)
 
 Feature ideas in email from Philip Taylor
 
-Remove package type from Makefile header
-
-Remove Package.Kind from unit test framework classes
-
-Can identify other windows compilers with __CYGWIN32__ and __MINGW32__
+Can identify other windows compilers with __CYGWIN32__ and __MINGW32__ (to set windows platform flag)
 
 Test again with more recent MonoDevelop. 
 
