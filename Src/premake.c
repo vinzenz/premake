@@ -201,7 +201,7 @@ int onCommand(const char* cmd, const char* arg)
 			return 0;
 		}
 
-		if (matches(arg, "cb"))
+		if (matches(arg, "cb-gcc"))
 		{
 			return cb_generate();
 		}
@@ -296,7 +296,7 @@ void showUsage()
 	puts("      windows   Microsoft Windows");
 	puts("");
 	puts(" --target name     Generate input files for the specified toolset; one of:");
-	puts("      cb        Code::Blocks Studio");
+	puts("      cb-gcc    Code::Blocks Studio with GCC (experimental)");
 	puts("      gnu       GNU Makefile for POSIX, MinGW, and Cygwin");
 	puts("      monodev   MonoDevelop");
 	puts("      sharpdev  ICSharpCode SharpDevelop");

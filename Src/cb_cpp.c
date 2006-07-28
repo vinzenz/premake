@@ -20,6 +20,8 @@
 #include "premake.h"
 #include "cb.h"
 
+static void print_opt(const char* opt);
+
 int cb_cpp()
 {
 	int i;
@@ -33,8 +35,6 @@ int cb_cpp()
 	io_print("\t<FileVersion major=\"1\" minor=\"4\" />\n");
 	io_print("\t<Project>\n");
 	io_print("\t\t<Option title=\"%s\" />\n", prj_get_pkgname());
-	io_print("\t\t<Option pch_mode=\"0\" />\n");
-	io_print("\t\t<Option default_target=\"-1\" />\n");
 	io_print("\t\t<Option compiler=\"gcc\" />\n");
 	io_print("\t\t<Build>\n");
 
@@ -62,10 +62,64 @@ int cb_cpp()
 			return 0;
 		}
 		io_print("\t\t\t\t<Option type=\"%d\" />\n", kindCode);
+
+		io_print("\t\t\t\t<Option compiler=\"gcc\" />\n");
+
+		if (prj_is_kind("dll"))
+		{
+			io_print("\t\t\t\t<Option createDefFile=\"0\" />\n");
+			io_print("\t\t\t\t<Option createStaticLib=\"%d\" />\n", prj_has_flag("no-import-lib") ? 0 : 1);
+		}
+
+		io_print("\t\t\t\t<Compiler>\n");
+		if (prj_has_flag("extra-warnings"))
+			print_opt("-Wall");
+		if (prj_has_flag("fatal-warnings"))
+			print_opt("-Werror");
+		if (prj_has_flag("no-exceptions"))
+			print_opt("--no-exceptions");
+		if (prj_has_flag("no-frame-pointer"))
+			print_opt("-fomit-frame-pointer");
+		if (prj_has_flag("no-rtti"))
+			print_opt("--no-rtti");
+		if (!prj_has_flag("no-symbols"))
+			print_opt("-g");
+		if (prj_has_flag("optimize-size"))
+			print_opt("-Os");
+		if (prj_has_flag("optimize-speed"))
+			print_opt("-O3");
+		if (prj_has_flag("optimize") && !prj_has_flag("optimize-size") && !prj_has_flag("optimize-speed"))
+			print_opt("-O");
+		print_list(prj_get_defines(), "\t\t\t\t\t<Add option=\"-D", "\" />\n", "", NULL);
+		print_list(prj_get_buildoptions(), "\t\t\t\t\t<Add option=\"", "\" />\n", "", NULL);
+		io_print("\t\t\t\t</Compiler>\n");
+
+		io_print("\t\t\t\t<Linker>\n");
+		if (prj_has_flag("no-symbols"))
+			print_opt("-s");
+		io_print("\t\t\t\t</Linker>\n");
+
+		io_print("\t\t\t</Target>\n");
 	}
 
 	io_print("\t\t</Build>\n");
 
+	io_print("\t\t<Unit filename=\"main.cpp\">\n");
+	io_print("\t\t\t<Option compilerVar=\"CPP\" />\n");
+	io_print("\t\t\t<Option target=\"Debug\" />\n");
+	io_print("\t\t\t<Option target=\"Release\" />\n");
+	io_print("\t\t</Unit>\n");
+	io_print("\t\t<Extensions />\n");
+	io_print("\t</Project>\n");
+	io_print("</CodeBlocks_project_file>\n");
+
 	io_closefile();
 	return 1;
 }
+
+
+static void print_opt(const char* opt)
+{
+	io_print("\t\t\t\t\t<Add option=\"%s\" />\n", opt);
+}
+

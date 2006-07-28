@@ -10,7 +10,7 @@ namespace Premake.Tests.CodeBlocks
 		#region Parser Methods
 		public override string TargetName
 		{
-			get { return "cb"; }
+			get { return "cb-gcc"; }
 		}
 		#endregion
 
@@ -56,8 +56,6 @@ namespace Premake.Tests.CodeBlocks
 			Match("\t<FileVersion major=\"1\" minor=\"4\" />");
 			Match("\t<Project>");
 			Match("\t\t<Option title=\"" + package.Name + "\" />");
-			Match("\t\t<Option pch_mode=\"0\" />");
-			Match("\t\t<Option default_target=\"-1\" />");
 			Match("\t\t<Option compiler=\"gcc\" />");
 			Match("\t\t<Build>");
 
@@ -71,41 +69,126 @@ namespace Premake.Tests.CodeBlocks
 				string[] matches = Regex("\t\t\t<Target title=\"(.+?)\">");
 				config.Name = matches[0];
 
-				matches = Regex("\t\t\t\t<Option output=\"(.+?)\" />");
-				config.OutDir = Path.GetDirectoryName(matches[0]);
-				config.OutFile = Path.GetFileName(matches[0]);
-
-				matches = Regex("\t\t\t\t<Option object_output=\"(.+?)\" />");
-				config.ObjDir = matches[0];
-
-				matches = Regex("\t\t\t\t<Option type=\"([0-9])\" />");
-				switch (matches[0])
+				while (!Match("\t\t\t</Target>", true))
 				{
-				case "0":
-					config.Kind = "winexe";
-					break;
-				case "1":
-					config.Kind = "exe";
-					break;
-				case "2":
-					config.Kind = "lib";
-					break;
-				case "3":
-					config.Kind = "dll";
-					break;
-				default:
-					throw new FormatException("Unknown configuration type " + matches[0]);
-				}
+					ArrayList buildFlags = new ArrayList();
+					ArrayList defines = new ArrayList();
+					config.BuildOptions = "";
+					config.LinkOptions = "";
 
-				if (config.Kind == "lib")
-				{
-					config.BinDir = "";
-					config.LibDir = config.OutDir;
-				}
-				else
-				{
-					config.BinDir = config.OutDir;
-					config.LibDir = "";
+					matches = Regex("\t\t\t\t<Option output=\"(.+?)\" />");
+					config.OutDir = Path.GetDirectoryName(matches[0]);
+					config.OutFile = Path.GetFileName(matches[0]);
+
+					matches = Regex("\t\t\t\t<Option object_output=\"(.+?)\" />");
+					config.ObjDir = matches[0];
+
+					matches = Regex("\t\t\t\t<Option type=\"([0-9])\" />");
+					switch (matches[0])
+					{
+					case "0":
+						config.Kind = "winexe";
+						break;
+					case "1":
+						config.Kind = "exe";
+						break;
+					case "2":
+						config.Kind = "lib";
+						break;
+					case "3":
+						config.Kind = "dll";
+						break;
+					default:
+						throw new FormatException("Unknown configuration type " + matches[0]);
+					}
+
+					if (config.Kind == "lib")
+					{
+						config.BinDir = "";
+						config.LibDir = config.OutDir;
+					}
+					else
+					{
+						config.BinDir = config.OutDir;
+						config.LibDir = "";
+					}
+
+					Match("\t\t\t\t<Option compiler=\"gcc\" />");
+
+					if (config.Kind == "dll")
+					{
+						Match("\t\t\t\t<Option createDefFile=\"0\" />");
+
+						matches = Regex("\t\t\t\t<Option createStaticLib=\"([0-1])\" />");
+						if (matches[0] == "0")
+							buildFlags.Add("no-import-lib");
+					}
+
+					Match("\t\t\t\t<Compiler>");
+
+					while (!Match("\t\t\t\t</Compiler>", true))
+					{
+						matches = Regex("\t\t\t\t\t<Add option=\"(.+?)\" />");
+						switch (matches[0])
+						{
+						case "-fomit-frame-pointer":
+							buildFlags.Add("no-frame-pointer");
+							break;
+						case "--no-exceptions":
+							buildFlags.Add("no-exceptions");
+							break;
+						case "--no-rtti":
+							buildFlags.Add("no-rtti");
+							break;
+						case "-O":
+							buildFlags.Add("optimize");
+							break;
+						case "-O3":
+							buildFlags.Add("optimize-speed");
+							break;
+						case "-Os":
+							buildFlags.Add("optimize-size");
+							break;
+						case "-g":
+							break;
+						case "-Wall":
+							buildFlags.Add("extra-warnings");
+							break;
+						case "-Werror":
+							buildFlags.Add("fatal-warnings");
+							break;
+						default:
+							if (matches[0].StartsWith("-D"))
+							{
+								defines.Add(matches[0].Substring(2));
+							}
+							else
+							{
+								config.BuildOptions += matches[0] + " ";
+							}
+							break;
+						}
+					}
+
+					Match("\t\t\t\t<Linker>");
+					while (!Match("\t\t\t\t</Linker>", true))
+					{
+						matches = Regex("\t\t\t\t\t<Add option=\"(.+?)\" />");
+						switch (matches[0])
+						{
+						case "-s":
+							buildFlags.Add("no-symbols");
+							break;
+						default:
+							config.LinkOptions += matches[0] + " ";
+							break;
+						}
+					}
+
+					config.BuildFlags = (string[])buildFlags.ToArray(typeof(string));
+					config.Defines = (string[])defines.ToArray(typeof(string));
+					config.BuildOptions = config.BuildOptions.Trim(' ');
+					config.LinkOptions = config.LinkOptions.Trim(' ');
 				}
 			}
 
@@ -114,6 +197,16 @@ namespace Premake.Tests.CodeBlocks
 				foreach (Configuration config in package.Config)
 					project.Configuration.Add(config.Name);
 			}
+
+			Match("\t\t<Unit filename=\"main.cpp\">");
+			Match("\t\t\t<Option compilerVar=\"CPP\" />");
+			Match("\t\t\t<Option target=\"Debug\" />");
+			Match("\t\t\t<Option target=\"Release\" />");
+			Match("\t\t</Unit>");
+
+			Match("\t\t<Extensions />");
+			Match("\t</Project>");
+			Match("</CodeBlocks_project_file>");
 		}
 		#endregion
 	}

@@ -50,6 +50,7 @@ namespace Premake.Tests.Gnu.Cpp
 			Run();
 		}
 
+		[Test]
 		public void Test_SetFlagOnPackageAndConfig()
 		{
 			_script.Append("package.buildflags = { 'no-exceptions' }");

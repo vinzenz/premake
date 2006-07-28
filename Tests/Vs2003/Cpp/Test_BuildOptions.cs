@@ -49,6 +49,7 @@ namespace Premake.Tests.Vs2003.Cpp
 			Run();
 		}
 
+		[Test]
 		public void Test_SetOptionsOnPackageAndConfig()
 		{
 			_script.Append("package.buildoptions = { 'pkgopt'  }");

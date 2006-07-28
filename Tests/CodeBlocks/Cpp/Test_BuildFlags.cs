@@ -33,27 +33,28 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		[Test]
 		public void Test_SetFlagOnPackage()
 		{
-			_script.Append("package.buildflags = { 'no-64bit-checks' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-64bit-checks" };
-			_expects.Package[0].Config[1].BuildFlags = new string[] { "no-64bit-checks", "optimize", "no-symbols" };
+			_script.Append("package.buildflags = { 'no-exceptions' }");
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-exceptions" };
+			_expects.Package[0].Config[1].BuildFlags = new string[] { "no-exceptions", "optimize", "no-symbols" };
 			Run();
 		}
 
 		[Test]
 		public void Test_SetFlagOnConfig()
 		{
-			_script.Append("package.config['Debug'].buildflags = { 'no-64bit-checks' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-64bit-checks" };
+			_script.Append("package.config['Debug'].buildflags = { 'no-exceptions' }");
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-exceptions" };
 			_expects.Package[0].Config[1].BuildFlags = new string[] { "optimize", "no-symbols" };
 			Run();
 		}
 
+		[Test]
 		public void Test_SetFlagOnPackageAndConfig()
 		{
-			_script.Append("package.buildflags = { 'no-64bit-checks' }");
-			_script.Append("package.config['Release'].buildflags = { 'no-exceptions' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-64bit-checks" };
-			_expects.Package[0].Config[1].BuildFlags = new string[] { "no-64bit-checks", "no-exceptions" };
+			_script.Append("package.buildflags = { 'no-exceptions' }");
+			_script.Append("package.config['Release'].buildflags = { 'no-rtti' }");
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-exceptions" };
+			_expects.Package[0].Config[1].BuildFlags = new string[] { "no-exceptions", "no-rtti" };
 			Run();
 		}
 
@@ -72,15 +73,6 @@ namespace Premake.Tests.CodeBlocks.Cpp
 			_script.Append("package.buildflags = { 'fatal-warnings' }");
 			_expects.Package[0].Config[0].BuildFlags = new string[] { "fatal-warnings" };
 			_expects.Package[0].Config[1].BuildFlags = new string[] { "fatal-warnings", "optimize", "no-symbols" };
-			Run();
-		}
-
-		[Test]
-		public void Test_No64BitChecks()
-		{
-			_script.Append("package.buildflags = { 'no-64bit-checks' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-64bit-checks" };
-			_expects.Package[0].Config[1].BuildFlags = new string[] { "no-64bit-checks", "optimize", "no-symbols" };
 			Run();
 		}
 
@@ -109,15 +101,6 @@ namespace Premake.Tests.CodeBlocks.Cpp
 			_script.Append("package.buildflags = { 'no-import-lib' }");
 			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-import-lib" };
 			_expects.Package[0].Config[1].BuildFlags = new string[] { "no-import-lib", "optimize", "no-symbols" };
-			Run();
-		}
-
-		[Test]
-		public void Test_NoMain()
-		{
-			_script.Append("package.buildflags = { 'no-main' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-main" };
-			_expects.Package[0].Config[1].BuildFlags = new string[] { "no-main", "optimize", "no-symbols" };
 			Run();
 		}
 
@@ -163,23 +146,6 @@ namespace Premake.Tests.CodeBlocks.Cpp
 			_script.Append("package.buildflags = { 'optimize-speed' }");
 			_expects.Package[0].Config[0].BuildFlags = new string[] { "optimize-speed" };
 			_expects.Package[0].Config[1].BuildFlags = new string[] { "optimize-speed", "no-symbols" };
-			Run();
-		}
-
-		[Test]
-		public void Test_StaticRuntime()
-		{
-			_script.Append("package.buildflags = { 'static-runtime' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "static-runtime" };
-			_expects.Package[0].Config[1].BuildFlags = new string[] { "static-runtime", "optimize", "no-symbols" };
-		}
-
-		[Test]
-		public void Test_Unicode()
-		{
-			_script.Append("package.buildflags = { 'unicode' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "unicode" };
-			_expects.Package[0].Config[1].BuildFlags = new string[] { "unicode", "optimize", "no-symbols" };
 			Run();
 		}
 	}
