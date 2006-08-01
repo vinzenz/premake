@@ -24,9 +24,10 @@ namespace Premake.Tests.CodeBlocks
 			Match("<CodeBlocks_workspace_file>");
 			Match("\t<Workspace title=\"" + project.Name + "\">");
 
+			Hashtable packageDependencies = new Hashtable();
 			while (!Match("\t</Workspace>", true))
 			{
-				string[] matches = Regex("\t\t<Project filename=\"(.+?)\"(.*)/>");
+				string[] matches = Regex("\t\t<Project filename=\"(.+?)\"(.*)>");
 
 				Package package = new Package();
 				project.Package.Add(package);
@@ -34,6 +35,14 @@ namespace Premake.Tests.CodeBlocks
 				package.Name = Path.GetFileNameWithoutExtension(matches[0]);
 				package.Path = Path.GetDirectoryName(matches[0]);
 				package.ScriptName = Path.GetFileName(matches[0]);
+
+				ArrayList deps = new ArrayList();
+				while (!Match("\t\t</Project>", true))
+				{
+					matches = Regex("\t\t\t<Depends filename=\"(.+?)\" />");
+					deps.Add(Path.GetFileNameWithoutExtension(matches[0]));
+				}
+				packageDependencies.Add(package, deps.ToArray(typeof(string)));
 			}
 
 			Match("</CodeBlocks_workspace_file>");
@@ -42,6 +51,9 @@ namespace Premake.Tests.CodeBlocks
 			{
 				filename = Path.Combine(Path.Combine(project.Path, package.Path), package.ScriptName);
 				ParseCpp(project, package, filename);
+
+				foreach (Configuration cfg in package.Config)
+					cfg.Dependencies = (string[])packageDependencies[package];
 			}
 		}
 		#endregion

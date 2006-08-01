@@ -52,6 +52,28 @@ int cb_generate()
 }
 
 
+/************************************************************************
+ * List callback: scans the list of links for a package. If a link is
+ * found to a sibling package, prints a dependency string for the 
+ * workspace file. 
+ ***********************************************************************/
+static char* printProjectDependencies(const char* name)
+{
+	int i;
+	for (i = 0; i < prj_get_numpackages(); ++i)
+	{
+		if (matches(prj_get_pkgname_for(i), name))
+		{
+			const char* filename = prj_get_pkgfilename_for(i, "cbp");
+			if (startsWith(filename, "./")) filename += 2;
+			io_print("\t\t\t<Depends filename=\"%s\" />\n", filename);
+		}
+	}
+
+	return NULL;
+}
+
+
 static int writeWorkspace()
 {
 	int i;
@@ -74,7 +96,13 @@ static int writeWorkspace()
 		if (startsWith(filename, "./")) filename += 2;
 		io_print("\t\t<Project filename=\"%s\"", filename);
 		if (i == 0) io_print(" active=\"1\"");
-		io_print("/>\n");
+		io_print(">\n");
+
+		/* Write project dependencies */
+		prj_select_config(0);
+		print_list(prj_get_links(), "", "", "", printProjectDependencies);
+
+		io_print("\t\t</Project>\n");
 	}
 
 	io_print("\t</Workspace>\n");

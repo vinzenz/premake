@@ -959,10 +959,7 @@ static int lf_dopackage(lua_State* L)
 
 	if (!io_fileexists(filename))
 	{
-		lua_pushstring(L, "Unable to open package '");
-		lua_pushvalue(L, 1);
-		lua_pushstring(L, "'");
-		lua_concat(L, 3);
+		printf("** No such package: %s\n", filename);
 		lua_error(L);
 	}
 

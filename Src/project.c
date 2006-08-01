@@ -520,10 +520,27 @@ const char* prj_get_pkgpath_for(int i)
 
 const char* prj_get_pkgfilename(const char* extension)
 {
+	return prj_get_pkgfilename_for(my_pkg->index, extension);
+/*
 	strcpy(buffer, path_build(project->path, my_pkg->path));
 	if (strlen(buffer) > 0)
 		strcat(buffer, "/");
 	strcat(buffer, my_pkg->name);
+	if (extension != NULL)
+	{
+		strcat(buffer, ".");
+		strcat(buffer, extension);
+	}
+	return buffer;
+*/
+}
+
+const char* prj_get_pkgfilename_for(int i, const char* extension)
+{
+	strcpy(buffer, path_build(project->path, my_pkg->path));
+	if (strlen(buffer) > 0)
+		strcat(buffer, "/");
+	strcat(buffer, project->packages[i]->name);
 	if (extension != NULL)
 	{
 		strcat(buffer, ".");
