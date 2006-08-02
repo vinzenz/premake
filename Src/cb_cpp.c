@@ -22,6 +22,18 @@
 
 static void print_opt(const char* opt);
 
+
+static const char* listFiles(const char* filename)
+{
+	io_print("\t\t<Unit filename=\"%s\">\n", filename);
+	io_print("\t\t\t<Option compilerVar=\"CPP\" />\n");
+	io_print("\t\t\t<Option target=\"Debug\" />\n");
+	io_print("\t\t\t<Option target=\"Release\" />\n");
+	io_print("\t\t</Unit>\n");
+	return NULL;
+}
+
+
 int cb_cpp()
 {
 	int i;
@@ -104,11 +116,8 @@ int cb_cpp()
 
 	io_print("\t\t</Build>\n");
 
-	io_print("\t\t<Unit filename=\"main.cpp\">\n");
-	io_print("\t\t\t<Option compilerVar=\"CPP\" />\n");
-	io_print("\t\t\t<Option target=\"Debug\" />\n");
-	io_print("\t\t\t<Option target=\"Release\" />\n");
-	io_print("\t\t</Unit>\n");
+	print_list(prj_get_files(), "", "", "", listFiles);
+
 	io_print("\t\t<Extensions />\n");
 	io_print("\t</Project>\n");
 	io_print("</CodeBlocks_project_file>\n");

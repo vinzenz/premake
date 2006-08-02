@@ -210,13 +210,18 @@ namespace Premake.Tests.CodeBlocks
 					project.Configuration.Add(config.Name);
 			}
 
-			Match("\t\t<Unit filename=\"main.cpp\">");
-			Match("\t\t\t<Option compilerVar=\"CPP\" />");
-			Match("\t\t\t<Option target=\"Debug\" />");
-			Match("\t\t\t<Option target=\"Release\" />");
-			Match("\t\t</Unit>");
+			while (!Match("\t\t<Extensions />", true))
+			{
+				string[] matches = Regex("\t\t<Unit filename=\"(.+?)\">");
 
-			Match("\t\t<Extensions />");
+				Match("\t\t\t<Option compilerVar=\"CPP\" />");
+				foreach (Configuration cfg in package.Config)
+					Match("\t\t\t<Option target=\"" + cfg.Name + "\" />");
+				Match("\t\t</Unit>");
+
+				package.File.Add(matches[0]);
+			}
+
 			Match("\t</Project>");
 			Match("</CodeBlocks_project_file>");
 		}
