@@ -85,6 +85,7 @@ namespace Premake.Tests.CodeBlocks
 				{
 					ArrayList buildFlags = new ArrayList();
 					ArrayList defines = new ArrayList();
+					ArrayList incPaths = new ArrayList();
 					config.BuildOptions = "";
 					config.LinkOptions = "";
 
@@ -140,45 +141,54 @@ namespace Premake.Tests.CodeBlocks
 
 					while (!Match("\t\t\t\t</Compiler>", true))
 					{
-						matches = Regex("\t\t\t\t\t<Add option=\"(.+?)\" />");
-						switch (matches[0])
+						matches = Regex("\t\t\t\t\t<Add option=\"(.+?)\" />", true);
+						if (matches != null)
 						{
-						case "-fomit-frame-pointer":
-							buildFlags.Add("no-frame-pointer");
-							break;
-						case "--no-exceptions":
-							buildFlags.Add("no-exceptions");
-							break;
-						case "--no-rtti":
-							buildFlags.Add("no-rtti");
-							break;
-						case "-O":
-							buildFlags.Add("optimize");
-							break;
-						case "-O3":
-							buildFlags.Add("optimize-speed");
-							break;
-						case "-Os":
-							buildFlags.Add("optimize-size");
-							break;
-						case "-g":
-							break;
-						case "-Wall":
-							buildFlags.Add("extra-warnings");
-							break;
-						case "-Werror":
-							buildFlags.Add("fatal-warnings");
-							break;
-						default:
-							if (matches[0].StartsWith("-D"))
+							switch (matches[0])
 							{
-								defines.Add(matches[0].Substring(2));
+							case "-fomit-frame-pointer":
+								buildFlags.Add("no-frame-pointer");
+								break;
+							case "--no-exceptions":
+								buildFlags.Add("no-exceptions");
+								break;
+							case "--no-rtti":
+								buildFlags.Add("no-rtti");
+								break;
+							case "-O":
+								buildFlags.Add("optimize");
+								break;
+							case "-O3":
+								buildFlags.Add("optimize-speed");
+								break;
+							case "-Os":
+								buildFlags.Add("optimize-size");
+								break;
+							case "-g":
+								break;
+							case "-Wall":
+								buildFlags.Add("extra-warnings");
+								break;
+							case "-Werror":
+								buildFlags.Add("fatal-warnings");
+								break;
+							default:
+								if (matches[0].StartsWith("-D"))
+								{
+									defines.Add(matches[0].Substring(2));
+								}
+								else
+								{
+									config.BuildOptions += matches[0] + " ";
+								}
+								break;
 							}
-							else
-							{
-								config.BuildOptions += matches[0] + " ";
-							}
-							break;
+						}
+
+						matches = Regex("\t\t\t\t\t<Add directory=\"(.+?)\" />", true);
+						if (matches != null)
+						{
+							incPaths.Add(matches[0]);
 						}
 					}
 
@@ -199,6 +209,7 @@ namespace Premake.Tests.CodeBlocks
 
 					config.BuildFlags = (string[])buildFlags.ToArray(typeof(string));
 					config.Defines = (string[])defines.ToArray(typeof(string));
+					config.IncludePaths = (string[])incPaths.ToArray(typeof(string));
 					config.BuildOptions = config.BuildOptions.Trim(' ');
 					config.LinkOptions = config.LinkOptions.Trim(' ');
 				}

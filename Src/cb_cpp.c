@@ -80,7 +80,7 @@ int cb_cpp()
 		if (prj_is_kind("dll"))
 		{
 			io_print("\t\t\t\t<Option createDefFile=\"0\" />\n");
-			io_print("\t\t\t\t<Option createStaticLib=\"%d\" />\n", prj_has_flag("no-import-lib") ? 0 : 1);
+			io_print("\t\t\t\t<Option createStaticLib=\"0\" />\n");
 		}
 
 		io_print("\t\t\t\t<Compiler>\n");
@@ -104,6 +104,7 @@ int cb_cpp()
 			print_opt("-O");
 		print_list(prj_get_defines(), "\t\t\t\t\t<Add option=\"-D", "\" />\n", "", NULL);
 		print_list(prj_get_buildoptions(), "\t\t\t\t\t<Add option=\"", "\" />\n", "", NULL);
+		print_list(prj_get_incpaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL); 
 		io_print("\t\t\t\t</Compiler>\n");
 
 		io_print("\t\t\t\t<Linker>\n");
