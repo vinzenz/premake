@@ -20,6 +20,7 @@
 #include "premake.h"
 #include "cb.h"
 
+static const char* filterLinks(const char* name);
 static void print_opt(const char* opt);
 
 
@@ -110,6 +111,8 @@ int cb_cpp()
 		io_print("\t\t\t\t<Linker>\n");
 		if (prj_has_flag("no-symbols"))
 			print_opt("-s");
+		print_list(prj_get_libpaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL);
+		print_list(prj_get_links(), "\t\t\t\t\t<Add library=\"", "\" />\n", "", filterLinks);
 		io_print("\t\t\t\t</Linker>\n");
 
 		io_print("\t\t\t</Target>\n");
@@ -133,3 +136,29 @@ static void print_opt(const char* opt)
 	io_print("\t\t\t\t\t<Add option=\"%s\" />\n", opt);
 }
 
+
+/************************************************************************
+ * Checks each entry in the list of package links. If the entry refers
+ * to a sibling package, returns the path to that package's output
+ ***********************************************************************/
+
+static const char* filterLinks(const char* name)
+{
+	int i = prj_find_package(name);
+	if (i >= 0)
+	{
+		const char* lang = prj_get_language_for(i);
+		if (matches(lang, "c++") || matches(lang, "c"))
+		{
+			return prj_get_target_for(i);
+		}
+		else
+		{
+			return NULL;
+		}
+	}
+	else
+	{
+		return name;
+	}
+}

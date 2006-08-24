@@ -34,8 +34,8 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		public void Test_LinksOnPackage()
 		{
 			_script.Append("package.links = { 'lib1', 'lib2' }");
-			_expects.Package[0].Config[0].Links = new string[] { "lib1.lib", "lib2.lib" };
-			_expects.Package[0].Config[1].Links = new string[] { "lib1.lib", "lib2.lib" };
+			_expects.Package[0].Config[0].Links = new string[] { "lib1", "lib2" };
+			_expects.Package[0].Config[1].Links = new string[] { "lib1", "lib2" };
 			Run();
 		}
 
@@ -44,8 +44,8 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		{
 			_script.Append("package.config['Debug'].links = { 'lib1-d' }");
 			_script.Append("package.config['Release'].links = { 'lib1' }");
-			_expects.Package[0].Config[0].Links = new string[] { "lib1-d.lib" };
-			_expects.Package[0].Config[1].Links = new string[] { "lib1.lib" };
+			_expects.Package[0].Config[0].Links = new string[] { "lib1-d" };
+			_expects.Package[0].Config[1].Links = new string[] { "lib1" };
 			Run();
 		}
 
@@ -55,8 +55,8 @@ namespace Premake.Tests.CodeBlocks.Cpp
 			_script.Append("package.links = { 'pkglib' }");
 			_script.Append("package.config['Debug'].links = { 'liba-d' }");
 			_script.Append("package.config['Release'].links = { 'liba' }");
-			_expects.Package[0].Config[0].Links = new string[] { "pkglib.lib", "liba-d.lib" };
-			_expects.Package[0].Config[1].Links = new string[] { "pkglib.lib", "liba.lib" };
+			_expects.Package[0].Config[0].Links = new string[] { "pkglib", "liba-d" };
+			_expects.Package[0].Config[1].Links = new string[] { "pkglib", "liba" };
 			Run();
 		}
 

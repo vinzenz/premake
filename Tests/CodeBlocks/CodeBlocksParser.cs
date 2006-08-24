@@ -86,12 +86,15 @@ namespace Premake.Tests.CodeBlocks
 					ArrayList buildFlags = new ArrayList();
 					ArrayList defines = new ArrayList();
 					ArrayList incPaths = new ArrayList();
+					ArrayList libPaths = new ArrayList();
+					ArrayList libs = new ArrayList();
 					config.BuildOptions = "";
 					config.LinkOptions = "";
 
 					matches = Regex("\t\t\t\t<Option output=\"(.+?)\" />");
-					config.OutDir = Path.GetDirectoryName(matches[0]);
-					config.OutFile = Path.GetFileName(matches[0]);
+					config.Target = Path.GetFileName(matches[0]).Replace('\\', '/');
+					config.OutDir = Path.GetDirectoryName(matches[0]).Replace('\\', '/'); ;
+					config.OutFile = Path.GetFileName(matches[0]).Replace('\\', '/'); ;
 
 					matches = Regex("\t\t\t\t<Option object_output=\"(.+?)\" />");
 					config.ObjDir = matches[0];
@@ -195,21 +198,38 @@ namespace Premake.Tests.CodeBlocks
 					Match("\t\t\t\t<Linker>");
 					while (!Match("\t\t\t\t</Linker>", true))
 					{
-						matches = Regex("\t\t\t\t\t<Add option=\"(.+?)\" />");
-						switch (matches[0])
+						matches = Regex("\t\t\t\t\t<Add option=\"(.+?)\" />", true);
+						if (matches != null)
 						{
-						case "-s":
-							buildFlags.Add("no-symbols");
-							break;
-						default:
-							config.LinkOptions += matches[0] + " ";
-							break;
+							switch (matches[0])
+							{
+							case "-s":
+								buildFlags.Add("no-symbols");
+								break;
+							default:
+								config.LinkOptions += matches[0] + " ";
+								break;
+							}
+						}
+
+						matches = Regex("\t\t\t\t\t<Add directory=\"(.+?)\" />", true);
+						if (matches != null)
+						{
+							libPaths.Add(matches[0]);
+						}
+
+						matches = Regex("\t\t\t\t\t<Add library=\"(.+?)\" />", true);
+						if (matches != null)
+						{
+							libs.Add(matches[0]);
 						}
 					}
 
 					config.BuildFlags = (string[])buildFlags.ToArray(typeof(string));
 					config.Defines = (string[])defines.ToArray(typeof(string));
 					config.IncludePaths = (string[])incPaths.ToArray(typeof(string));
+					config.LibPaths = (string[])libPaths.ToArray(typeof(string));
+					config.Links = (string[])libs.ToArray(typeof(string));
 					config.BuildOptions = config.BuildOptions.Trim(' ');
 					config.LinkOptions = config.LinkOptions.Trim(' ');
 				}

@@ -53,8 +53,8 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		{
 			_script.Append("project.config['Debug'].bindir = 'bin/Debug'");
 			_script.Append("project.config['Release'].bindir = 'bin/Release'");
-			_expects.Package[0].Config[0].BinDir = "bin\\Debug";
-			_expects.Package[0].Config[1].BinDir = "bin\\Release";
+			_expects.Package[0].Config[0].BinDir = "bin/Debug";
+			_expects.Package[0].Config[1].BinDir = "bin/Release";
 			Run();
 		}
 		#endregion
@@ -85,8 +85,8 @@ namespace Premake.Tests.CodeBlocks.Cpp
 			_script.Replace("'exe'", "'lib'");
 			_script.Append("project.config['Debug'].libdir = 'lib/Debug'");
 			_script.Append("project.config['Release'].libdir = 'lib/Release'");
-			_expects.Package[0].Config[0].LibDir = "lib\\Debug";
-			_expects.Package[0].Config[1].LibDir = "lib\\Release";
+			_expects.Package[0].Config[0].LibDir = "lib/Debug";
+			_expects.Package[0].Config[1].LibDir = "lib/Release";
 			Run();
 		}
 		#endregion
