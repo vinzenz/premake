@@ -3,12 +3,12 @@
  * Common code for Visual Studio 2002-2005 targets.
  *
  * Copyright (c) 2002-2006 Jason Perkins and the Premake project
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -52,7 +52,7 @@ enum Blocks
 	VCAppVerifierTool
 };
 
-static int blocks_2002[] = 
+static int blocks_2002[] =
 {
 	VCCLCompilerTool,
 	VCCustomBuildTool,
@@ -67,7 +67,7 @@ static int blocks_2002[] =
 	BlocksEnd
 };
 
-static int blocks_2003[] = 
+static int blocks_2003[] =
 {
 	VCCLCompilerTool,
 	VCCustomBuildTool,
@@ -172,7 +172,7 @@ static void tag_attr_open(const char* name)
 	io_print("=\"");
 }
 
-static tag_attr_close()
+static void tag_attr_close()
 {
 	io_print("\"");
 	attrib++;
@@ -231,7 +231,7 @@ void vs_assign_guids()
 		VsPkgData* data = ALLOCT(VsPkgData);
 		prj_select_package(p);
 		prj_set_data(data);
-	
+
 		generateUUID(data->projGuid);
 
 		prj_select_config(0);
@@ -279,7 +279,7 @@ int vs_write_cpp()
 
 	prj_select_config(0);
 	io_print("<?xml version=\"1.0\" encoding=\"Windows-1252\"?>\n");
-	
+
 	tag_open("VisualStudioProject");
 	tag_attr("ProjectType=\"Visual C++\"");
 
@@ -303,7 +303,7 @@ int vs_write_cpp()
 	if (version == VS2005)
 		tag_attr("RootNamespace=\"%s\"", prj_get_pkgname());
 
-	tag_attr("Keyword=\"%s\"", prj_has_flag("managed") ? "ManagedCProj" : "Win32Proj");  
+	tag_attr("Keyword=\"%s\"", prj_has_flag("managed") ? "ManagedCProj" : "Win32Proj");
 
 	tag_open("Platforms");
 	tag_open("Platform");
@@ -370,7 +370,7 @@ int vs_write_cpp()
 		}
 		else
 		{
-			/* If optimizations are enabled, edit-and-continue won't work. 
+			/* If optimizations are enabled, edit-and-continue won't work.
 			 * Have to fall back to regular pdb in this case */
 			symbols = (optimization != 0 || prj_has_flag("managed")) ? 3 : 4;
 		}
@@ -381,7 +381,7 @@ int vs_write_cpp()
 		tag_attr("IntermediateDirectory=\"%s\"", prj_get_objdir());
 		tag_attr("ConfigurationType=\"%d\"", configTypeId);
 		tag_attr("CharacterSet=\"%d\"", prj_has_flag("unicode") ? 1 : 2);
-		if (prj_has_flag("managed")) 
+		if (prj_has_flag("managed"))
 			tag_attr("ManagedExtensions=\"%s\"", S_TRUE);
 
 		/* Write out tool blocks */
@@ -462,7 +462,7 @@ int vs_write_cpp()
 
 				tag_attr("Optimization=\"%d\"", optimization);
 
-				if (prj_has_flag("no-frame-pointer")) 
+				if (prj_has_flag("no-frame-pointer"))
 					tag_attr("OmitFramePointers=\"%s\"", S_TRUE);
 
 				if (prj_get_numincpaths() > 0)
@@ -485,15 +485,15 @@ int vs_write_cpp()
 				if (debug && !prj_has_flag("managed"))
 					tag_attr("MinimalRebuild=\"%s\"", S_TRUE);
 
-				if (prj_has_flag("no-exceptions")) 
+				if (prj_has_flag("no-exceptions"))
 					tag_attr("ExceptionHandling=\"%s\"", S_FALSE);
 
 				if (debug && !prj_has_flag("managed"))
 					tag_attr("BasicRuntimeChecks=\"3\"");
-				
-				if (!debug) 
+
+				if (!debug)
 					tag_attr("StringPooling=\"%s\"", S_TRUE);
-				
+
 				tag_attr("RuntimeLibrary=\"%d\"", runtime);
 				tag_attr("EnableFunctionLevelLinking=\"%s\"", S_TRUE);
 
@@ -506,7 +506,7 @@ int vs_write_cpp()
 				tag_attr("WarningLevel=\"%d\"", prj_has_flag("extra-warnings") ? 4 : 3);
 				if (prj_has_flag("fatal-warnings"))
 					tag_attr("WarnAsError=\"%s\"", S_TRUE);
-				if (!prj_has_flag("managed")) 
+				if (!prj_has_flag("managed"))
 					tag_attr("Detect64BitPortabilityProblems=\"%s\"", prj_has_flag("no-64bit-checks") ? S_FALSE : S_TRUE);
 
 				tag_attr("DebugInformationFormat=\"%d\"", symbols);
@@ -545,7 +545,7 @@ int vs_write_cpp()
 						tag_attr("ModuleDefinitionFile=\"%s\"", prj_find_filetype(".def"));
 
 					tag_attr("GenerateDebugInformation=\"%s\"", symbols ? S_TRUE : S_FALSE);
-					if (symbols) 
+					if (symbols)
 						tag_attr("ProgramDatabaseFile=\"$(OutDir)/%s.pdb\"", path_getbasename(prj_get_target()));
 
 					tag_attr("SubSystem=\"%d\"", prj_is_kind("exe") ? 1 : 2);
@@ -556,7 +556,7 @@ int vs_write_cpp()
 					{
 						tag_attr("EntryPointSymbol=\"mainCRTStartup\"");
 					}
-					else if (prj_is_kind("dll")) 
+					else if (prj_is_kind("dll"))
 					{
 						tag_attr_open("ImportLibrary");
 						if (prj_has_flag("no-import-lib"))
@@ -638,7 +638,7 @@ void vs_list_files(const char* path, int stage)
 		ptr += 3;
 
 	ptr = strchr(ptr, '/');
-	while (ptr != NULL) 
+	while (ptr != NULL)
 		ptr = strchr(ptr + 1, '/');
 
 	ptr = strrchr(path, '/');
@@ -656,7 +656,7 @@ void vs_list_files(const char* path, int stage)
 		break;
 
 	case WST_CLOSEGROUP:
-		if (strlen(path) > 0 && !matches(ptr, "..")) 
+		if (strlen(path) > 0 && !matches(ptr, ".."))
 			tag_close("Filter", 1);
 		break;
 
@@ -675,8 +675,8 @@ void vs_list_files(const char* path, int stage)
 
 /************************************************************************
  * List callback: scans the list of links for a package. If a link is
- * found to a sibling package, return a dependency string for the 
- * solution file. 
+ * found to a sibling package, return a dependency string for the
+ * solution file.
  ***********************************************************************/
 
 const char* vs_list_pkgdeps(const char* name)

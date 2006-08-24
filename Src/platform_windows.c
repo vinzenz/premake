@@ -3,12 +3,12 @@
  * Windows-specific functions.
  *
  * Copyright (c) 2002-2005 Jason Perkins and the Premake project
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -81,7 +81,7 @@ void platform_getuuid(char* uuid)
 	if (CoCreateGuid == NULL)
 	{
 		HMODULE hOleDll = LoadLibrary("OLE32.DLL");
-		*((void**)&CoCreateGuid) = GetProcAddress(hOleDll, "CoCreateGuid");
+		*((void**)&CoCreateGuid) = (void*)GetProcAddress(hOleDll, "CoCreateGuid");
 	}
 	CoCreateGuid((char*)uuid);
 }
@@ -179,7 +179,7 @@ int platform_rmdir(const char* path)
 	{
 		if (strcmp(data.cFileName, ".") == 0) continue;
 		if (strcmp(data.cFileName, "..") == 0) continue;
-		
+
 		buffer = (char*)malloc(strlen(path) + strlen(data.cFileName) + 2);
 		strcpy(buffer, path);
 		strcat(buffer, "\\");

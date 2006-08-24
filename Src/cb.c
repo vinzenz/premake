@@ -3,12 +3,12 @@
  * The Code::Blocks target
  *
  * Copyright (c) 2002-2006 Jason Perkins and the Premake project
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -54,10 +54,10 @@ int cb_generate()
 
 /************************************************************************
  * List callback: scans the list of links for a package. If a link is
- * found to a sibling package, prints a dependency string for the 
- * workspace file. 
+ * found to a sibling package, prints a dependency string for the
+ * workspace file.
  ***********************************************************************/
-static char* printProjectDependencies(const char* name)
+static const char* printProjectDependencies(const char* name)
 {
 	int i;
 	for (i = 0; i < prj_get_numpackages(); ++i)
@@ -91,7 +91,7 @@ static int writeWorkspace()
 		const char* filename;
 
 		prj_select_package(i);
-	
+
 		filename = prj_get_pkgfilename("cbp");
 		if (startsWith(filename, "./")) filename += 2;
 		io_print("\t\t<Project filename=\"%s\"", filename);

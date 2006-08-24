@@ -3,12 +3,12 @@
  * An interface around the project data.
  *
  * Copyright (c) 2002-2005 Jason Perkins and the Premake project
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -178,7 +178,7 @@ const char* prj_get_bindir()
 
 const char* prj_get_bindir_for(int i)
 {
-	Package*   pkg = prj_get_package(i);
+	Package*   pkg = prj_get_package();
 	PkgConfig* cfg = prj_get_config_for(i);
 
 	strcpy(buffer, path_build(pkg->path, cfg->prjConfig->bindir));
@@ -192,7 +192,7 @@ const char* prj_get_libdir()
 
 const char* prj_get_libdir_for(int i)
 {
-	Package*   pkg = prj_get_package(i);
+	Package*   pkg = prj_get_package();
 	PkgConfig* cfg = prj_get_config_for(i);
 
 	strcpy(buffer, path_build(pkg->path, cfg->prjConfig->libdir));
@@ -226,7 +226,7 @@ const char* prj_get_outdir_for(int i)
 
 	Package*   pkg = prj_get_package_for(i);
 	PkgConfig* cfg = prj_get_config_for(i);
-	
+
 	if (matches(cfg->kind, "lib"))
 		strcpy(buffer, prj_get_libdir_for(i));
 	else
@@ -659,7 +659,7 @@ const char* prj_get_target_for(int i)
 		strcat(buffer, ".");
 
 	strcat(buffer, extension);
-	
+
 	return buffer;
 }
 
@@ -705,7 +705,7 @@ void prj_select_file(const char* name)
 	}
 }
 
-void prj_select_option(i)
+void prj_select_option(int i)
 {
 	my_opt = project->options[i];
 }
