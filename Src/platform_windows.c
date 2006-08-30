@@ -38,7 +38,6 @@ struct PlatformMaskData
 };
 
 static int (__stdcall *CoCreateGuid)(char*) = NULL;
-static BOOL (__stdcall *GetUserName_)(LPTSTR,LPDWORD) = NULL;
 
 
 int platform_chdir(const char* path)
@@ -81,7 +80,9 @@ void platform_getuuid(char* uuid)
 	if (CoCreateGuid == NULL)
 	{
 		HMODULE hOleDll = LoadLibrary("OLE32.DLL");
-		*((void**)&CoCreateGuid) = (void*)GetProcAddress(hOleDll, "CoCreateGuid");
+		void* func = GetProcAddress(hOleDll, "CoCreateGuid");
+		CoCreateGuid = (int(__stdcall*)(char*))func;
+//		*((void**)&CoCreateGuid) = (void*)GetProcAddress(hOleDll, "CoCreateGuid");
 	}
 	CoCreateGuid((char*)uuid);
 }

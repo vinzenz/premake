@@ -268,8 +268,8 @@ void vs_assign_guids()
 
 int vs_write_cpp()
 {
-	const char* str;
 	int i, b;
+	const char* str = NULL;
 
 	VsPkgData* data = (VsPkgData*)prj_get_data();
 

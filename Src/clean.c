@@ -47,6 +47,9 @@ int clean()
 	io_remove(path_join(prj_get_path(), prj_get_name(), "mdsx"));
 	io_remove(path_join(prj_get_path(), "make", "sh"));
 
+	/* Code::Blocks */
+	io_remove(path_join(prj_get_path(), prj_get_name(), "workspace"));
+
 	for (i = 0; i < prj_get_numpackages(); ++i)
 	{
 		char cwd[8192];
@@ -139,6 +142,11 @@ int clean()
 		io_remove(path_join(".", prj_get_pkgname(), "cmbx"));
 		io_remove(path_join(".", "Makefile", prj_get_pkgname()));
 		io_remove(path_join(".", prj_get_pkgname(), "pidb"));
+
+		/* Code::Blocks */
+		io_remove(path_join(".", prj_get_pkgname(), "cbp"));
+		io_remove(path_join(".", prj_get_pkgname(), "depend"));
+		io_remove(path_join(".", prj_get_pkgname(), "layout"));
 
 		/* All */
 		if (prj_get_pkgobjdir() != NULL)

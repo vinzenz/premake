@@ -56,5 +56,14 @@ namespace Premake.Tests.CodeBlocks.Cpp
 			_expects.Package[0].File.Add("../Help/file2.cpp");
 			Run();
 		}
+
+		[Test]
+		public void Test_HeaderFiles()
+		{
+			_script.Replace("'somefile.txt'", "'file1.h','file1.cpp'");
+			_expects.Package[0].File.Add("file1.h");
+			_expects.Package[0].File.Add("file1.cpp");
+			Run();
+		}
 	}
 }

@@ -26,10 +26,22 @@ static void print_opt(const char* opt);
 
 static const char* listFiles(const char* filename)
 {
+	int i;
+
 	io_print("\t\t<Unit filename=\"%s\">\n", filename);
-	io_print("\t\t\t<Option compilerVar=\"CPP\" />\n");
-	io_print("\t\t\t<Option target=\"Debug\" />\n");
-	io_print("\t\t\t<Option target=\"Release\" />\n");
+	io_print("\t\t\t<Option compilerVar=\"%s\" />\n", prj_is_lang("c") ? "CC" : "CPP");
+	if (!is_cpp(filename))
+	{
+		io_print("\t\t\t<Option compile=\"0\" />\n");
+		io_print("\t\t\t<Option link=\"0\" />\n");
+	}
+	
+	for (i = 0; i < prj_get_numconfigs(); ++i)
+	{
+		Package* pkg = prj_get_package();
+		io_print("\t\t\t<Option target=\"%s\" />\n", pkg->configs[i]->prjConfig->name);
+	}
+
 	io_print("\t\t</Unit>\n");
 	return NULL;
 }
@@ -45,10 +57,13 @@ int cb_cpp()
 
 	io_print("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n");
 	io_print("<CodeBlocks_project_file>\n");
-	io_print("\t<FileVersion major=\"1\" minor=\"4\" />\n");
+	io_print("\t<FileVersion major=\"1\" minor=\"5\" />\n");
 	io_print("\t<Project>\n");
 	io_print("\t\t<Option title=\"%s\" />\n", prj_get_pkgname());
+	io_print("\t\t<Option pch_mode=\"2\" />\n");
+	io_print("\t\t<Option default_target=\"\" />\n");
 	io_print("\t\t<Option compiler=\"gcc\" />\n");
+	io_print("\t\t<Option virtualFolders=\"\" />\n");
 	io_print("\t\t<Build>\n");
 
 	for (i = 0; i < prj_get_numconfigs(); ++i)

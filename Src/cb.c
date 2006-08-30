@@ -81,8 +81,7 @@ static int writeWorkspace()
 	if (!io_openfile(path_join(prj_get_path(), prj_get_name(), "workspace")))
 		return 0;
 
-	io_print("<?xml version=\"1.0\"?>\n");
-	io_print("<!DOCTYPE CodeBlocks_workspace_file>\n");
+	io_print("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n");
 	io_print("<CodeBlocks_workspace_file>\n");
 	io_print("\t<Workspace title=\"%s\">\n", prj_get_name());
 

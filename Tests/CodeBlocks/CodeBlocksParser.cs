@@ -19,8 +19,7 @@ namespace Premake.Tests.CodeBlocks
 		{
 			/* File header */
 			Begin(filename + ".workspace");
-			Match("<?xml version=\"1.0\"?>");
-			Match("<!DOCTYPE CodeBlocks_workspace_file>");
+			Match("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>");
 			Match("<CodeBlocks_workspace_file>");
 			Match("\t<Workspace title=\"" + project.Name + "\">");
 
@@ -65,10 +64,13 @@ namespace Premake.Tests.CodeBlocks
 
 			Match("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>");
 			Match("<CodeBlocks_project_file>");
-			Match("\t<FileVersion major=\"1\" minor=\"4\" />");
+			Match("\t<FileVersion major=\"1\" minor=\"5\" />");
 			Match("\t<Project>");
 			Match("\t\t<Option title=\"" + package.Name + "\" />");
+			Match("\t\t<Option pch_mode=\"2\" />");
+			Match("\t\t<Option default_target=\"\" />");
 			Match("\t\t<Option compiler=\"gcc\" />");
+			Match("\t\t<Option virtualFolders=\"\" />");
 			Match("\t\t<Build>");
 
 			package.Language = "c++";
@@ -244,13 +246,23 @@ namespace Premake.Tests.CodeBlocks
 			while (!Match("\t\t<Extensions />", true))
 			{
 				string[] matches = Regex("\t\t<Unit filename=\"(.+?)\">");
+				string name = matches[0];
+				package.File.Add(name);
 
-				Match("\t\t\t<Option compilerVar=\"CPP\" />");
+				matches = Regex("\t\t\t<Option compilerVar=\"(.+?)\" />");
+				if (matches[0] == "CC")
+					package.Language = "c";
+
+				if (!name.EndsWith(".c") && !name.EndsWith(".cpp"))
+				{
+					Match("\t\t\t<Option compile=\"0\" />");
+					Match("\t\t\t<Option link=\"0\" />");
+				}
+
 				foreach (Configuration cfg in package.Config)
 					Match("\t\t\t<Option target=\"" + cfg.Name + "\" />");
 				Match("\t\t</Unit>");
 
-				package.File.Add(matches[0]);
 			}
 
 			Match("\t</Project>");

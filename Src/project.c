@@ -223,8 +223,6 @@ const char* prj_get_outdir()
 const char* prj_get_outdir_for(int i)
 {
 	const char* targetdir;
-
-	Package*   pkg = prj_get_package_for(i);
 	PkgConfig* cfg = prj_get_config_for(i);
 
 	if (matches(cfg->kind, "lib"))
@@ -666,9 +664,7 @@ const char* prj_get_target_for(int i)
 
 const char* prj_get_targetname_for(int i)
 {
-	Package* pkg = prj_get_package_for(i);
 	PkgConfig* cfg = prj_get_config_for(i);
-
 	strcpy(buffer, path_getname(cfg->target));
 	return buffer;
 }

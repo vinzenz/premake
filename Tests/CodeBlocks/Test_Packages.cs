@@ -16,6 +16,7 @@ namespace Premake.Tests.CodeBlocks
 		public void Test_Setup()
 		{
 			_script = Script.MakeBasic("exe", "c++");
+			_script.Replace("somefile.txt", "somefile.cpp");
 
 			_expects = new Project();
 			_expects.Package.Add(1);
@@ -35,6 +36,15 @@ namespace Premake.Tests.CodeBlocks
 			_expects.Package[0].Name = "MyPackage";
 			Run();
 		}
+
+		[Test]
+		public void Test_C()
+		{
+			_script.Replace("c++", "c");
+			_expects.Package[0].Language = "c";
+			Run();
+		}
+
 		[Test]
 		public void Test_Cpp()
 		{
