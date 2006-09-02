@@ -28,7 +28,7 @@
 
 static lua_State*  L;
 static const char* currentScript = NULL;
-
+static int         in_command = 0;
 
 static int         tbl_get(int from, const char* name);
 static int         tbl_geti(int from, int i);
@@ -476,7 +476,9 @@ int script_docommand(const char* cmd)
 	else
 		lua_pushnil(L);
 
+	in_command = 1;
 	lua_call(L, 2, 0);
+	in_command = 0;
 	return 1;
 }
 
@@ -1110,15 +1112,19 @@ static int doFileMatching(lua_State* L, int recursive)
 	int pathlen, i;
 
 	/* Get the current package path */
-	lua_getglobal(L, "package");
-	lua_pushstring(L, "path");
-	lua_gettable(L, -2);
-	pkgPath = lua_tostring(L, -1);
-	lua_pop(L, 2);
+	pkgPath = "";
+	if (!in_command)
+	{
+		lua_getglobal(L, "package");
+		lua_pushstring(L, "path");
+		lua_gettable(L, -2);
+		pkgPath = lua_tostring(L, -1);
+		lua_pop(L, 2);
 
-	/* If path is same as current, I can ignore it */
-	if (path_compare(path_getdir(currentScript), pkgPath))
-		pkgPath = "";
+		/* If path is same as current, I can ignore it */
+		if (path_compare(path_getdir(currentScript), pkgPath))
+			pkgPath = "";
+	}
 
 	/* Create a table to hold the results */
 	lua_newtable(L);
