@@ -2,6 +2,8 @@ Premake Changelog
 -----------------
 
 3.2 (in progress)
+* Added support for Code::Blocks
+* Expose list of packages as _PACKAGES global in Lua
 * Turn off edit-and-continue in release builds with symbols
 
 3.1

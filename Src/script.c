@@ -181,11 +181,8 @@ int script_init()
 	buildOptionsTable();
 
 	/* Create an empty list of packages */
-	lua_getregistry(L);
-	lua_pushstring(L, "packages");
 	lua_newtable(L);
-	lua_settable(L, -3);
-	lua_pop(L, 1);
+	lua_setglobal(L, "_PACKAGES");
 
 	/* Create a default project object */
 	buildNewProject();
@@ -417,7 +414,7 @@ int script_export()
 	}
 
 	/* Copy out the packages */
-	tbl = tbl_get(LUA_REGISTRYINDEX, "packages");
+	tbl = tbl_get(LUA_GLOBALSINDEX, "_PACKAGES");
 	len = tbl_getlen(tbl);
 	project->packages = (Package**)prj_newlist(len);
 	for (i = 0; i < len; ++i)
@@ -1182,16 +1179,12 @@ static int lf_newpackage(lua_State* L)
 
 	lua_newtable(L);
 
-	/* Add this package to the master list in the registry */
-	lua_getregistry(L);
-	lua_pushstring(L, "packages");
-	lua_gettable(L, -2);
+	/* Add this package to the master list */
+	lua_getglobal(L, "_PACKAGES");
 	count = luaL_getn(L, -1);
-
-	lua_pushvalue(L, -3);
+	lua_pushvalue(L, -2);
 	lua_rawseti(L, -2, count + 1);
-
-	lua_pop(L, 2);
+	lua_pop(L, 1);
 
 	/* Set default values */
 	if (count == 0)
