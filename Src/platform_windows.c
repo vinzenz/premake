@@ -187,9 +187,17 @@ int platform_rmdir(const char* path)
 		strcat(buffer, data.cFileName);
 
 		if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
 			platform_rmdir(buffer);
+		}
 		else
+		{
+			/* In order to delete not-checked-out version controlled files I need
+			 * to clear the read-only flag first */
+			if (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
+				SetFileAttributes(buffer, data.dwFileAttributes & !FILE_ATTRIBUTE_READONLY);
 			DeleteFile(buffer);
+		}
 
 		free(buffer);
 	} while (FindNextFile(hDir, &data));
