@@ -53,6 +53,7 @@ static int         lf_getdir(lua_State* L);
 static int         lf_getextension(lua_State* L);
 static int         lf_getglobal(lua_State* L);
 static int         lf_getname(lua_State* L);
+static int         lf_matchdirs(lua_State* L);
 static int         lf_matchfiles(lua_State* L);
 static int         lf_matchrecursive(lua_State* L);
 static int         lf_newfileconfig(lua_State* L);
@@ -90,6 +91,7 @@ int script_init()
 	lua_register(L, "dopackage",  lf_dopackage);
 	lua_register(L, "fileexists", lf_fileexists);
 	lua_register(L, "findlib",    lf_findlib);
+	lua_register(L, "matchdirs",  lf_matchdirs);
 	lua_register(L, "matchfiles", lf_matchfiles);
 	lua_register(L, "matchrecursive", lf_matchrecursive);
 	lua_register(L, "newpackage", lf_newpackage);
@@ -1056,7 +1058,7 @@ static int lf_getname(lua_State* L)
 
 static int debugging = 0;
 
-static void doFileScan(lua_State* L, char* path, int recursive)
+static void doFileScan(lua_State* L, char* path, int recursive, int findFiles)
 {
 	MaskHandle handle;
 
@@ -1065,7 +1067,7 @@ static void doFileScan(lua_State* L, char* path, int recursive)
 	handle = io_mask_open(path);
 	while (io_mask_getnext(handle))
 	{
-		if (io_mask_isfile(handle))
+		if ((findFiles && io_mask_isfile(handle)) || (!findFiles && !io_mask_isfile(handle)))
 		{
 			const char* name = io_mask_getname(handle);
 			lua_pushstring(L, name);
@@ -1095,7 +1097,7 @@ static void doFileScan(lua_State* L, char* path, int recursive)
 				if (!matches(name, ".") && !matches(name, "..") && !endsWith(name, "/.") && !endsWith(name, "/.."))
 				{
 					strcpy(path, path_combine(name, mask));
-					doFileScan(L, path, recursive);
+					doFileScan(L, path, recursive, findFiles);
 					path[len] = '\0';
 				}
 			}
@@ -1104,7 +1106,7 @@ static void doFileScan(lua_State* L, char* path, int recursive)
 	}
 }
 
-static int doFileMatching(lua_State* L, int recursive)
+static int doFileMatching(lua_State* L, int recursive, int findFiles)
 {
 	char path[8192];
 	const char* pkgPath;
@@ -1135,7 +1137,7 @@ static int doFileMatching(lua_State* L, int recursive)
 		const char* mask = luaL_checkstring(L, i);
 		const char* maskWithPath = path_combine(pkgPath, mask);
 		strcpy(path, maskWithPath);
-		doFileScan(L, path, recursive);
+		doFileScan(L, path, recursive, findFiles);
 	}
 
 	/* Remove the base package path from all files */
@@ -1155,15 +1157,21 @@ static int doFileMatching(lua_State* L, int recursive)
 }
 
 
+static int lf_matchdirs(lua_State* L)
+{
+	return doFileMatching(L, 1, 0);
+}
+
+
 static int lf_matchfiles(lua_State* L)
 {
-	return doFileMatching(L, 0);
+	return doFileMatching(L, 0, 1);
 }
 
 
 static int lf_matchrecursive(lua_State* L)
 {
-	return doFileMatching(L, 1);
+	return doFileMatching(L, 1, 1);
 }
 
 

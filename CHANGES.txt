@@ -3,6 +3,7 @@ Premake Changelog
 
 3.2 (in progress)
 * Added support for Code::Blocks
+* Added new matchdirs() to Lua script environment
 * Expose list of packages as _PACKAGES global in Lua
 * Turn off edit-and-continue in release builds with symbols
 
