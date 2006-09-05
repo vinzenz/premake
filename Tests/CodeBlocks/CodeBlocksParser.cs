@@ -249,14 +249,25 @@ namespace Premake.Tests.CodeBlocks
 				string name = matches[0];
 				package.File.Add(name);
 
-				matches = Regex("\t\t\t<Option compilerVar=\"(.+?)\" />");
-				if (matches[0] == "CC")
-					package.Language = "c";
-
-				if (!name.EndsWith(".c") && !name.EndsWith(".cpp"))
+				if (Path.GetExtension(name) == ".rc")
 				{
-					Match("\t\t\t<Option compile=\"0\" />");
-					Match("\t\t\t<Option link=\"0\" />");
+					string resname = name.Replace("../", "");
+					resname = resname.Replace(".rc", ".res");
+
+					Match("\t\t\t<Option compilerVar=\"WINDRES\" />");
+					Match("\t\t\t<Option objectName=\"" + resname + "\" />");
+				}
+				else
+				{
+					matches = Regex("\t\t\t<Option compilerVar=\"(.+?)\" />");
+					if (matches[0] == "CC")
+						package.Language = "c";
+
+					if (!name.EndsWith(".c") && !name.EndsWith(".cpp"))
+					{
+						Match("\t\t\t<Option compile=\"0\" />");
+						Match("\t\t\t<Option link=\"0\" />");
+					}
 				}
 
 				foreach (Configuration cfg in package.Config)

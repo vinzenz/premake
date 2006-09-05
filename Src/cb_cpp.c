@@ -21,30 +21,8 @@
 #include "cb.h"
 
 static const char* filterLinks(const char* name);
+static const char* listFiles(const char* name);
 static void print_opt(const char* opt);
-
-
-static const char* listFiles(const char* filename)
-{
-	int i;
-
-	io_print("\t\t<Unit filename=\"%s\">\n", filename);
-	io_print("\t\t\t<Option compilerVar=\"%s\" />\n", prj_is_lang("c") ? "CC" : "CPP");
-	if (!is_cpp(filename))
-	{
-		io_print("\t\t\t<Option compile=\"0\" />\n");
-		io_print("\t\t\t<Option link=\"0\" />\n");
-	}
-	
-	for (i = 0; i < prj_get_numconfigs(); ++i)
-	{
-		Package* pkg = prj_get_package();
-		io_print("\t\t\t<Option target=\"%s\" />\n", pkg->configs[i]->prjConfig->name);
-	}
-
-	io_print("\t\t</Unit>\n");
-	return NULL;
-}
 
 
 int cb_cpp()
@@ -150,6 +128,45 @@ static void print_opt(const char* opt)
 {
 	io_print("\t\t\t\t\t<Add option=\"%s\" />\n", opt);
 }
+
+
+/************************************************************************
+ * Output a description block for each source file
+ ***********************************************************************/
+
+static const char* listFiles(const char* filename)
+{
+	int i;
+
+	io_print("\t\t<Unit filename=\"%s\">\n", filename);
+	if (matches(path_getextension(filename), ".rc"))
+	{
+		io_print("\t\t\t<Option compilerVar=\"WINDRES\" />\n");
+
+		while (strncmp(filename, "../", 3) == 0)
+			filename += 3;
+		io_print("\t\t\t<Option objectName=\"%s\" />\n", path_swapextension(filename, ".rc", ".res"));
+	}
+	else
+	{
+		io_print("\t\t\t<Option compilerVar=\"%s\" />\n", prj_is_lang("c") ? "CC" : "CPP");
+		if (!is_cpp(filename))
+		{
+			io_print("\t\t\t<Option compile=\"0\" />\n");
+			io_print("\t\t\t<Option link=\"0\" />\n");
+		}
+	}
+	
+	for (i = 0; i < prj_get_numconfigs(); ++i)
+	{
+		Package* pkg = prj_get_package();
+		io_print("\t\t\t<Option target=\"%s\" />\n", pkg->configs[i]->prjConfig->name);
+	}
+
+	io_print("\t\t</Unit>\n");
+	return NULL;
+}
+
 
 
 /************************************************************************

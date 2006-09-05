@@ -296,7 +296,7 @@ void showUsage()
 	puts("      windows   Microsoft Windows");
 	puts("");
 	puts(" --target name     Generate input files for the specified toolset; one of:");
-	puts("      cb-gcc    Code::Blocks Studio with GCC (experimental)");
+	puts("      cb-gcc    Code::Blocks Studio with GCC");
 	puts("      gnu       GNU Makefile for POSIX, MinGW, and Cygwin");
 	puts("      monodev   MonoDevelop");
 	puts("      sharpdev  ICSharpCode SharpDevelop");

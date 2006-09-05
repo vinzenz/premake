@@ -65,5 +65,14 @@ namespace Premake.Tests.CodeBlocks.Cpp
 			_expects.Package[0].File.Add("file1.cpp");
 			Run();
 		}
+
+
+		[Test]
+		public void Test_ResourceFiles()
+		{
+			_script.Replace("'somefile.txt'", "'../resource1.rc'");
+			_expects.Package[0].File.Add("../resource1.rc");
+			Run();
+		}
 	}
 }
