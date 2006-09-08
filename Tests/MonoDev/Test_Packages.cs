@@ -35,6 +35,7 @@ namespace Premake.Tests.MonoDev
 			_expects.Package[0].Name = "MyPackage";
 			Run();
 		}
+
 		[Test]
 		public void Test_Cs()
 		{

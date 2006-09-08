@@ -24,6 +24,7 @@
 
 #include "cb.h"
 #include "gnu.h"
+#include "monodev.h"
 #include "sharpdev.h"
 #include "vs6.h"
 #include "vs2002.h"
@@ -211,7 +212,7 @@ int onCommand(const char* cmd, const char* arg)
 		}
 		else if (matches(arg, "monodev") || matches(arg, "md"))
 		{
-			return sharpdev_generate("monodev");
+			return monodev_generate();
 		}
 		else if (matches(arg, "sharpdev") || matches(arg, "sd"))
 		{
