@@ -45,6 +45,7 @@ int clean()
 
 	/* MonoDevelop */
 	io_remove(path_join(prj_get_path(), prj_get_name(), "mdsx"));
+	io_remove(path_join(prj_get_path(), prj_get_name(), "mds"));
 	io_remove(path_join(prj_get_path(), "make", "sh"));
 
 	/* Code::Blocks */
@@ -102,7 +103,8 @@ int clean()
 			io_remove(path_join(prj_get_libdir(), buffer, "exp"));
 
 			/* Mono debugger symbols */
-			io_remove(path_join(prj_get_outdir(), buffer, "mdb"));
+			io_remove(path_join(prj_get_outdir(), buffer, "exe.mdb"));
+			io_remove(path_join(prj_get_outdir(), buffer, "dll.mdb"));
 
 			/* All */
 			io_rmdir(".", prj_get_objdir());
@@ -140,6 +142,7 @@ int clean()
 
 		/* MonoDevelop */
 		io_remove(path_join(".", prj_get_pkgname(), "cmbx"));
+		io_remove(path_join(".", prj_get_pkgname(), "mdp"));
 		io_remove(path_join(".", "Makefile", prj_get_pkgname()));
 		io_remove(path_join(".", prj_get_pkgname(), "pidb"));
 
