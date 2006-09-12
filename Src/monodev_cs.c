@@ -104,6 +104,9 @@ int monodev_cs()
 		io_print(" optimize=\"%s\"", optimized ? "True" : "False");
 		io_print(" unsafecodeallowed=\"%s\"", prj_has_flag("unsafe") ? "True" : "False");
 		io_print(" generateoverflowchecks=\"%s\"", optimized ? "False" : "True");
+		io_print(" definesymbols=\"");
+			print_list(prj_get_defines(), "", "", ";", NULL);
+			io_print("\"");
 		io_print(" generatexmldocumentation=\"False\"");
 		io_print(" ctype=\"CSharpCompilerParameters\" />\n");
 
@@ -121,6 +124,7 @@ int monodev_cs()
 	io_print("  </Contents>\n");
 
 	/* References - all configuration will use the same set */
+	prj_select_config(0);
 	io_print("  <References>\n");
 	print_list(prj_get_links(), "    <Reference", " />\n", "", listReferences);
 	io_print("  </References>\n");
@@ -146,7 +150,7 @@ static void listFiles(const char* path, int stage)
 			if (strncmp(path, "..", 2) != 0)
 				io_print("./");
 			io_print("%s\"", path);
-			io_print(" subtype=\"Directory\" buildaction=\"Compile\" dependson=\"\" data=\"\" />\n");
+			io_print(" subtype=\"Directory\" buildaction=\"Compile\" />\n");
 		}
 		break;
 
@@ -256,10 +260,10 @@ static const char* listReferences(const char* name)
 		
 	if(isSibling)
 	{
-		strcat(buffer, "Project\"");
+		strcat(buffer, "Project\" localcopy=\"True\"");
 		strcat(buffer, " refto=\"");
 		strcat(buffer, fileName);
-		strcat(buffer, "\" localcopy=\"True\"");
+		strcat(buffer, "\"");
 	}
 	else
 	{
@@ -268,18 +272,18 @@ static const char* listReferences(const char* name)
 		/* See if this assembly exists on one of the link paths */
 		if (io_fileexists(path_join(prj_get_bindir(), name, ext)))
 		{
-			strcat(buffer, "Assembly\" refto=\"");
+			strcat(buffer, "Assembly\" localcopy=\"False\" refto=\"");
 			strcat(buffer, path_build(prj_get_pkgpath(), prj_get_bindir()));
 			strcat(buffer, "/");
 			strcat(buffer, name);
-			strcat(buffer, ".dll\" localcopy=\"False\"");
+			strcat(buffer, ".dll\"");
 		}
 		else
 		{
-			strcat(buffer, "Gac\" refto=\"");
+			strcat(buffer, "Gac\" localcopy=\"False\" refto=\"");
 			strcat(buffer, name);
 			strcat(buffer, ext);
-			strcat(buffer, "\" localcopy=\"False\"");
+			strcat(buffer, "\"");
 		}
 	}
 

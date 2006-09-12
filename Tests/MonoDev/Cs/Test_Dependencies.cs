@@ -31,7 +31,7 @@ namespace Premake.Tests.MonoDev.Cs
 		}
 		#endregion
 
-#if FAILING
+// #if FAILING
 		[Test]
 		public void Test_ExeAndDll()
 		{
@@ -40,8 +40,9 @@ namespace Premake.Tests.MonoDev.Cs
 			 * when that method exits back to TestEnvironment.Run() they have
 			 * disappeared, replaced by an empty list! I spent a couple of
 			 * hours trying to figure this one out to no avail. If you think
-			 * you are up for it, search for MonoDev_DEPENDENCY_BUG in 
+			 * you are up for it, search for SHARPDEV_DEPENDENCY_BUG in 
 			 * Parser_MonoDev.cs and TestEnvironment.cs. */
+
 			_script.Append("package.links = { 'PackageB' }");
 			_script.Append("package = newpackage()");
 			_script.Append("package.name = 'PackageB'");
@@ -54,7 +55,7 @@ namespace Premake.Tests.MonoDev.Cs
 
 			Run();
 		}
-#endif
+// #endif
 
 	}
 }

@@ -110,11 +110,11 @@ namespace Premake.Tests.MonoDev
 			package.Name = matches[0];
 			package.Language = matches[1].ToLower();
 
-			ArrayList buildFlags = new ArrayList();
-
 			Match("  <Configurations active=\"" + project.Configuration[0] + "\">");
 			foreach (Configuration config in package.Config)
 			{
+				ArrayList buildFlags = new ArrayList();
+
 				Match("    <Configuration name=\"" + config.Name + "\" ctype=\"DotNetProjectConfiguration\">");
 
 				matches = Regex("      <Output directory=\"(.+)\" assembly=\"(.+)\" />");
@@ -136,11 +136,17 @@ namespace Premake.Tests.MonoDev
 				if (matches[0] == "False")
 					buildFlags.Add("fatal-warnings");
 
-				matches = Regex("      <CodeGeneration compiler=\"Csc\" warninglevel=\"4\" optimize=\"(True|False)\" unsafecodeallowed=\"(True|False)\" generateoverflowchecks=\"(True|False)\" generatexmldocumentation=\"(True|False)\" ctype=\"CSharpCompilerParameters\" />");
+				matches = Regex("      <CodeGeneration compiler=\"Csc\" warninglevel=\"4\" optimize=\"(True|False)\" unsafecodeallowed=\"(True|False)\" generateoverflowchecks=\"(True|False)\" definesymbols=\"(.*?)\" generatexmldocumentation=\"(True|False)\" ctype=\"CSharpCompilerParameters\" />");
 				package.Compiler = "Csc";
+
+				if (matches[0] == "True")
+					buildFlags.Add("optimize");
+				if (matches[1] == "True")
+					buildFlags.Add("unsafe");
 
 				Match("    </Configuration>");
 				config.BuildFlags = (string[])buildFlags.ToArray(typeof(string));
+				config.Defines = (matches[3] != "") ? matches[3].Split(';') : new string[] { };
 			}
 			Match("  </Configurations>");
 
@@ -186,11 +192,11 @@ namespace Premake.Tests.MonoDev
 				Match("  <References>");
 				while (!Match("  </References>", true))
 				{
-					matches = Regex("    <Reference type=\"(Assembly|Gac|Project)\" refto=\"(.+)\" localcopy=\"(True|False)\" />");
-					links.Add(matches[1]);
+					matches = Regex("    <Reference type=\"(Assembly|Gac|Project)\" localcopy=\"(True|False)\" refto=\"(.+)\" />");
+					links.Add(matches[2]);
 
 					if (matches[0] == "Project")
-						lddep.Add(matches[1]);
+						lddep.Add(matches[2]);
 				}
 			}
 			foreach (Configuration config in package.Config)

@@ -45,7 +45,7 @@ namespace Premake.Tests.MonoDev.Cs
 			Run();
 		}
 
-		/* #dev doesn't support the "Content" build action */
+		/* MonoDevelop doesn't support the "Content" build action */
 #if UNSUPPORTED
 		[Test]
 		public void Test_CodeAsContent()
@@ -70,8 +70,9 @@ namespace Premake.Tests.MonoDev.Cs
 		[Test]
 		public void Test_ResxWithDependencyAction()
 		{
+			// MonoDevelop doesn't provide file dependencies, as far as I can tell
 			_script.Replace("'somefile.txt'", "'file0.resx','file0.cs'");
-			_expects.Package[0].File.Add("./file0.resx", null, "EmbeddedResource", "file0.cs");
+			_expects.Package[0].File.Add("./file0.resx", null, "EmbeddedResource");
 			_expects.Package[0].File.Add("./file0.cs");
 			Run();
 		}

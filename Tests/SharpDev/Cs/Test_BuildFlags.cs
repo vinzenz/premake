@@ -48,6 +48,7 @@ namespace Premake.Tests.SharpDev.Cs
 			Run();
 		}
 
+		[Test]
 		public void Test_SetFlagOnPackageAndConfig()
 		{
 			_script.Append("package.buildflags = { 'unsafe' }");
