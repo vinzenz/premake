@@ -31,7 +31,7 @@ namespace Premake.Tests.MonoDev.Cs
 		}
 		#endregion
 
-// #if FAILING
+#if FAILING
 		[Test]
 		public void Test_ExeAndDll()
 		{
@@ -55,7 +55,6 @@ namespace Premake.Tests.MonoDev.Cs
 
 			Run();
 		}
-// #endif
-
+#endif
 	}
 }

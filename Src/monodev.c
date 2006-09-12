@@ -79,6 +79,7 @@ static int writeCombine()
 	io_print("<Combine name=\"%s\" fileversion=\"2.0\">\n", prj_get_name());
 
 	/* Write out the entries for each build configuration */
+	prj_select_package(0);
 	prj_select_config(0);
 	io_print("  <Configurations active=\"%s\">\n", prj_get_cfgname());
 	for (i = 0; i < prj_get_numconfigs(); ++i)

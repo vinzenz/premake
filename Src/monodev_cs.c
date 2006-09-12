@@ -36,6 +36,7 @@ int monodev_cs()
 	int i;
 
 	/* Figure out what I'm building */
+	prj_select_config(0);
 	if (prj_is_kind("winexe"))
 		kind = "WinExe";
 	else if (prj_is_kind("exe"))
