@@ -76,7 +76,7 @@ int monodev_cs()
 */
 
 	/* Write the file */
-	if (!io_openfile(path_join(prj_get_pkgpath(), prj_get_pkgname(), "prjx")))
+	if (!io_openfile(path_join(prj_get_pkgpath(), prj_get_pkgname(), "mdp")))
 		return 0;
 
 	io_print("<Project name=\"%s\" fileversion=\"2.0\" language=\"C#\" ctype=\"DotNetProject\">\n", prj_get_pkgname());

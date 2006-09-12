@@ -116,7 +116,7 @@ static int writeCombine()
 	for (i = 0; i < prj_get_numpackages(); ++i)
 	{
 		prj_select_package(i);
-		path = prj_get_pkgfilename("prjx");
+		path = prj_get_pkgfilename("mdp");
 		io_print("    <Entry filename=\"");
 		if (path[0] != '.')
 			io_print("./");
