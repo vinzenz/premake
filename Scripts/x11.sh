@@ -42,7 +42,7 @@ echo ""
 echo "RETRIEVING SOURCE CODE FROM REPOSITORY..."
 echo ""
 cd ../..
-svn co https://svn.berlios.de/svnroot/repos/premake/Branches/$1 Premake-$1
+svn co https://svn.sourceforge.net/svnroot/premake/Branches/$1 Premake-$1
 
 echo ""
 echo "REMOVING PRIVATE FILES..."
