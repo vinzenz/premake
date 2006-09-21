@@ -1,4 +1,4 @@
-PREMAKE v3.1+svn
+PREMAKE v3.2
 
 Copyright (C) 2002-2006 by Jason Perkins
 Distributed under the GNU General Public License, see LICENSE.txt
@@ -9,7 +9,7 @@ See their website at http://www.lua.org/
 
 BUILDING PREMAKE
 
-  GNU make: type 'make'
+  GNU make: type 'make' (also Cygwin and MinGW)
 
   MS Visual C++ 6: open Premake.dsw and build.
 
