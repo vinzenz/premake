@@ -1,23 +1,21 @@
 1. Update support files (README and CHANGES)
 
-2. Create SVN branch for release and switch to it
+2. Update premake.c
 
-3. Update premake.c
+3. Create SVN branch for release
 
-4. Commit changes to branch
+4. Run Windows packaging script
 
-6. Build Windows packaging script (has unit tests)
+5. Run Linux packaging script
 
-7. Run Linux packaging script
+6. Create new file release on SourceForge
 
-8. Create new file release on SourceForge
+7. Move branch to tag
 
-9. Move branch to tag
+8. Update online documentation
 
-10. Update online documentation
+9. Add new group to SourceForge tracker
 
-11. Add new group to SourceForge tracker
+10. Announce on website and mailing list
 
-12. Announce on website and mailing list
-
-13. Switch back to trunk and update README and premake.c version to "+"
+11. Update README and premake.c on trunk to version "+"

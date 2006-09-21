@@ -8,6 +8,7 @@ Premake Changelog
 * Added new matchdirs() to Lua script environment
 * Expose list of packages as _PACKAGES global in Lua
 * Turn off edit-and-continue in release builds with symbols
+* Bug 1559873: libpaths inserts extra space after -L
 
 3.1
 * Added support for Visual Studio 2005

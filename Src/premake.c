@@ -31,7 +31,7 @@
 #include "vs2005.h"
 
 const char* DEFAULT   = "premake.lua";
-const char* VERSION   = "3.1+svn";
+const char* VERSION   = "3.2";
 const char* COPYRIGHT = "Copyright (C) 2002-2006 Jason Perkins and the Premake Project";
 const char* HELP_MSG  = "Type 'premake --help' for help";
 
