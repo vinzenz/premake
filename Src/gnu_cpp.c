@@ -120,7 +120,7 @@ int gnu_cpp()
 		if (os_is("macosx") && prj_has_flag("dylib"))
 			io_print(" -dynamiclib -flat_namespace");
 		print_list(prj_get_linkoptions(), " ", "", "", NULL);
-		print_list(prj_get_libpaths(), " -L \"", "\"", "", NULL);
+		print_list(prj_get_libpaths(), " -L\"", "\"", "", NULL);
 		print_list(prj_get_links(), " ", "", "", filterLinks);
 		io_print("\n");
 

@@ -227,7 +227,7 @@ namespace Premake.Tests.Gnu
 
 				matches = Regex("  LDFLAGS \\+= -L\\$\\(BINDIR\\) -L\\$\\(LIBDIR\\)(.*)");
 
-				mc = System.Text.RegularExpressions.Regex.Matches(matches[0], "-L \"(.+?)\"");
+				mc = System.Text.RegularExpressions.Regex.Matches(matches[0], "-L\"(.+?)\"");
 				config.LibPaths = new string[mc.Count];
 				for (int i = 0; i < mc.Count; ++i)
 					config.LibPaths[i] = mc[i].Groups[1].ToString();
