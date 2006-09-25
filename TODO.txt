@@ -1,7 +1,3 @@
-CB: enable all flags, see what goes into linker section
-
-CB: try a C project (instead of C++)
-
 Feature ideas in email from Philip Taylor
 
 Can identify other windows compilers with __CYGWIN32__ and __MINGW32__ (to set windows platform flag)

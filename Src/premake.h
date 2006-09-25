@@ -27,5 +27,6 @@ extern const char* HELP_MSG;
 extern const char* g_cc;
 extern const char* g_dotnet;
 extern int         g_verbose;
+extern const char* g_target;
 
 int onCommand(const char* cmd, const char* arg);

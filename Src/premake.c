@@ -38,6 +38,7 @@ const char* HELP_MSG  = "Type 'premake --help' for help";
 const char* g_filename;
 const char* g_cc;
 const char* g_dotnet;
+const char* g_target;
 int         g_verbose;
 int         g_hasScript;
 
@@ -204,34 +205,42 @@ int onCommand(const char* cmd, const char* arg)
 
 		if (matches(arg, "cb-gcc"))
 		{
+			g_target = "cb-gcc";
 			return cb_generate();
 		}
 		if (matches(arg, "gnu"))
 		{
+			g_target = "gnu";
 			return gnu_generate();
 		}
 		else if (matches(arg, "monodev") || matches(arg, "md"))
 		{
+			g_target = "monodev";
 			return monodev_generate();
 		}
 		else if (matches(arg, "sharpdev") || matches(arg, "sd"))
 		{
+			g_target = "sharpdev";
 			return sharpdev_generate("sharpdev");
 		}
 		else if (matches(arg, "vs6"))
 		{
+			g_target = "vs6";
 			return vs6_generate();
 		}
 		else if (matches(arg, "vs2002") || matches(arg, "vs7"))
 		{
+			g_target = "vs2002";
 			return vs2002_generate(2002);
 		}
 		else if (matches(arg, "vs2003"))
 		{
+			g_target = "vs2003";
 			return vs2002_generate(2003);
 		}
 		else if (matches(arg, "vs2005"))
 		{
+			g_target = "vs2005";
 			return vs2005_generate();
 		}
 		else

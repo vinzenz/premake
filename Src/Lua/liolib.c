@@ -678,7 +678,7 @@ static int io_date (lua_State *L) {
 
 static int io_time (lua_State *L) {
   if (lua_isnoneornil(L, 1))  /* called without args? */
-    lua_pushnumber(L, time(NULL));  /* return current time */
+    lua_pushnumber(L, (lua_Number)time(NULL));  /* return current time */
   else {
     time_t t;
     struct tm ts;
@@ -695,7 +695,7 @@ static int io_time (lua_State *L) {
     if (t == (time_t)(-1))
       lua_pushnil(L);
     else
-      lua_pushnumber(L, t);
+      lua_pushnumber(L, (lua_Number)t);
   }
   return 1;
 }

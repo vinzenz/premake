@@ -602,13 +602,24 @@ const char* prj_get_target_for(int i)
 
 	else if (os_is("windows"))
 	{
-		strcat(buffer, filename);
-		if (matches(cfg->kind, "lib"))
-			extension = "lib";
-		else if (matches(cfg->kind, "dll"))
-			extension = "dll";
+		/* Codeblocks uses Unix naming for static libs */
+		if (matches(g_target, "cb-gcc") && matches(cfg->kind, "lib"))
+		{
+			if (cfg->prefix == NULL)
+				strcat(buffer, "lib");
+			strcat(buffer, filename);
+			extension = "a";
+		}
 		else
-			extension = "exe";
+		{
+			strcat(buffer, filename);
+			if (matches(cfg->kind, "lib"))
+				extension = "lib";
+			else if (matches(cfg->kind, "dll"))
+				extension = "dll";
+			else
+				extension = "exe";
+		}
 	}
 
 	else if (os_is("macosx") && matches(cfg->kind, "dll"))
