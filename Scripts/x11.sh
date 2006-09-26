@@ -54,7 +54,7 @@ read line
 echo ""
 echo "RETRIEVING SOURCE CODE FROM REPOSITORY..."
 echo ""
-cd ../..
+
 svn export https://svn.sourceforge.net/svnroot/premake/Branches/$1 Premake-$1
 
 echo ""
@@ -84,7 +84,7 @@ unix2dos Src/Premake.dsp
 unix2dos Src/Premake.vcproj
 
 cd ..
-zip -r9 $script_dir/premake-src-$1.zip Premake-$1/*
+zip -r9 ../../premake-src-$1.zip Premake-$1/*
 
 
 #####################################################################
@@ -114,7 +114,7 @@ tar czvf ../../premake-linux-$1.tar.gz premake
 # Send the files to SourceForge
 #####################################################################
 
-cd $script_dir
+cd ../.. 
 echo ""
 echo "Upload packages to SourceForge?"
 read line
