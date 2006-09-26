@@ -1,35 +1,48 @@
 #!/bin/sh
+###################################################################
+# Premake Source Code and Linux Binary Release Script
+# Originally written by Jason Perkins (starkos@gmail.com)
+#
+# Prerequisites:
+#  svn, zip
+###################################################################
 
-script_dir=`pwd`
-
-# Make sure a build number is supplied
+# Check arguments
 if [ $# -ne 1 ]; then
-  echo 1>&2 "Usage: $0 version"
+  echo 1>&2 "Usage: $0 version_number"
   exit 1
 fi
 
-echo "POSIX BUILD $1"
-echo ""
 
-# Make sure all prerequisites are met
-echo "Did you test against EVERY project?"
+###################################################################
+# Pre-build checklist
+###################################################################
+
+echo "" 
+echo "STARTING PREBUILD CHECKLIST, PRESS ^^C TO ABORT."
+echo ""
+echo "Is the version number '$1' correct?"
 read line
 echo ""
-echo "Did you create a release branch?"
+echo "Have you created a release branch named '$1' in SVN?"
 read line
 echo ""
-echo "Have you updated the version number in premake.c?"
+echo "Have you run all of the tests?"
 read line
 echo ""
-echo "Did you update README.txt?"
+echo "Is the version number in premake.c correct?"
 read line
 echo ""
-echo "Did you update CHANGES.txt?"
+echo "Is README.txt up to date?"
+read line
+echo ""
+echo "Is CHANGES.txt up to date?"
 read line
 echo ""
 echo "Ready to build Source Code and POSIX executable for version $1."
 echo "Press [Enter] to begin."
 read line
+
 
 
 #####################################################################
@@ -42,14 +55,13 @@ echo ""
 echo "RETRIEVING SOURCE CODE FROM REPOSITORY..."
 echo ""
 cd ../..
-svn co https://svn.sourceforge.net/svnroot/premake/Branches/$1 Premake-$1
+svn export https://svn.sourceforge.net/svnroot/premake/Branches/$1 Premake-$1
 
 echo ""
 echo "REMOVING PRIVATE FILES..."
 echo ""
 
 cd Premake-$1
-rm -rf `find . -name .svn`
 rm -rf Scripts
 rm -f  TODO.txt
 
@@ -93,7 +105,7 @@ make CONFIG=Release
 #####################################################################
 
 cd bin
-tar czvf $script_dir/premake-linux-$1.tar.gz premake
+tar czvf ../../premake-linux-$1.tar.gz premake
 
 
 #####################################################################
@@ -121,8 +133,4 @@ echo "CLEANING UP..."
 echo ""
 cd ../..
 rm -rf Premake-$1
-
-cd $script_dir
-echo ""
-echo "Done - NOW CREATE A TAG"
 
