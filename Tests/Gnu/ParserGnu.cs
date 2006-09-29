@@ -303,17 +303,24 @@ namespace Premake.Tests.Gnu
 				Match("");
 			}
 
+			Match("MKDIR_TYPE := msdos");
 			Match("CMD := $(subst \\,\\\\,$(ComSpec)$(COMSPEC))");
 			Match("ifeq (,$(CMD))");
+			Match("  MKDIR_TYPE := posix");
+			Match("endif");
+			Match("ifeq (/bin/sh.exe,$(SHELL))");
+			Match("  MKDIR_TYPE := posix");
+			Match("endif");
+			Match("ifeq ($(MKDIR_TYPE),posix)");
 			Match("  CMD_MKBINDIR := mkdir -p $(BINDIR)");
 			Match("  CMD_MKLIBDIR := mkdir -p $(LIBDIR)");
 			Match("  CMD_MKOUTDIR := mkdir -p $(OUTDIR)");
 			Match("  CMD_MKOBJDIR := mkdir -p $(OBJDIR)");
 			Match("else");
-			Match("  CMD_MKBINDIR := $(CMD) /c if not exist $(subst /,\\\\,$(BINDIR)) mkdir $(subst /,\\\\,$(BINDIR))");
-			Match("  CMD_MKLIBDIR := $(CMD) /c if not exist $(subst /,\\\\,$(LIBDIR)) mkdir $(subst /,\\\\,$(LIBDIR))");
-			Match("  CMD_MKOUTDIR := $(CMD) /c if not exist $(subst /,\\\\,$(OUTDIR)) mkdir $(subst /,\\\\,$(OUTDIR))");
-			Match("  CMD_MKOBJDIR := $(CMD) /c if not exist $(subst /,\\\\,$(OBJDIR)) mkdir $(subst /,\\\\,$(OBJDIR))");
+			Match("  CMD_MKBINDIR := $(CMD) /c if not exist $(subst /,\\,$(BINDIR)) mkdir $(subst /,\\,$(BINDIR))");
+			Match("  CMD_MKLIBDIR := $(CMD) /c if not exist $(subst /,\\,$(LIBDIR)) mkdir $(subst /,\\,$(LIBDIR))");
+			Match("  CMD_MKOUTDIR := $(CMD) /c if not exist $(subst /,\\,$(OUTDIR)) mkdir $(subst /,\\,$(OUTDIR))");
+			Match("  CMD_MKOBJDIR := $(CMD) /c if not exist $(subst /,\\,$(OBJDIR)) mkdir $(subst /,\\,$(OBJDIR))");
 			Match("endif");
 			Match("");
 

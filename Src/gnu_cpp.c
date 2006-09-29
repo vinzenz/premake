@@ -158,17 +158,25 @@ int gnu_cpp()
 		io_print("\n");
 	}
 
+	/* Try to figure out how to safely create a directory */
+	io_print("MKDIR_TYPE := msdos\n");
 	io_print("CMD := $(subst \\,\\\\,$(ComSpec)$(COMSPEC))\n");
 	io_print("ifeq (,$(CMD))\n");
+	io_print("  MKDIR_TYPE := posix\n");
+	io_print("endif\n");
+	io_print("ifeq (/bin/sh.exe,$(SHELL))\n");
+	io_print("  MKDIR_TYPE := posix\n");
+	io_print("endif\n");
+	io_print("ifeq ($(MKDIR_TYPE),posix)\n");
 	io_print("  CMD_MKBINDIR := mkdir -p $(BINDIR)\n");
 	io_print("  CMD_MKLIBDIR := mkdir -p $(LIBDIR)\n");
 	io_print("  CMD_MKOUTDIR := mkdir -p $(OUTDIR)\n");
 	io_print("  CMD_MKOBJDIR := mkdir -p $(OBJDIR)\n");
 	io_print("else\n");
-	io_print("  CMD_MKBINDIR := $(CMD) /c if not exist $(subst /,\\\\,$(BINDIR)) mkdir $(subst /,\\\\,$(BINDIR))\n");
-	io_print("  CMD_MKLIBDIR := $(CMD) /c if not exist $(subst /,\\\\,$(LIBDIR)) mkdir $(subst /,\\\\,$(LIBDIR))\n");
-	io_print("  CMD_MKOUTDIR := $(CMD) /c if not exist $(subst /,\\\\,$(OUTDIR)) mkdir $(subst /,\\\\,$(OUTDIR))\n");
-	io_print("  CMD_MKOBJDIR := $(CMD) /c if not exist $(subst /,\\\\,$(OBJDIR)) mkdir $(subst /,\\\\,$(OBJDIR))\n");
+	io_print("  CMD_MKBINDIR := $(CMD) /c if not exist $(subst /,\\,$(BINDIR)) mkdir $(subst /,\\,$(BINDIR))\n");
+	io_print("  CMD_MKLIBDIR := $(CMD) /c if not exist $(subst /,\\,$(LIBDIR)) mkdir $(subst /,\\,$(LIBDIR))\n");
+	io_print("  CMD_MKOUTDIR := $(CMD) /c if not exist $(subst /,\\,$(OUTDIR)) mkdir $(subst /,\\,$(OUTDIR))\n");
+	io_print("  CMD_MKOBJDIR := $(CMD) /c if not exist $(subst /,\\,$(OBJDIR)) mkdir $(subst /,\\,$(OBJDIR))\n");
 	io_print("endif\n");
 	io_print("\n");
 
