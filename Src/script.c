@@ -521,6 +521,14 @@ static void buildOptionsTable()
 			lua_pushboolean(L, 1);
 
 		lua_settable(L, -3);
+
+		/* special handling - set a "target" global variable */
+		if (matches(flag, "target"))
+		{
+			lua_pushstring(L, arg);
+			lua_setglobal(L, "target");
+		}
+
 		flag = arg_getflag();
 	}
 
