@@ -553,6 +553,9 @@ int vs_write_cpp()
 					if (prj_find_filetype(".def") != NULL)
 						tag_attr("ModuleDefinitionFile=\"%s\"", prj_find_filetype(".def"));
 
+					if (prj_has_flag("no-manifest"))
+						tag_attr("GenerateManifest=\"%s\"", S_FALSE);
+
 					tag_attr("GenerateDebugInformation=\"%s\"", symbols ? S_TRUE : S_FALSE);
 					if (symbols)
 						tag_attr("ProgramDatabaseFile=\"$(OutDir)/%s.pdb\"", path_getbasename(prj_get_target()));

@@ -317,6 +317,9 @@ namespace Premake.Tests.Vs2003
 					if (matches != null)
 						package.DefFile = matches[0];
 
+					if (Match("\t\t\t\tGenerateManifest=\"FALSE\"", true))
+						buildFlags.Add("no-manifest");
+
 					string expected = buildFlags.Contains("no-symbols") ? "FALSE" : "TRUE";
 					Match("\t\t\t\tGenerateDebugInformation=\"" + expected + "\"");
 
