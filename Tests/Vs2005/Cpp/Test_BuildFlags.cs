@@ -143,7 +143,7 @@ namespace Premake.Tests.Vs2005.Cpp
 		public void Test_Optimize()
 		{
 			_script.Append("package.buildflags = { 'optimize' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "optimize" };
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "optimize", "no-edit-and-continue" };
 			_expects.Package[0].Config[1].BuildFlags = new string[] { "optimize", "no-symbols" };
 			Run();
 		}
@@ -152,7 +152,7 @@ namespace Premake.Tests.Vs2005.Cpp
 		public void Test_OptimizeSize()
 		{
 			_script.Append("package.buildflags = { 'optimize-size' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "optimize-size" };
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "optimize-size", "no-edit-and-continue" };
 			_expects.Package[0].Config[1].BuildFlags = new string[] { "optimize-size", "no-symbols" };
 			Run();
 		}
@@ -161,8 +161,18 @@ namespace Premake.Tests.Vs2005.Cpp
 		public void Test_OptimizeSpeed()
 		{
 			_script.Append("package.buildflags = { 'optimize-speed' }");
-			_expects.Package[0].Config[0].BuildFlags = new string[] { "optimize-speed" };
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "optimize-speed", "no-edit-and-continue" };
 			_expects.Package[0].Config[1].BuildFlags = new string[] { "optimize-speed", "no-symbols" };
+			Run();
+		}
+
+		[Test]
+		public void OptimizeReleaseBuildWithSymbols()
+		{
+			_script.Append("package.buildflags = { 'optimize' }");
+			_script.Append("package.config['Release'].buildflags = { 'no-edit-and-continue' }");
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "optimize", "no-edit-and-continue" };
+			_expects.Package[0].Config[1].BuildFlags = new string[] { "optimize", "no-edit-and-continue" };
 			Run();
 		}
 

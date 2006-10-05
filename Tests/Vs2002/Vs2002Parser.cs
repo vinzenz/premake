@@ -279,8 +279,8 @@ namespace Premake.Tests.Vs2002
 				matches = Regex("\t\t\t\tDebugInformationFormat=\"([0-9])\"/>");
 				if (matches[0] == "0")
 					buildFlags.Add("no-symbols");
-				else if ((optimization > 0 && matches[0] != "3") || (optimization == 0 && matches[0] != "4"))
-					throw new FormatException("Unexpected value: DebugInformationFormat=\"" + matches[0] + "\"");
+				else if (matches[0] == "3")
+					buildFlags.Add("no-edit-and-continue");
 
 				Match("\t\t\t<Tool");
 				Match("\t\t\t\tName=\"VCCustomBuildTool\"/>");

@@ -370,9 +370,12 @@ int vs_write_cpp()
 		}
 		else
 		{
-			/* If optimizations are enabled, edit-and-continue won't work.
-			 * Have to fall back to regular pdb in this case */
-			symbols = (optimization != 0 || prj_has_flag("managed")) ? 3 : 4;
+			/* Edit-and-continue does not work if optimizations are enabled, or
+			 * for managed C++ projects */
+			if (prj_has_flag("no-edit-and-continue") || optimization != 0 || prj_has_flag("managed"))
+				symbols = 3;
+			else
+				symbols = 4;
 		}
 
 		tag_open("Configuration");
