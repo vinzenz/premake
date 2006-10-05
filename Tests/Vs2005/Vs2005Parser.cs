@@ -389,6 +389,10 @@ namespace Premake.Tests.Vs2005
 				if (matches[0] != "0")
 					throw new FormatException("Expected UsePrecompiledHeader to be 0, got " + matches[0]);
 
+				matches = Regex("\t\t\t\tTreatWChar_tAsBuiltInType=\"(true|false)\"", true);
+				if (matches != null)
+					buildFlags.Add(matches[0] == "true" ? "native-wchar" : "no-native-wchar");
+
 				matches = Regex("\t\t\t\tWarningLevel=\"([3-4])\"");
 				if (matches[0] == "4")
 					buildFlags.Add("extra-warnings");

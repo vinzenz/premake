@@ -506,6 +506,12 @@ int vs_write_cpp()
 					tag_attr("RuntimeTypeInfo=\"%s\"", S_FALSE);
 
 				tag_attr("UsePrecompiledHeader=\"%d\"", version < VS2005 ? 2 : 0);
+
+				if (prj_has_flag("native-wchar"))
+					tag_attr("TreatWChar_tAsBuiltInType=\"%s\"", S_TRUE);
+				else if (prj_has_flag("no-native-wchar"))
+					tag_attr("TreatWChar_tAsBuiltInType=\"%s\"", S_FALSE);
+
 				tag_attr("WarningLevel=\"%d\"", prj_has_flag("extra-warnings") ? 4 : 3);
 				if (prj_has_flag("fatal-warnings"))
 					tag_attr("WarnAsError=\"%s\"", S_TRUE);

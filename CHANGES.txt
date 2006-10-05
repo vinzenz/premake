@@ -4,6 +4,7 @@ Premake Changelog
 3.3 (in progress)
 * Added `target` global variable to script environment
 * Added build flag `no-edit-and-continue`
+* Added build flags `native-wchar` and `no-native-wchar`
 * Bug 1565755: Generated makefiles do not work with MSYS
 
 3.2

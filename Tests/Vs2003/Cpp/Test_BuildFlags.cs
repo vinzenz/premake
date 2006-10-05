@@ -192,5 +192,23 @@ namespace Premake.Tests.Vs2003.Cpp
 			_expects.Package[0].Config[1].BuildFlags = new string[] { "unicode", "optimize", "no-symbols" };
 			Run();
 		}
+
+		[Test]
+		public void NativeWChar()
+		{
+			_script.Append("package.buildflags = { 'native-wchar' }");
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "native-wchar" };
+			_expects.Package[0].Config[1].BuildFlags = new string[] { "native-wchar", "optimize", "no-symbols" };
+			Run();
+		}
+
+		[Test]
+		public void NoNativeWChar()
+		{
+			_script.Append("package.buildflags = { 'no-native-wchar' }");
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "no-native-wchar" };
+			_expects.Package[0].Config[1].BuildFlags = new string[] { "no-native-wchar", "optimize", "no-symbols" };
+			Run();
+		}
 	}
 }
