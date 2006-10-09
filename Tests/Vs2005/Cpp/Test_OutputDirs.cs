@@ -152,15 +152,6 @@ namespace Premake.Tests.Vs2005.Cpp
 			_expects.Package[0].Config[1].ObjDir = "temp/Release";
 			Run();
 		}
-		
-		[Test]
-		public void ObjDir_SetAtProject()
-		{
-			_script.Append("project.objdir = 'obj'");
-			_expects.Package[0].Config[0].ObjDir = "obj/MyPackage/Debug";
-			_expects.Package[0].Config[1].ObjDir = "obj/MyPackage/Release";
-			Run();
-		}
 
 		#endregion
 	}
