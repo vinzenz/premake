@@ -6,6 +6,7 @@ Premake Changelog
 * Added build flag `no-edit-and-continue`
 * Added build flags `native-wchar` and `no-native-wchar`
 * Added build flags `no-manifest`
+* Feature (@): package level bindir and libdir
 * Bug 1565755: Generated makefiles do not work with MSYS
 
 3.2

@@ -46,6 +46,8 @@ typedef struct tagPkgConfig
 	const char** libpaths;
 	const char** linkopts;
 	const char** links;
+	const char*  bindir;
+	const char*  libdir;
 	const char*  objdir;
 	const char*  prefix;
 	const char*  target;

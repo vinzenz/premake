@@ -12,8 +12,9 @@ namespace Premake.Tests.Gnu
 		Parser  _parser;
 
 		#region Setup and Teardown
+
 		[SetUp]
-		public void Test_Setup()
+		public void Setup()
 		{
 			_script = Script.MakeBasic("exe", "c++");
 
@@ -27,6 +28,7 @@ namespace Premake.Tests.Gnu
 		{
 			TestEnvironment.Run(_script, _parser, _expects, null);
 		}
+		
 		#endregion
 
 		[Test]

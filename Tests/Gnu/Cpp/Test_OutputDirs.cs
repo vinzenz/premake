@@ -12,8 +12,9 @@ namespace Premake.Tests.Gnu.Cpp
 		Parser  _parser;
 
 		#region Setup and Teardown
+
 		[SetUp]
-		public void Test_Setup()
+		public void Setup()
 		{
 			_script = Script.MakeBasic("exe", "c++");
 
@@ -28,11 +29,13 @@ namespace Premake.Tests.Gnu.Cpp
 		{
 			TestEnvironment.Run(_script, _parser, _expects, null);
 		}
+
 		#endregion
 
 		#region BinDir Tests
+
 		[Test]
-		public void Test_BinDir_Default()
+		public void BinDir_Default()
 		{
 			_expects.Package[0].Config[0].BinDir = ".";
 			_expects.Package[0].Config[1].BinDir = ".";
@@ -40,7 +43,7 @@ namespace Premake.Tests.Gnu.Cpp
 		}
 
 		[Test]
-		public void Test_BinDir_SetAtProject()
+		public void BinDir_SetAtProject()
 		{
 			_script.Append("project.bindir = 'bin'");
 			_expects.Package[0].Config[0].BinDir = "bin";
@@ -49,7 +52,7 @@ namespace Premake.Tests.Gnu.Cpp
 		}
 
 		[Test]
-		public void Test_BinDir_SetAtProjectConfig()
+		public void BinDir_SetAtProjectConfig()
 		{
 			_script.Append("project.config['Debug'].bindir = 'bin/Debug'");
 			_script.Append("project.config['Release'].bindir = 'bin/Release'");
@@ -57,6 +60,28 @@ namespace Premake.Tests.Gnu.Cpp
 			_expects.Package[0].Config[1].BinDir = "bin/Release";
 			Run();
 		}
+
+		[Test]
+		public void BinDir_FromSubDir()
+		{
+			_script.Append("project.bindir = 'bin'");
+			_script.Append("package.path = 'MyPackage'");
+			_expects.Package[0].Config[0].BinDir = "../bin";
+			_expects.Package[0].Config[1].BinDir = "../bin";
+			Run();
+		}
+
+
+		[Test]
+		public void BinDir_SetAtPackage()
+		{
+			_script.Append("package.path = 'MyPackage'");
+			_script.Append("package.bindir = 'bin'");
+			_expects.Package[0].Config[0].BinDir = "bin";
+			_expects.Package[0].Config[1].BinDir = "bin";
+			Run();
+		}
+
 		#endregion
 
 		#region LibDir Tests

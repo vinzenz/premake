@@ -342,12 +342,18 @@ static int export_pkgconfig(Package* package, int tbl)
 		config->prjConfig = project->configs[i];
 
 		obj = tbl_geti(arr, i + 1);
-		config->objdir = tbl_getstring(obj, "objdir");
 
+		/* Pull out the non-list values */
+		config->bindir    = export_value(tbl, obj, "bindir");
+		config->libdir    = export_value(tbl, obj, "libdir");
 		config->extension = export_value(tbl, obj, "targetextension");
 		config->prefix    = export_value(tbl, obj, "targetprefix");
 		config->target    = export_value(tbl, obj, "target");
 		config->kind      = export_value(tbl, obj, "kind");
+
+		/* objdir automatically uses config name as subdir, should not be
+		 * specified per configuration */
+		config->objdir = tbl_getstring(obj, "objdir");
 
 		/* Assign a default target, if none specified */
 		if (config->target == NULL)

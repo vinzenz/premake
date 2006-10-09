@@ -471,7 +471,7 @@ namespace Premake.Tests.Vs2005
 					if (matches != null)
 						package.DefFile = matches[0];
 
-					if (Match("\t\t\t\tGenerateManifest=\"FALSE\"", true))
+					if (Match("\t\t\t\tGenerateManifest=\"false\"", true))
 						buildFlags.Add("no-manifest");
 
 					string expected = buildFlags.Contains("no-symbols") ? "false" : "true";

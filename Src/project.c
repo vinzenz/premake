@@ -173,46 +173,82 @@ const char** prj_get_defines()
 
 const char* prj_get_bindir()
 {
-	return path_build(my_pkg->path, my_cfg->prjConfig->bindir);
+	if (my_cfg->bindir != NULL)
+	{
+		return my_cfg->bindir;
+	}
+	else
+	{
+		strcpy(buffer, path_build(my_pkg->path, my_cfg->prjConfig->bindir));
+		return buffer;
+	}
 }
 
 const char* prj_get_bindir_for(int i)
 {
 	Package*   pkg = prj_get_package();
 	PkgConfig* cfg = prj_get_config_for(i);
-
-	strcpy(buffer, path_build(pkg->path, cfg->prjConfig->bindir));
-	return buffer;
+	if (my_cfg->bindir != NULL)
+	{
+		return my_cfg->bindir;
+	}
+	else
+	{
+		strcpy(buffer, path_build(pkg->path, cfg->prjConfig->bindir));
+		return buffer;
+	}
 }
 
 const char* prj_get_libdir()
 {
-	return path_build(my_pkg->path, my_cfg->prjConfig->libdir);
+	if (my_cfg->libdir != NULL)
+	{
+		return my_cfg->libdir;
+	}
+	else
+	{
+		strcpy(buffer, path_build(my_pkg->path, my_cfg->prjConfig->libdir));
+		return buffer;
+	}
 }
 
 const char* prj_get_libdir_for(int i)
 {
 	Package*   pkg = prj_get_package();
 	PkgConfig* cfg = prj_get_config_for(i);
-
-	strcpy(buffer, path_build(pkg->path, cfg->prjConfig->libdir));
-	return buffer;
+	if (my_cfg->libdir != NULL)
+	{
+		return my_cfg->libdir;
+	}
+	else
+	{
+		strcpy(buffer, path_build(my_pkg->path, my_cfg->prjConfig->libdir));
+		return buffer;
+	}
 }
 
 const char* prj_get_objdir()
 {
 	if (my_cfg->objdir != NULL)
+	{
 		return my_cfg->objdir;
+	}
 	else
+	{
 		return path_combine(my_pkg->objdir, my_cfg->prjConfig->name);
+	}
 }
 
 const char* prj_get_pkgobjdir()
 {
 	if (my_cfg->objdir == NULL)
+	{
 		return my_pkg->objdir;
+	}
 	else
+	{
 		return NULL;
+	}
 }
 
 const char* prj_get_outdir()

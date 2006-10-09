@@ -12,8 +12,9 @@ namespace Premake.Tests.Vs2005.Cpp
 		Parser  _parser;
 
 		#region Setup and Teardown
+
 		[SetUp]
-		public void Test_Setup()
+		public void Setup()
 		{
 			_script = Script.MakeBasic("exe", "c++");
 
@@ -28,11 +29,13 @@ namespace Premake.Tests.Vs2005.Cpp
 		{
 			TestEnvironment.Run(_script, _parser, _expects, null);
 		}
+		
 		#endregion
 
 		#region BinDir Tests
+
 		[Test]
-		public void Test_BinDir_Default()
+		public void BinDir_Default()
 		{
 			_expects.Package[0].Config[0].BinDir = ".";
 			_expects.Package[0].Config[1].BinDir = ".";
@@ -40,7 +43,7 @@ namespace Premake.Tests.Vs2005.Cpp
 		}
 
 		[Test]
-		public void Test_BinDir_SetAtProject()
+		public void BinDir_SetAtProject()
 		{
 			_script.Append("project.bindir = 'bin'");
 			_expects.Package[0].Config[0].BinDir = "bin";
@@ -49,7 +52,7 @@ namespace Premake.Tests.Vs2005.Cpp
 		}
 
 		[Test]
-		public void Test_BinDir_SetAtProjectConfig()
+		public void BinDir_SetAtProjectConfig()
 		{
 			_script.Append("project.config['Debug'].bindir = 'bin/Debug'");
 			_script.Append("project.config['Release'].bindir = 'bin/Release'");
@@ -57,11 +60,33 @@ namespace Premake.Tests.Vs2005.Cpp
 			_expects.Package[0].Config[1].BinDir = "bin/Release";
 			Run();
 		}
+
+		[Test]
+		public void BinDir_FromSubDir()
+		{
+			_script.Append("project.bindir = 'bin'");
+			_script.Append("package.path = 'MyPackage'");
+			_expects.Package[0].Config[0].BinDir = "../bin";
+			_expects.Package[0].Config[1].BinDir = "../bin";
+			Run();
+		}
+
+		[Test]
+		public void BinDir_SetAtPackage()
+		{
+			_script.Append("package.path = 'MyPackage'");
+			_script.Append("package.bindir = 'bin'");
+			_expects.Package[0].Config[0].BinDir = "bin";
+			_expects.Package[0].Config[1].BinDir = "bin";
+			Run();
+		}
+
 		#endregion
 
 		#region LibDir Tests
+
 		[Test]
-		public void Test_LibDir_Default()
+		public void LibDir_Default()
 		{
 			_expects.Package[0].Config[0].LibDir = ".";
 			_expects.Package[0].Config[1].LibDir = ".";
@@ -69,7 +94,7 @@ namespace Premake.Tests.Vs2005.Cpp
 		}
 
 		[Test]
-		public void Test_LibDir_SetAtProject()
+		public void LibDir_SetAtProject()
 		{
 			_script.Append("project.libdir = 'lib'");
 			_expects.Package[0].Config[0].LibDir = "lib";
@@ -78,7 +103,7 @@ namespace Premake.Tests.Vs2005.Cpp
 		}
 
 		[Test]
-		public void Test_LibDir_SetAtProjectConfig()
+		public void LibDir_SetAtProjectConfig()
 		{
 			_script.Append("project.config['Debug'].libdir = 'lib/Debug'");
 			_script.Append("project.config['Release'].libdir = 'lib/Release'");
@@ -86,11 +111,33 @@ namespace Premake.Tests.Vs2005.Cpp
 			_expects.Package[0].Config[1].LibDir = "lib/Release";
 			Run();
 		}
+
+		[Test]
+		public void LibDir_FromSubDir()
+		{
+			_script.Append("project.libdir = 'lib'");
+			_script.Append("package.path = 'MyPackage'");
+			_expects.Package[0].Config[0].LibDir = "../lib";
+			_expects.Package[0].Config[1].LibDir = "../lib";
+			Run();
+		}
+
+		[Test]
+		public void LibDir_SetAtPackage()
+		{
+			_script.Append("package.path = 'MyPackage'");
+			_script.Append("package.libdir = 'lib'");
+			_expects.Package[0].Config[0].LibDir = "lib";
+			_expects.Package[0].Config[1].LibDir = "lib";
+			Run();
+		}
+
 		#endregion
 
 		#region ObjDir Tests
+
 		[Test]
-		public void Test_ObjDir_Default()
+		public void ObjDir_Default()
 		{
 			_expects.Package[0].Config[0].ObjDir = "obj/Debug";
 			_expects.Package[0].Config[1].ObjDir = "obj/Release";
@@ -98,13 +145,23 @@ namespace Premake.Tests.Vs2005.Cpp
 		}
 
 		[Test]
-		public void Test_ObjDir_SetAtPackage()
+		public void ObjDir_SetAtPackage()
 		{
 			_script.Append("package.objdir = 'temp'");
 			_expects.Package[0].Config[0].ObjDir = "temp/Debug";
 			_expects.Package[0].Config[1].ObjDir = "temp/Release";
 			Run();
 		}
+		
+		[Test]
+		public void ObjDir_SetAtProject()
+		{
+			_script.Append("project.objdir = 'obj'");
+			_expects.Package[0].Config[0].ObjDir = "obj/MyPackage/Debug";
+			_expects.Package[0].Config[1].ObjDir = "obj/MyPackage/Release";
+			Run();
+		}
+
 		#endregion
 	}
 }
