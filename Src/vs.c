@@ -505,12 +505,20 @@ int vs_write_cpp()
 				if (version == VS2005 && prj_has_flag("no-rtti"))
 					tag_attr("RuntimeTypeInfo=\"%s\"", S_FALSE);
 
-				tag_attr("UsePrecompiledHeader=\"%d\"", version < VS2005 ? 2 : 0);
-
 				if (prj_has_flag("native-wchar"))
 					tag_attr("TreatWChar_tAsBuiltInType=\"%s\"", S_TRUE);
 				else if (prj_has_flag("no-native-wchar"))
 					tag_attr("TreatWChar_tAsBuiltInType=\"%s\"", S_FALSE);
+
+				if (prj_has_pch())
+				{
+					tag_attr("UsePrecompiledHeader=\"%d\"", version < VS2005 ? 3 : 2);
+					tag_attr("PrecompiledHeaderThrough=\"%s\"", prj_get_pch_header());
+				}
+				else
+				{
+					tag_attr("UsePrecompiledHeader=\"%d\"", version < VS2005 ? 2 : 0);
+				}
 
 				tag_attr("WarningLevel=\"%d\"", prj_has_flag("extra-warnings") ? 4 : 3);
 				if (prj_has_flag("fatal-warnings"))
@@ -645,6 +653,8 @@ const char* vs_filter_links(const char* name)
 
 void vs_list_files(const char* path, int stage)
 {
+	const char* pchSource = prj_get_pch_source();
+
 	const char* ptr = path;
 	while (strncmp(ptr, "../", 3) == 0)
 		ptr += 3;
@@ -679,6 +689,24 @@ void vs_list_files(const char* path, int stage)
 			io_print(".\\");
 		io_print(path_translate(path, "windows"));
 		tag_attr_close();
+
+		/* Add FileConfiguration section as needed */
+		if (matches(path_getname(path), pchSource))
+		{
+			int i;
+			for (i = 0; i < prj_get_numconfigs(); ++i)
+			{
+				prj_select_config(i);
+				tag_open("FileConfiguration");
+				tag_attr("Name=\"%s|Win32\"", prj_get_cfgname());
+				tag_open("Tool");
+				tag_attr("Name=\"VCCLCompilerTool\"");
+				tag_attr("UsePrecompiledHeader=\"1\"");
+				tag_close("Tool", 0);
+				tag_close("FileConfiguration", 1);
+			}
+		}
+
 		tag_close("File", 1);
 		break;
 	}

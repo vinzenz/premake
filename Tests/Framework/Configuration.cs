@@ -25,6 +25,8 @@ namespace Premake.Tests.Framework
 		public string[] Dependencies;
 		public string[] LinkDeps;
 		public string   ImportLib;
+		public string PchHeader;
+		public string PchSource;
 
 		public Configuration()
 		{
@@ -43,6 +45,8 @@ namespace Premake.Tests.Framework
 			Test(this.BuildOptions, actual.BuildOptions, "Build options");
 			Test(this.LinkOptions,  actual.LinkOptions,  "Link options");
 			Test(this.ImportLib,    actual.ImportLib,    "Import library");
+			Test(this.PchHeader, actual.PchHeader, "PCH Header");
+			Test(this.PchSource, actual.PchSource, "PCH Source");
 
 			TestList(this.IncludePaths, actual.IncludePaths, "Include paths");
 			TestList(this.Defines,      actual.Defines,      "Defined symbols");

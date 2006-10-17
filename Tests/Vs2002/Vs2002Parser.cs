@@ -261,13 +261,20 @@ namespace Premake.Tests.Vs2002
 				if (!Match("\t\t\t\tRuntimeTypeInfo=\"TRUE\"", true))
 					buildFlags.Add("no-rtti");
 
-				matches = Regex("\t\t\t\tUsePrecompiledHeader=\"([0-9])\"");
-				if (matches[0] != "2")
-					throw new FormatException("Expected UsePrecompiledHeader to be 2, got " + matches[0]);
-
 				matches = Regex("\t\t\t\tTreatWChar_tAsBuiltInType=\"(TRUE|FALSE)\"", true);
 				if (matches != null)
 					buildFlags.Add(matches[0] == "TRUE" ? "native-wchar" : "no-native-wchar");
+
+				matches = Regex("\t\t\t\tUsePrecompiledHeader=\"([0-9])\"");
+				if (matches[0] == "3")
+				{
+					matches = Regex("\t\t\t\tPrecompiledHeaderThrough=\"(.+?)\"");
+					config.PchHeader = matches[0];
+				}
+				else if (matches[0] != "2")
+				{
+					throw new FormatException("Expected UsePrecompiledHeader to be 2, got " + matches[0]);
+				}
 
 				matches = Regex("\t\t\t\tWarningLevel=\"([3-4])\"");
 				if (matches[0] == "4")
@@ -421,7 +428,6 @@ namespace Premake.Tests.Vs2002
 					Match(indent + "\t<File");
 					matches = Regex(indent + "\t\tRelativePath=\"(.+)\">");
 					package.File.Add(matches[0]);
-					Match(indent + "\t</File>");
 
 					/* Make sure file appears in the correct folder */
 					filename = matches[0];
@@ -431,6 +437,23 @@ namespace Premake.Tests.Vs2002
 						filename = filename.Substring(3);
 					if (Path.GetDirectoryName(filename) != folder)
 						throw new FormatException("File '" + matches[0] + "' is in folder '" + folder + "'");
+
+					/* Check for file configuration section */
+					foreach (Configuration config in package.Config)
+					{
+						if (Match(indent + "\t\t<FileConfiguration", true))
+						{
+							config.PchSource = filename;
+							Match(indent + "\t\t\tName=\"" + config.Name + "|Win32\">");
+							Match(indent + "\t\t\t<Tool");
+							Match(indent + "\t\t\t\tName=\"VCCLCompilerTool\"");
+							Match(indent + "\t\t\t\tUsePrecompiledHeader=\"1\"/>");
+							Match(indent + "\t\t</FileConfiguration>");
+						}
+					}
+
+					Match(indent + "\t</File>");
+
 				}
 			}
 

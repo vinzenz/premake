@@ -52,6 +52,8 @@ typedef struct tagPkgConfig
 	const char*  prefix;
 	const char*  target;
 	const char*  kind;
+	const char*  pchHeader;
+	const char*  pchSource;
 	FileConfig** fileconfigs;
 } PkgConfig;
 
@@ -123,6 +125,8 @@ const char*  prj_get_outdir_for(int i);
 Package*     prj_get_package();
 Package*     prj_get_package_for(int i);
 const char*  prj_get_path();
+const char*  prj_get_pch_header();
+const char*  prj_get_pch_source();
 const char*  prj_get_pkgfilename(const char* extension);
 const char*  prj_get_pkgfilename_for(int i, const char* extension);
 const char*  prj_get_pkgname();
@@ -140,6 +144,7 @@ const char*  prj_get_url();
 int          prj_has_file(const char* name);
 int          prj_has_flag(const char* flag);
 int          prj_has_flag_for(int i, const char* flag);
+int          prj_has_pch();
 int          prj_is_buildaction(const char* action);
 int          prj_is_kind(const char* kind);
 int          prj_is_lang(const char* lang);

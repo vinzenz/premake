@@ -350,6 +350,8 @@ static int export_pkgconfig(Package* package, int tbl)
 		config->prefix    = export_value(tbl, obj, "targetprefix");
 		config->target    = export_value(tbl, obj, "target");
 		config->kind      = export_value(tbl, obj, "kind");
+		config->pchHeader = export_value(tbl, obj, "pchheader");
+		config->pchSource = export_value(tbl, obj, "pchsource");
 
 		/* objdir automatically uses config name as subdir, should not be
 		 * specified per configuration */

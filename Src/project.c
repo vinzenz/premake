@@ -555,18 +555,6 @@ const char* prj_get_pkgpath_for(int i)
 const char* prj_get_pkgfilename(const char* extension)
 {
 	return prj_get_pkgfilename_for(my_pkg->index, extension);
-/*
-	strcpy(buffer, path_build(project->path, my_pkg->path));
-	if (strlen(buffer) > 0)
-		strcat(buffer, "/");
-	strcat(buffer, my_pkg->name);
-	if (extension != NULL)
-	{
-		strcat(buffer, ".");
-		strcat(buffer, extension);
-	}
-	return buffer;
-*/
 }
 
 const char* prj_get_pkgfilename_for(int i, const char* extension)
@@ -581,6 +569,26 @@ const char* prj_get_pkgfilename_for(int i, const char* extension)
 		strcat(buffer, extension);
 	}
 	return buffer;
+}
+
+
+/************************************************************************
+ * Get the PCH information for the configuration.
+ ***********************************************************************/
+
+int prj_has_pch()
+{
+	return (my_cfg->pchHeader != NULL);
+}
+
+const char* prj_get_pch_header()
+{
+	return my_cfg->pchHeader;
+}
+
+const char* prj_get_pch_source()
+{
+	return my_cfg->pchSource;
 }
 
 
