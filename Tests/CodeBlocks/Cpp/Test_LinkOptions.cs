@@ -2,14 +2,14 @@ using System;
 using NUnit.Framework;
 using Premake.Tests.Framework;
 
-namespace Premake.Tests.Gnu.Cpp
+namespace Premake.Tests.CodeBlocks.Cpp
 {
 	[TestFixture]
 	public class Test_LinkOptions
 	{
-		Script  _script;
+		Script _script;
 		Project _expects;
-		Parser  _parser;
+		Parser _parser;
 
 		#region Setup and Teardown
 		[SetUp]
@@ -21,7 +21,7 @@ namespace Premake.Tests.Gnu.Cpp
 			_expects.Package.Add(1);
 			_expects.Package[0].Config.Add(2);
 
-			_parser = new GnuParser();
+			_parser = new CodeBlocksParser();
 		}
 
 		public void Run()
@@ -31,7 +31,7 @@ namespace Premake.Tests.Gnu.Cpp
 		#endregion
 
 		[Test]
-		public void Test_SetOptionsOnPackage()
+		public void SetOptionsOnPackage()
 		{
 			_script.Append("package.linkoptions = { '--some-opt'  }");
 			_expects.Package[0].Config[0].LinkOptions = "--some-opt";
@@ -40,7 +40,7 @@ namespace Premake.Tests.Gnu.Cpp
 		}
 
 		[Test]
-		public void Test_SetOptionsOnConfig()
+		public void SetOptionsOnConfig()
 		{
 			_script.Append("package.config['Debug'].linkoptions = { '--debug-opt'  }");
 			_script.Append("package.config['Release'].linkoptions = { '--release-opt'  }");
@@ -50,7 +50,7 @@ namespace Premake.Tests.Gnu.Cpp
 		}
 
 		[Test]
-		public void Test_SetOptionsOnPackageAndConfig()
+		public void SetOptionsOnPackageAndConfig()
 		{
 			_script.Append("package.linkoptions = { '--some-opt'  }");
 			_script.Append("package.config['Release'].linkoptions = { '--release-opt'  }");

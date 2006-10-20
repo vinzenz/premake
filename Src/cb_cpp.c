@@ -104,6 +104,7 @@ int cb_cpp()
 		io_print("\t\t\t\t<Linker>\n");
 		if (prj_has_flag("no-symbols"))
 			print_opt("-s");
+		print_list(prj_get_linkoptions(), "\t\t\t\t\t<Add option=\"", "\" />\n", "", NULL);
 		print_list(prj_get_libpaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL);
 		print_list(prj_get_links(), "\t\t\t\t\t<Add library=\"", "\" />\n", "", filterLinks);
 		io_print("\t\t\t\t</Linker>\n");
