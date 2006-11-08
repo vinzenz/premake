@@ -9,6 +9,7 @@ Premake Changelog
 * Added `pchheader` and `pchsource` (Visual Studio only)
 * Feature 1337547: Package-level bindir and libdir
 * Bug 1565755: Generated makefiles do not work with MSYS
+* Bug 1587955: Target path ignored for libs
 
 3.2
 * Added support for Code::Blocks
