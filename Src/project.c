@@ -716,6 +716,10 @@ const char* prj_get_target_for(int i)
 	return buffer;
 }
 
+const char* prj_get_target_raw()
+{
+	return my_cfg->target;
+}
 
 const char* prj_get_targetname_for(int i)
 {

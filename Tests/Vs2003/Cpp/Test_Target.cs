@@ -69,6 +69,20 @@ namespace Premake.Tests.Vs2003.Cpp
 			Run();
 		}
 
+		[Test]
+		public void TargetAppliedToImportLib()
+		{
+			_script.Replace("'exe'", "'dll'");
+			_script.Append("project.bindir = 'bin'");
+			_script.Append("project.libdir = 'lib'");
+			_script.Append("package.target = 'MyApp/MyPackage'");
+			_expects.Package[0].Config[0].OutDir = "bin/MyApp";
+			_expects.Package[0].Config[0].ImportLib = "lib/MyApp/MyPackage.lib";
+			_expects.Package[0].Config[1].OutDir = "bin/MyApp";
+			_expects.Package[0].Config[1].ImportLib = "lib/MyApp/MyPackage.lib";
+			Run();
+		}
+
 		#endregion
 
 		#region Custom Target Tests

@@ -30,8 +30,6 @@ namespace Premake.Tests.Vs2005.Cpp
 		}
 		#endregion
 
-		#region Default Target Tests
-		
 		[Test]
 		public void Test_DefaultTarget()
 		{
@@ -69,9 +67,19 @@ namespace Premake.Tests.Vs2005.Cpp
 			Run();
 		}
 
-		#endregion
-
-		#region Custom Target Tests
+		[Test]
+		public void TargetAppliedToImportLib()
+		{
+			_script.Replace("'exe'", "'dll'");
+			_script.Append("project.bindir = 'bin'");
+			_script.Append("project.libdir = 'lib'");
+			_script.Append("package.target = 'MyApp/MyPackage'");
+			_expects.Package[0].Config[0].OutDir = "bin/MyApp";
+			_expects.Package[0].Config[0].ImportLib = "lib/MyApp/MyPackage.lib";
+			_expects.Package[0].Config[1].OutDir = "bin/MyApp";
+			_expects.Package[0].Config[1].ImportLib = "lib/MyApp/MyPackage.lib";
+			Run();
+		}
 
 		[Test]
 		public void Test_CustomTarget()
@@ -90,8 +98,5 @@ namespace Premake.Tests.Vs2005.Cpp
 			_expects.Package[0].Config[1].Target = "MyPackage.exe";
 			Run();
 		}
-
-		#endregion
-
 	}
 }

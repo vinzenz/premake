@@ -139,6 +139,7 @@ const char*  prj_get_prefix();
 const char*  prj_get_script();
 const char*  prj_get_target();
 const char*  prj_get_target_for(int i);
+const char*  prj_get_target_raw();
 const char*  prj_get_targetname_for(int i);
 const char*  prj_get_url();
 int          prj_has_file(const char* name);
