@@ -256,6 +256,30 @@ static int export_list(int parent, int object, const char* name, const char*** l
 	return (parLen + objLen);
 }
 
+static int export_append_list(int parent, int object, const char* name, const char*** list)
+{
+	int i;
+
+	int oldLen = prj_getlistsize((void**)(*list));
+
+	const char** toAppendList;
+	int toAppendLen = export_list(parent, object, name, &toAppendList);
+
+	const char** newlist = (const char**)prj_newlist(oldLen + toAppendLen);
+	
+	for (i = 0; i < oldLen; ++i)
+		newlist[i] = (*list)[i];
+
+	for (i = 0; i < toAppendLen; ++i)
+		newlist[oldLen + i] = toAppendList[i];
+
+	free((void*)*list);
+	free((void*)toAppendList);
+
+	*list = newlist;
+	return (oldLen + toAppendLen);
+}
+
 static const char* export_value(int parent, int object, const char* name)
 {
 	const char* value;
@@ -368,7 +392,14 @@ static int export_pkgconfig(Package* package, int tbl)
 		export_list(tbl, obj, "includepaths", &config->incpaths);
 		export_list(tbl, obj, "libpaths",     &config->libpaths);
 		export_list(tbl, obj, "linkoptions",  &config->linkopts);
+		export_list(tbl, obj, "resoptions",   &config->resopts);
 		export_list(tbl, obj, "links",        &config->links);
+
+		/* Resource lists are really two combined */
+		export_list(tbl, obj, "defines", &config->resdefines);
+		export_append_list(tbl, obj, "resdefines", &config->resdefines);
+		export_list(tbl, obj, "includepaths", &config->respaths);
+		export_append_list(tbl, obj, "respaths", &config->respaths);
 
 		/* Build the file list */
 		config->files = export_files(tbl, obj);
@@ -640,6 +671,18 @@ static void buildNewConfig(const char* name)
 	lua_settable(L, -3);
 
 	lua_pushstring(L, "links");
+	lua_newtable(L);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "resdefines");
+	lua_newtable(L);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "resoptions");
+	lua_newtable(L);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "respaths");
 	lua_newtable(L);
 	lua_settable(L, -3);
 }

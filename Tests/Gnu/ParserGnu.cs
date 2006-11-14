@@ -269,6 +269,31 @@ namespace Premake.Tests.Gnu
 				matches = Regex("  LDDEPS :=(.*)");
 				config.LinkDeps = matches[0].Trim().Split(' ');
 
+				ArrayList resDefines = new ArrayList();
+				ArrayList resPaths = new ArrayList();
+				matches = Regex("  RESFLAGS :=(.*)");
+				matches[0] = matches[0].Trim();
+				while (matches[0].Length > 0)
+				{
+					if (matches[0].StartsWith("-D") || matches[0].StartsWith("-I"))
+					{
+						split = matches[0].IndexOf('"', 4);
+						string value = matches[0].Substring(4, split - 4);
+						if (matches[0].StartsWith("-D"))
+							resDefines.Add(value);
+						else
+							resPaths.Add(value);
+						matches[0] = matches[0].Substring(split + 1).TrimStart();
+					}
+					else
+					{
+						config.ResOptions = matches[0];
+						matches[0] = "";
+					}
+				}
+				config.ResDefines = (string[])resDefines.ToArray(typeof(string));
+				config.ResPaths = (string[])resPaths.ToArray(typeof(string));
+
 				matches = Regex("  TARGET := (.+)");
 				config.Target = matches[0];
 
@@ -387,7 +412,7 @@ namespace Premake.Tests.Gnu
 						Match("\t@$(CC) -x assembler-with-cpp $(CPPFLAGS) -o $@ -c $<");
 						break;
 					case ".rc":
-						Match("\t@windres $< -O coff -o $@");
+						matches = Regex("\t@windres $< -O coff -o $@ $(RESFLAGS)");
 						break;
 					default:
 						Match("\t@$(CXX) $(CXXFLAGS) -o $@ -c $<");

@@ -424,17 +424,13 @@ namespace Premake.Tests.Vs2005
 				Match("\t\t\t/>");
 
 				Match("\t\t\t<Tool");
-				if (config.IncludePaths.Length == 0)
-				{
-					Match("\t\t\t\tName=\"VCResourceCompilerTool\"");
-				}
-				else
-				{
-					Match("\t\t\t\tName=\"VCResourceCompilerTool\"");
-					matches = Regex("\t\t\t\tAdditionalIncludeDirectories=\"(.+)\"");
-					if (config.IncludePaths.Length != matches[0].Split(';').Length)
-						throw new FormatException("Resource compiler getting different include paths");
-				}
+				Match("\t\t\t\tName=\"VCResourceCompilerTool\"");
+				matches = Regex("\t\t\t\tAdditionalOptions=\"(.+)\"", true);
+				config.ResOptions = (matches != null) ? matches[0] : "";
+				matches = Regex("\t\t\t\tPreprocessorDefinitions=\"(.+)\"", true);
+				config.ResDefines = (matches != null) ? matches[0].Split(';') : new string[] { };
+				matches = Regex("\t\t\t\tAdditionalIncludeDirectories=\"(.+)\"", true);
+				config.ResPaths = (matches != null) ? matches[0].Split(';') : new string[] { };
 				Match("\t\t\t/>");
 
 				Match("\t\t\t<Tool");

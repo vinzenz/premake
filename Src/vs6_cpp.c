@@ -142,8 +142,18 @@ int vs6_cpp()
 			io_print("# ADD MTL /nologo /D \"%s\" /mktyplib203 /win32\n", debugSymbol);
 		}
 
-		io_print("# ADD BASE RSC /l 0x409 /d \"%s\"\n", debugSymbol);
-		io_print("# ADD RSC /l 0x409 /d \"%s\"\n", debugSymbol);
+		io_print("# ADD BASE RSC /l 0x409 /d \"%s\"", debugSymbol);
+		print_list(prj_get_resdefines(), " /d \"", "\"", "", NULL);
+		print_list(prj_get_respaths(), " /i \"", "\"", "", NULL);
+		print_list(prj_get_resoptions(), " ", "", "", NULL);
+		io_print("\n");
+        		
+		io_print("# ADD RSC /l 0x409 /d \"%s\"", debugSymbol);
+		print_list(prj_get_resdefines(), " /d \"", "\"", "", NULL);
+		print_list(prj_get_respaths(), " /i \"", "\"", "", NULL);
+		print_list(prj_get_resoptions(), " ", "", "", NULL);
+		io_print("\n");
+
 		io_print("BSC32=bscmake.exe\n");
 		io_print("# ADD BASE BSC32 /nologo\n");
 		io_print("# ADD BSC32 /nologo\n");

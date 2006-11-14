@@ -593,6 +593,51 @@ const char* prj_get_pch_source()
 
 
 /************************************************************************
+ * Query the list of resource defines for the current object
+ ***********************************************************************/
+
+int prj_get_numresdefines()
+{
+	return prj_getlistsize((void**)prj_get_resdefines());
+}
+
+const char** prj_get_resdefines()
+{
+	return my_cfg->resdefines;
+}
+
+
+/************************************************************************
+ * Query the list of resource options for the current object
+ ***********************************************************************/
+
+int prj_get_numresoptions()
+{
+	return prj_getlistsize((void**)prj_get_resoptions());
+}
+ 
+const char** prj_get_resoptions()
+{
+	return my_cfg->resopts;
+}
+
+
+/************************************************************************
+ * Query the list of resource paths for the current object
+ ***********************************************************************/
+
+int prj_get_numrespaths()
+{
+	return prj_getlistsize((void**)prj_get_respaths());
+}
+
+const char** prj_get_respaths()
+{
+	return my_cfg->respaths;
+}
+
+
+/************************************************************************
  * Return the script name for an object.
  ***********************************************************************/
 

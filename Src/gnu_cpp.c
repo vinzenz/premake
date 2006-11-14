@@ -129,6 +129,13 @@ int gnu_cpp()
 		print_list(prj_get_links(), " ", "", "", listLinkerDeps);
 		io_print("\n");
 
+		/* Build a list of flags for the resource compiler */
+		io_print("  RESFLAGS :=");
+		print_list(prj_get_resdefines(), " -D \"", "\"", "", NULL);
+		print_list(prj_get_respaths(), " -I \"", "\"", "", NULL);
+		print_list(prj_get_resoptions(), " ", "", "", NULL);
+		io_print("\n");
+
 		/* Build the target name */
 		io_print("  TARGET := %s\n", path_getname(prj_get_target()));
 		if (os_is("macosx") && prj_is_kind("winexe"))
@@ -387,7 +394,7 @@ static const char* listRcTargets(const char* name)
 		io_print("\t-%s$(CMD_MKOBJDIR)\n", prefix);
 		if (!g_verbose)
 			io_print("\t@echo $(notdir $<)\n");
-		io_print("\t%swindres $< -O coff -o $@\n", prefix);
+		io_print("\t%swindres $< -O coff -o $@ $(RESFLAGS)\n", prefix);
 		io_print("\n");
 	}
 

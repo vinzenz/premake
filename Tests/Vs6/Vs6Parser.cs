@@ -341,8 +341,40 @@ namespace Premake.Tests.Vs6
 				if (hasMtl)
 					Match("# ADD MTL /nologo /D \"" + debugSymbol + "\" /mktyplib203 /win32");
 
-				Match("# ADD BASE RSC /l 0x409 /d \"" + debugSymbol + "\"");
-				Match("# ADD RSC /l 0x409 /d \"" + debugSymbol + "\"");
+				ArrayList resDefines = new ArrayList();
+				ArrayList resPaths = new ArrayList();
+				matches = Regex("# ADD BASE RSC /l 0x409 (.+)");
+				while (matches[0].Length > 0)
+				{
+					if (matches[0].StartsWith("/d") || matches[0].StartsWith("/i"))
+					{
+						int split = matches[0].IndexOf('"', 4);
+						string value = matches[0].Substring(4, split - 4);
+						if (matches[0].StartsWith("/d"))
+							resDefines.Add(value);
+						else
+							resPaths.Add(value);
+						matches[0] = matches[0].Substring(split + 1).TrimStart();
+					}
+					else
+					{
+						config.ResOptions = matches[0];
+						matches[0] = "";
+					}
+				}
+
+				config.ResDefines = (string[])resDefines.ToArray(typeof(string));
+				config.ResPaths = (string[])resPaths.ToArray(typeof(string));
+
+				string rsc = "# ADD RSC /l 0x409";
+				foreach (string symbol in resDefines)
+					rsc += " /d \"" + symbol + "\"";
+				foreach (string symbol in resPaths)
+					rsc += " /i \"" + symbol + "\"";
+				if (config.ResOptions != null)
+					rsc += " " + config.ResOptions;
+				Match(rsc);
+				
 				Match("BSC32=bscmake.exe");
 				Match("# ADD BASE BSC32 /nologo");
 				Match("# ADD BSC32 /nologo");

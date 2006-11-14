@@ -419,13 +419,25 @@ int vs_write_cpp()
 				break;
 			case VCResourceCompilerTool:
 				tag_attr("Name=\"VCResourceCompilerTool\"");
-				if (prj_get_numincpaths() > 0)
-				{
-					tag_attr_open("AdditionalIncludeDirectories");
-					print_list(prj_get_incpaths(), "", "", ";", NULL);
+				if (prj_get_numresoptions() > 0)
+ 				{
+					tag_attr_open("AdditionalOptions");
+					print_list(prj_get_resoptions(), "", "", " ", NULL);
 					tag_attr_close();
 				}
-				break;
+				if (prj_get_numdefines() > 0 || prj_get_numresdefines() > 0)
+				{
+					tag_attr_open("PreprocessorDefinitions");
+					print_list(prj_get_resdefines(), "", "", ";", NULL);
+					tag_attr_close();
+				}
+				if (prj_get_numincpaths() > 0 || prj_get_numrespaths() > 0)
+				{			    
+					tag_attr_open("AdditionalIncludeDirectories");
+					print_list(prj_get_respaths(), "", "", ";", NULL);
+ 					tag_attr_close();
+ 				}
+ 				break;
 			case VCPreLinkEventTool:
             tag_attr("Name=\"VCPreLinkEventTool\"");
 				break;

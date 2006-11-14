@@ -27,6 +27,9 @@ namespace Premake.Tests.Framework
 		public string   ImportLib;
 		public string PchHeader;
 		public string PchSource;
+		public string[] ResDefines;
+		public string[] ResPaths;
+		public string ResOptions;
 
 		public Configuration()
 		{
@@ -34,19 +37,20 @@ namespace Premake.Tests.Framework
 
 		public void CompareTo(Configuration actual)
 		{
-			Test(this.Name, actual.Name,     "Configuration name");
-			Test(this.BinDir,  actual.BinDir,  "BinDir");
-			Test(this.LibDir,  actual.LibDir,  "LibDir");
-			Test(this.ObjDir,  actual.ObjDir,  "ObjDir");
-			Test(this.OutDir,  actual.OutDir,  "Output directory");
-			Test(this.Target,  actual.Target,  "Target");
-			Test(this.OutFile, actual.OutFile, "Output file");
-			Test(this.Kind, actual.Kind, "Kind");
+			Test(this.Name,         actual.Name,         "Configuration name");
+			Test(this.BinDir,       actual.BinDir,       "BinDir");
+			Test(this.LibDir,       actual.LibDir,       "LibDir");
+			Test(this.ObjDir,       actual.ObjDir,       "ObjDir");
+			Test(this.OutDir,       actual.OutDir,       "Output directory");
+			Test(this.Target,       actual.Target,       "Target");
+			Test(this.OutFile,      actual.OutFile,      "Output file");
+			Test(this.Kind,         actual.Kind,         "Kind");
 			Test(this.BuildOptions, actual.BuildOptions, "Build options");
 			Test(this.LinkOptions,  actual.LinkOptions,  "Link options");
 			Test(this.ImportLib,    actual.ImportLib,    "Import library");
-			Test(this.PchHeader, actual.PchHeader, "PCH Header");
-			Test(this.PchSource, actual.PchSource, "PCH Source");
+			Test(this.PchHeader,    actual.PchHeader,    "PCH Header");
+			Test(this.PchSource,    actual.PchSource,    "PCH Source");
+			Test(this.ResOptions,   actual.ResOptions,   "Resource options");
 
 			TestList(this.IncludePaths, actual.IncludePaths, "Include paths");
 			TestList(this.Defines,      actual.Defines,      "Defined symbols");
@@ -56,6 +60,8 @@ namespace Premake.Tests.Framework
 			TestList(this.LinkFlags,    actual.LinkFlags,    "Link flags");
 			TestList(this.Dependencies, actual.Dependencies, "Dependencies");
 			TestList(this.LinkDeps,     actual.LinkDeps,     "Linker dependencies");
+			TestList(this.ResDefines,   actual.ResDefines,   "Resource defines");
+			TestList(this.ResPaths,     actual.ResPaths,     "Resource paths");
 		}
 
 		private void Test(string expected, string actual, string description)

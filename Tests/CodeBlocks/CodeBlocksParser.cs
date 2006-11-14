@@ -227,6 +227,14 @@ namespace Premake.Tests.CodeBlocks
 						}
 					}
 
+					ArrayList resPaths = new ArrayList();
+					Match("\t\t\t\t<ResourceCompiler>");
+					while (!Match("\t\t\t\t</ResourceCompiler>", true))
+					{
+						matches = Regex("\t\t\t\t\t<Add directory=\"(.+?)\" />");
+						resPaths.Add(matches[0]);
+					}
+
 					config.BuildFlags = (string[])buildFlags.ToArray(typeof(string));
 					config.Defines = (string[])defines.ToArray(typeof(string));
 					config.IncludePaths = (string[])incPaths.ToArray(typeof(string));
@@ -234,6 +242,7 @@ namespace Premake.Tests.CodeBlocks
 					config.Links = (string[])libs.ToArray(typeof(string));
 					config.BuildOptions = config.BuildOptions.Trim(' ');
 					config.LinkOptions = config.LinkOptions.Trim(' ');
+					config.ResPaths = (string[])resPaths.ToArray(typeof(string));
 				}
 			}
 

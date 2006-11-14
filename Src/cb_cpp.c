@@ -108,6 +108,10 @@ int cb_cpp()
 		print_list(prj_get_libpaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL);
 		print_list(prj_get_links(), "\t\t\t\t\t<Add library=\"", "\" />\n", "", filterLinks);
 		io_print("\t\t\t\t</Linker>\n");
+        
+		io_print("\t\t\t\t<ResourceCompiler>\n");
+		print_list(prj_get_respaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL);
+		io_print("\t\t\t\t</ResourceCompiler>\n");
 
 		io_print("\t\t\t</Target>\n");
 	}
