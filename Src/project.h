@@ -38,6 +38,9 @@ typedef struct tagPkgConfig
 {
 	PrjConfig*   prjConfig;
 	const char** buildopts;
+	const char** prebuildcmds;
+	const char** prelinkcmds;
+	const char** postbuildcmds;
 	const char** defines;
 	const char** resdefines;
 	const char*  extension;
@@ -95,6 +98,9 @@ int          prj_find_package(const char* name);
 const char*  prj_get_bindir();
 const char*  prj_get_buildaction();
 const char** prj_get_buildoptions();
+const char** prj_get_prebuildcommands();
+const char** prj_get_prelinkcommands();
+const char** prj_get_postbuildcommands();
 const char*  prj_get_cfgname();
 PkgConfig*   prj_get_config_for(int i);
 void*        prj_get_data();
@@ -113,6 +119,9 @@ const char** prj_get_linkoptions();
 const char** prj_get_links();
 const char*  prj_get_name();
 int          prj_get_numbuildoptions();
+int          prj_get_numprebuildcommands();
+int          prj_get_numprelinkcommands();
+int          prj_get_numpostbuildcommands();
 int          prj_get_numconfigs();
 int          prj_get_numdefines();
 int          prj_get_numincpaths();
@@ -168,4 +177,5 @@ void         prj_set_data(void* data);
 void**       prj_newlist(int len);
 void         prj_freelist(void** list);
 int          prj_getlistsize(void** list);
+
 

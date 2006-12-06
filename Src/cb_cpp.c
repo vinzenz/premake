@@ -113,6 +113,19 @@ int cb_cpp()
 		print_list(prj_get_respaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL);
 		io_print("\t\t\t\t</ResourceCompiler>\n");
 
+		if (prj_get_numprebuildcommands() > 0 || prj_get_numpostbuildcommands() > 0)
+		{
+			io_print("\t\t\t\t<ExtraCommands>\n");
+			
+			if (prj_get_numprebuildcommands() > 0)
+				print_list(prj_get_prebuildcommands(), "\t\t\t\t\t<Add before=\"", "\" />\n", "", NULL);
+		
+			if (prj_get_numpostbuildcommands() > 0)
+				print_list(prj_get_postbuildcommands(), "\t\t\t\t\t<Add after=\"", "\" />\n", "", NULL);
+
+			io_print("\t\t\t\t</ExtraCommands>\n");
+		}	
+
 		io_print("\t\t\t</Target>\n");
 	}
 

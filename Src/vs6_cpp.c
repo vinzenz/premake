@@ -172,6 +172,25 @@ int vs6_cpp()
 			io_print("# ADD LINK32");
 			writeLinkFlags();
 		}
+		
+		if (prj_get_numprelinkcommands() > 0 || prj_get_numpostbuildcommands() > 0)
+		{
+			io_print("# Begin Special Build Tool\n");
+			if (prj_get_numprelinkcommands() > 0)
+			{
+				io_print("PreLink_Cmds=");
+				print_list(prj_get_prelinkcommands(), "", "", "\t", NULL);
+				io_print("\n");
+			}
+		
+			if (prj_get_numpostbuildcommands() > 0)
+			{
+				io_print("PostBuild_Cmds=");
+				print_list(prj_get_postbuildcommands(), "", "", "\t", NULL);
+				io_print("\n");
+			}
+			io_print("# End Special Build Tool\n");
+		}
 
 		io_print("\n");
 	}
@@ -359,4 +378,5 @@ static void listFiles(const char* path, int stage)
 		break;
 	}
 }
+
 

@@ -187,8 +187,12 @@ int gnu_cpp()
 	io_print("endif\n");
 	io_print("\n");
 
-	io_print(".PHONY: clean\n");
-	io_print("\n");
+	io_print(".PHONY: clean");
+	if (prj_get_numprebuildcommands() > 0)
+		io_print(" prebuild");
+	if (prj_get_numprelinkcommands() > 0)
+		io_print(" prelink");
+	io_print("\n\n");
 
 	/* Write the main build target */
 	if (os_is("macosx") && prj_is_kind("winexe"))
@@ -201,7 +205,13 @@ int gnu_cpp()
 		io_print("$(OUTDIR)/$(TARGET)");
 	}
 
-	io_print(": $(OBJECTS) $(LDDEPS) $(RESOURCES)\n");
+	io_print(": ");
+	if (prj_get_numprebuildcommands() > 0)
+		io_print("prebuild ");
+	io_print("$(OBJECTS) $(LDDEPS) $(RESOURCES)");
+	if (prj_get_numprelinkcommands() > 0)
+		io_print(" prelink");
+	io_print("\n");
 	if (!g_verbose)
 		io_print("\t@echo Linking %s\n", prj_get_pkgname());
 	io_print("\t-%s$(CMD_MKBINDIR)\n", prefix);
@@ -209,8 +219,38 @@ int gnu_cpp()
 	io_print("\t-%s$(CMD_MKOUTDIR)\n", prefix);
 	if (os_is("macosx") && prj_is_kind("winexe"))
 		io_print("\t-%sif [ ! -d $(OUTDIR)/$(MACAPP)/MacOS ]; then mkdir -p $(OUTDIR)/$(MACAPP)/MacOS; fi\n", prefix);
-	io_print("\t%s$(BLDCMD)\n\n", prefix);
+	
+	io_print("\t%s$(BLDCMD)\n", prefix);
+	
+	if (prj_get_numpostbuildcommands() > 0)
+		io_print("\t$(postbuild)\n");
 
+	io_print("\n");
+	
+	if (prj_get_numprebuildcommands() > 0)
+	{
+		io_print("prebuild:\n");
+		io_print("\t@echo Running pre-build commands\n");
+		print_list(prj_get_prebuildcommands(), "\t", "\n", "", NULL);
+		io_print("\n");
+	}
+	
+	if (prj_get_numprelinkcommands() > 0)
+	{
+		io_print("prelink:\n");
+		io_print("\t@echo Running pre-link commands\n");
+		print_list(prj_get_prelinkcommands(), "\t", "\n", "", NULL);
+		io_print("\n");
+	}	
+
+	if (prj_get_numpostbuildcommands() > 0)
+	{
+		io_print("define postbuild\n");
+		io_print("\t@echo Running post-build commands\n");
+		print_list(prj_get_postbuildcommands(), "\t", "\n", "", NULL);
+		io_print("endef\n\n");
+	}
+	
 /*
 	if (prj_is_kind("lib"))
 	{

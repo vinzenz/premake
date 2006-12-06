@@ -130,9 +130,11 @@ int sharpdev_cs()
 		prj_select_config(0);
 		io_print("assembly=\"%s\" ", path_getbasename(prj_get_target()));
 		io_print("executeScript=\"\" ");
-		io_print("executeBeforeBuild=\"\" ");
-		io_print("executeAfterBuild=\"\" ");
-		io_print("executeBeforeBuildArguments=\"\" ");
+		io_print("executeBeforeBuild=\"");
+		print_list(prj_get_prebuildcommands(), "", "", " | ", NULL);
+		io_print("\" executeAfterBuild=\"");
+		print_list(prj_get_postbuildcommands(), "", "", " | ", NULL);
+		io_print("\" executeBeforeBuildArguments=\"\" ");
 		io_print("executeAfterBuildArguments=\"\" ");
 		io_print("/>\n");		
 
@@ -301,4 +303,5 @@ static const char* listReferences(const char* name)
 
 	return buffer;
 }
+
 

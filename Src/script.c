@@ -399,6 +399,9 @@ static int export_pkgconfig(Package* package, int tbl)
 		export_list(tbl, obj, "defines", &config->resdefines);
 		export_append_list(tbl, obj, "resdefines", &config->resdefines);
 		export_list(tbl, obj, "includepaths", &config->respaths);
+		export_list(tbl, obj, "prebuildcommands", &config->prebuildcmds);
+		export_list(tbl, obj, "prelinkcommands", &config->prelinkcmds);
+		export_list(tbl, obj, "postbuildcommands", &config->postbuildcmds);
 		export_append_list(tbl, obj, "respaths", &config->respaths);
 
 		/* Build the file list */
@@ -643,6 +646,18 @@ static void buildNewConfig(const char* name)
 	lua_settable(L, -3);
 
 	lua_pushstring(L, "buildoptions");
+	lua_newtable(L);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "prebuildcommands");
+	lua_newtable(L);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "prelinkcommands");
+	lua_newtable(L);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "postbuildcommands");
 	lua_newtable(L);
 	lua_settable(L, -3);
 

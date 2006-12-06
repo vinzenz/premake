@@ -373,6 +373,41 @@ const char** prj_get_linkoptions()
 
 
 /************************************************************************
+ * Return the list of pre/post build commands for the current object
+ ***********************************************************************/
+
+int prj_get_numprebuildcommands()
+{
+	return prj_getlistsize((void**)prj_get_prebuildcommands());
+}
+
+const char** prj_get_prebuildcommands()
+{
+	return my_cfg->prebuildcmds;
+}
+
+int prj_get_numprelinkcommands()
+{
+	return prj_getlistsize((void**)prj_get_prelinkcommands());
+}
+
+const char** prj_get_prelinkcommands()
+{
+	return my_cfg->prelinkcmds;
+}
+
+int prj_get_numpostbuildcommands()
+{
+	return prj_getlistsize((void**)prj_get_postbuildcommands());
+}
+
+const char** prj_get_postbuildcommands()
+{
+	return my_cfg->postbuildcmds;
+}
+
+
+/************************************************************************
  * Query the target kind of the current object
  ***********************************************************************/
 

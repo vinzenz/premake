@@ -98,7 +98,20 @@ int monodev_cs()
 		io_print("assembly=\"%s\" />\n", path_getbasename(prj_get_target()));
 
 		prj_select_config(i);
-		io_print("      <Build debugmode=\"%s\" target=\"%s\" />\n", prj_has_flag("no-symbols") ? "False" : "True", kind);
+		io_print("      <Build");
+		if (prj_get_numprebuildcommands() > 0)
+		{
+			io_print(" executeBeforeBuild=\"");
+			print_list(prj_get_prebuildcommands(), "", "", " &amp;&amp; ", NULL);
+			io_print("\"");
+		}
+		if (prj_get_numpostbuildcommands() > 0)
+		{
+			io_print(" executeAfterBuild=\"");
+			print_list(prj_get_postbuildcommands(), "", "", " &amp;&amp; ", NULL);
+			io_print("\"");
+		}
+		io_print(" debugmode=\"%s\" target=\"%s\" />\n", prj_has_flag("no-symbols") ? "False" : "True", kind);
 		io_print("      <Execution runwithwarnings=\"%s\" consolepause=\"False\" runtime=\"MsNet\" />\n", prj_has_flag("fatal-warnings") ? "False" : "True");
 
 		io_print("      <CodeGeneration compiler=\"Csc\" warninglevel=\"4\"");
@@ -290,4 +303,5 @@ static const char* listReferences(const char* name)
 
 	return buffer;
 }
+
 

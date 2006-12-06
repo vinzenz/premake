@@ -394,7 +394,14 @@ int vs_write_cpp()
 			switch (blocks[version][b])
 			{
 			case VCPreBuildEventTool:
-            tag_attr("Name=\"VCPreBuildEventTool\"");
+				tag_attr("Name=\"VCPreBuildEventTool\"");
+				
+				if (prj_get_numprebuildcommands() > 0)
+				{
+					tag_attr_open("CommandLine");
+					print_list(prj_get_prebuildcommands(), "", "", "&#x0D;&#x0A;", NULL);
+					tag_attr_close();
+				}				
 				break;
 			case VCCustomBuildTool:
             tag_attr("Name=\"VCCustomBuildTool\"");
@@ -435,11 +442,18 @@ int vs_write_cpp()
 				{			    
 					tag_attr_open("AdditionalIncludeDirectories");
 					print_list(prj_get_respaths(), "", "", ";", NULL);
- 					tag_attr_close();
- 				}
- 				break;
+					tag_attr_close();
+				}
+				break;
 			case VCPreLinkEventTool:
-            tag_attr("Name=\"VCPreLinkEventTool\"");
+				tag_attr("Name=\"VCPreLinkEventTool\"");
+				
+				if (prj_get_numprelinkcommands() > 0)
+				{
+					tag_attr_open("CommandLine");
+					print_list(prj_get_prelinkcommands(), "", "", "&#x0D;&#x0A;", NULL);
+					tag_attr_close();
+				}				
 				break;
 			case VCALinkTool:
             tag_attr("Name=\"VCALinkTool\"");
@@ -463,7 +477,14 @@ int vs_write_cpp()
             tag_attr("Name=\"VCWebDeploymentTool\"");
 				break;
 			case VCPostBuildEventTool:
-            tag_attr("Name=\"VCPostBuildEventTool\"");
+				tag_attr("Name=\"VCPostBuildEventTool\"");
+				
+				if (prj_get_numpostbuildcommands() > 0)
+				{
+					tag_attr_open("CommandLine");
+					print_list(prj_get_postbuildcommands(), "", "", "&#x0D;&#x0A;", NULL);
+					tag_attr_close();
+				}				
 				break;
 			case VCCLCompilerTool:
 				tag_attr("Name=\"VCCLCompilerTool\"");
