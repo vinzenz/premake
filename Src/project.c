@@ -726,8 +726,9 @@ const char* prj_get_target_for(int i)
 
 	else if (os_is("windows"))
 	{
-		/* Codeblocks uses Unix naming for static libs */
-		if (matches(g_target, "cb-gcc") && matches(cfg->kind, "lib"))
+		/* CodeBlocks and GNU uses Unix naming for static libs */
+		if ((matches(g_target, "cb-gcc") || matches(g_target, "gnu")) && 
+			matches(cfg->kind, "lib"))
 		{
 			if (cfg->prefix == NULL)
 				strcat(buffer, "lib");
