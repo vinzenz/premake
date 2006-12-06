@@ -77,13 +77,13 @@ int gnu_cpp()
 		/* Write preprocessor flags - how to generate dependencies for DMC? */
 		io_print("  CPPFLAGS :=");
 		if (!matches(g_cc, "dmc"))
-			io_print(" -MD");
+			io_print(" -MMD");
 		print_list(prj_get_defines(), " -D \"", "\"", "", NULL);
 		print_list(prj_get_incpaths(), " -I \"", "\"", "", NULL);
 		io_print("\n");
 
 		/* Write C flags */
-		io_print("  CFLAGS += $(CPPFLAGS)");
+		io_print("  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH)");
 		if (prj_is_kind("dll") && !os_is("windows"))
 			io_print(" -fPIC");
 		if (!prj_has_flag("no-symbols"))
@@ -144,9 +144,9 @@ int gnu_cpp()
 		/* Build command */
 		io_print("  BLDCMD = ");
 		if (prj_is_kind("lib"))
-			io_print("ar -cr $(OUTDIR)/$(TARGET) $(OBJECTS); ranlib $(OUTDIR)/$(TARGET)");
+			io_print("ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)");
 		else
-			io_print("$(%s) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES)", prj_is_lang("c") ? "CC" : "CXX");
+			io_print("$(%s) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)", prj_is_lang("c") ? "CC" : "CXX");
 		io_print("\n");
 
 		io_print("endif\n\n");
@@ -435,7 +435,10 @@ static const char* listRcTargets(const char* name)
 		io_print("\t-%s$(CMD_MKOBJDIR)\n", prefix);
 		if (!g_verbose)
 			io_print("\t@echo $(notdir $<)\n");
-		io_print("\t%swindres $< -O coff -o $@ $(RESFLAGS)\n", prefix);
+		if (matches(g_cc, "dmc"))
+			io_print("\t%srcc $< -o$@ $(RESFLAGS)\n", prefix);
+		else
+			io_print("\t%swindres $< -O coff -o $@ $(RESFLAGS)\n", prefix);
 		io_print("\n");
 	}
 
