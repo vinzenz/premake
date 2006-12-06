@@ -135,7 +135,7 @@ int clean()
 
 		/* GNU */
 		io_remove(path_join(".", "Makefile", ""));
-		io_remove(path_join(".", prj_get_pkgname(), "mak"));
+		io_remove(path_join(".", prj_get_pkgname(), "make"));
 
 		/* SharpDevelop */
 		io_remove(path_join(".", prj_get_pkgname(), "prjx"));
