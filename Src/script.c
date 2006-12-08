@@ -567,6 +567,14 @@ static void buildOptionsTable()
 		/* special handling - set a "target" global variable */
 		if (matches(flag, "target"))
 		{
+			// Use the canonical target name
+			if (matches(arg, "vs7"))
+				arg = "vs2002";
+			else if (matches(arg, "md"))
+				arg = "monodev";
+			else if (matches(arg, "sd"))
+				arg = "sharpdev";
+
 			lua_pushstring(L, arg);
 			lua_setglobal(L, "target");
 		}
