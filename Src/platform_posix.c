@@ -72,11 +72,14 @@ static int findLibHelper(const char* lib, const char* path)
 int platform_findlib(const char* name, char* buffer, int len)
 {
 	FILE* file;
+	char* libpaths;
 
-	if (findLibHelper(name, "/usr/lib"))
+	libpaths = getenv("LD_LIBRARY_PATH");
+	strcpy(buffer, strtok(libpaths, ":"));
+	while (buffer != NULL)
 	{
-		strcpy(buffer, "/usr/lib");
-		return 1;
+		if (findLibHelper(name, buffer)) return 1;
+		strcpy(buffer, strtok(libpaths, ":"));
 	}
 
 	file = fopen("/etc/ld.so.conf", "rt");
@@ -102,6 +105,19 @@ int platform_findlib(const char* name, char* buffer, int len)
 	}
 
 	fclose(file);
+
+	if (findLibHelper(name, "/lib"))
+	{
+		strcpy(buffer, "/lib");
+		return 1;
+	}
+
+	if (findLibHelper(name, "/usr/lib"))
+	{
+		strcpy(buffer, "/usr/lib");
+		return 1;
+	}
+
 	return 0;
 }
 
