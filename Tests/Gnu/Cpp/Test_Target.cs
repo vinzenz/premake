@@ -164,7 +164,7 @@ namespace Premake.Tests.Gnu.Cpp
 		public void Test_Windows_LibTarget()
 		{
 			_script.Replace("'exe'", "'lib'");
-			_expects.Package[0].Config[0].Target = "MyPackage.lib";
+			_expects.Package[0].Config[0].Target = "libMyPackage.a";
 			Run("--os windows");
 		}
 

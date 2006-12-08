@@ -198,7 +198,8 @@ namespace Premake.Tests.Gnu
 							buildFlags.Add("fatal-warnings");
 							break;
 						default:
-							config.BuildOptions += flag + " ";
+							if (flag != "" && flag != "$(TARGET_ARCH)")
+								config.BuildOptions += flag + " ";
 							break;
 						}
 					}
@@ -299,12 +300,12 @@ namespace Premake.Tests.Gnu
 
 				isMac = Match("  MACAPP := " + config.Target + ".app/Contents", true);
 
-				if (Match("  BLDCMD = ar -cr $(OUTDIR)/$(TARGET) $(OBJECTS); ranlib $(OUTDIR)/$(TARGET)", true))
+				if (Match("  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)", true))
 					config.Kind = "lib";
 				else if (package.Language == "c++")
-					Match("  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES)");
+					Match("  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)");
 				else
-					Match("  BLDCMD = $(CC) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES)");
+					Match("  BLDCMD = $(CC) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)");
 
 				Match("endif");
 				Match("");
@@ -383,6 +384,7 @@ namespace Premake.Tests.Gnu
 			
 			Match("clean:");
 			Match("\t@echo Cleaning " + package.Name);
+			Match("ifeq ($(MKDIR_TYPE),posix)");
 			if (isMac)
 			{
 				Match("\t-@rm -rf $(OUTDIR)/$(TARGET).app $(OBJDIR)");
@@ -391,6 +393,11 @@ namespace Premake.Tests.Gnu
 			{
 				Match("\t-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)");
 			}
+			Match("else");
+			Match("\t-@if exist $(subst /,\\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\\,$(OUTDIR)/$(TARGET))");
+			Match("\t-@if exist $(subst /,\\,$(OBJDIR)) del /q $(subst /,\\,$(OBJDIR))");
+			Match("\t-@if exist $(subst /,\\,$(OBJDIR)) rmdir /s /q $(subst /,\\,$(OBJDIR))");
+			Match("endif");
 			Match("");
 
 			do
@@ -412,7 +419,7 @@ namespace Premake.Tests.Gnu
 						Match("\t@$(CC) -x assembler-with-cpp $(CPPFLAGS) -o $@ -c $<");
 						break;
 					case ".rc":
-						matches = Regex("\t@windres $< -O coff -o $@ $(RESFLAGS)");
+						Match("\t@windres $< -O coff -o $@ $(RESFLAGS)");
 						break;
 					default:
 						Match("\t@$(CXX) $(CXXFLAGS) -o $@ -c $<");

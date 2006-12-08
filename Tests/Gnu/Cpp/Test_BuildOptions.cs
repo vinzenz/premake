@@ -31,6 +31,14 @@ namespace Premake.Tests.Gnu.Cpp
 		#endregion
 
 		[Test]
+		public void NoBuildOptions()
+		{
+			_expects.Package[0].Config[0].BuildOptions = "";
+			_expects.Package[0].Config[1].BuildOptions = "";
+			Run();
+		}
+
+		[Test]
 		public void Test_SetOptionsOnPackage()
 		{
 			_script.Append("package.buildoptions = { '`wx-config --dll`'  }");

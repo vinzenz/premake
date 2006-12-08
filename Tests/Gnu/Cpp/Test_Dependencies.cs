@@ -175,6 +175,5 @@ namespace Premake.Tests.Gnu.Cpp
 		}
 
 		#endregion
-
 	}
 }
