@@ -188,9 +188,9 @@ const char* prj_get_bindir_for(int i)
 {
 	Package*   pkg = prj_get_package();
 	PkgConfig* cfg = prj_get_config_for(i);
-	if (my_cfg->bindir != NULL)
+	if (cfg->bindir != NULL)
 	{
-		return my_cfg->bindir;
+		return cfg->bindir;
 	}
 	else
 	{
@@ -216,9 +216,9 @@ const char* prj_get_libdir_for(int i)
 {
 	Package*   pkg = prj_get_package();
 	PkgConfig* cfg = prj_get_config_for(i);
-	if (my_cfg->libdir != NULL)
+	if (cfg->libdir != NULL)
 	{
-		return my_cfg->libdir;
+		return cfg->libdir;
 	}
 	else
 	{
@@ -594,7 +594,7 @@ const char* prj_get_pkgfilename(const char* extension)
 
 const char* prj_get_pkgfilename_for(int i, const char* extension)
 {
-	strcpy(buffer, path_build(project->path, my_pkg->path));
+	strcpy(buffer, path_build(project->path, prj_get_pkgpath_for(i)));
 	if (strlen(buffer) > 0)
 		strcat(buffer, "/");
 	strcat(buffer, project->packages[i]->name);

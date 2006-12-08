@@ -70,7 +70,6 @@ typedef struct tagPackage
 	const char*  path;
 	const char*  script;
 	const char*  lang;
-	const char*  kind;
 	const char*  objdir;
 	const char*  url;
 	PkgConfig**  configs;
