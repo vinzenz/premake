@@ -73,13 +73,18 @@ int platform_findlib(const char* name, char* buffer, int len)
 {
 	FILE* file;
 	char* libpaths;
+	char* token;
 
 	libpaths = getenv("LD_LIBRARY_PATH");
-	strcpy(buffer, strtok(libpaths, ":"));
-	while (buffer != NULL)
+	token = strtok(libpaths, ":");
+	while (token != NULL)
 	{
-		if (findLibHelper(name, buffer)) return 1;
-		strcpy(buffer, strtok(libpaths, ":"));
+		if (findLibHelper(name, buffer))
+		{
+			strcpy(buffer, token);
+			return 1;
+		}
+		token = strtok(NULL, ":");
 	}
 
 	file = fopen("/etc/ld.so.conf", "rt");
