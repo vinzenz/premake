@@ -199,4 +199,39 @@
    or perhaps
    package.links = { findlib("freetype") }
    
+ * Add inter-package dependencies, without needing to use package.links()
+   An example of usage can be: packageA.depends(packageB)
    
+ * There is a bug in GNU when there is a file for example in "../src/main.cpp"
+   but you want to compile "../src/testing/main.cpp", GNU make compiles
+   "../src/main.cpp" instead.
+   
+ So the output currently it is:
+   
+ $(OBJDIR)/main.o: ../src/testing/main.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+and will have to change to this:
+
+ $(OBJDIR)/src/testing/main.o: ../src/testing/main.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+ * There is also a bug when using links("library"),
+   it doesn't adds (in some cases?) the relative libpath to it in cb-gcc.
+   And for gnu it doesn't adds a libpath but adds the "../lib/path/to/library.a"
+   Both seems different bugs.
+   
+ * In Code::Blocks rev. 3458 project file version has upgraded to 1.6. 
+   Differences from 1.5 include changes to accommodate the some new features plus 
+   that now only values that differ from the defaults are saved (so project files are smaller now).
+   
+   Premake has been updated to reflect that, but there are some bugs in Code::Blocks like that if 
+   an Unit (a file) doesn't belongs to any target (configuration) it still thinks it belongs to
+   all targets, which is the default.
+   
+   So to make the premake generated project files even more simmilar to what Code::Blocks
+   generates as of now, some issues will have to be fixed from Code::Blocks first.

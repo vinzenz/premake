@@ -14,8 +14,10 @@ Premake Changelog
 * Bug 1565755: Generated makefiles do not work with MSYS
 * Bug 1587955: Target path ignored for libs
 * Bug 1574725: Static library extension for "gnu" target
+* Bug 1522861: Fixed by using "ar -rcs" instead of "ar -cr && ranlib"
 * Bug: "gnu" clean rule doesn't work in cmd.exe
 * Improved behavior of Linux findlib()
+* Updated Code::Blocks support to latest project version (major="1" minor="6")
 
 3.2
 * Added support for Code::Blocks

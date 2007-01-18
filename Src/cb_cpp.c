@@ -35,13 +35,13 @@ int cb_cpp()
 
 	io_print("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n");
 	io_print("<CodeBlocks_project_file>\n");
-	io_print("\t<FileVersion major=\"1\" minor=\"5\" />\n");
+	io_print("\t<FileVersion major=\"1\" minor=\"6\" />\n");
 	io_print("\t<Project>\n");
 	io_print("\t\t<Option title=\"%s\" />\n", prj_get_pkgname());
 	io_print("\t\t<Option pch_mode=\"2\" />\n");
-	io_print("\t\t<Option default_target=\"\" />\n");
+/*	io_print("\t\t<Option default_target=\"\" />\n"); */
 	io_print("\t\t<Option compiler=\"gcc\" />\n");
-	io_print("\t\t<Option virtualFolders=\"\" />\n");
+/*	io_print("\t\t<Option virtualFolders=\"\" />\n"); */
 	io_print("\t\t<Build>\n");
 
 	for (i = 0; i < prj_get_numconfigs(); ++i)
@@ -109,9 +109,12 @@ int cb_cpp()
 		print_list(prj_get_links(), "\t\t\t\t\t<Add library=\"", "\" />\n", "", filterLinks);
 		io_print("\t\t\t\t</Linker>\n");
         
-		io_print("\t\t\t\t<ResourceCompiler>\n");
-		print_list(prj_get_respaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL);
-		io_print("\t\t\t\t</ResourceCompiler>\n");
+        if (prj_find_filetype(".rc"))
+        {
+			io_print("\t\t\t\t<ResourceCompiler>\n");
+			print_list(prj_get_respaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL);
+			io_print("\t\t\t\t</ResourceCompiler>\n");
+        }
 
 		if (prj_get_numprebuildcommands() > 0 || prj_get_numpostbuildcommands() > 0)
 		{
@@ -157,17 +160,15 @@ static const char* listFiles(const char* filename)
 	int i;
 
 	io_print("\t\t<Unit filename=\"%s\">\n", filename);
+	
 	if (matches(path_getextension(filename), ".rc"))
-	{
 		io_print("\t\t\t<Option compilerVar=\"WINDRES\" />\n");
-
-		while (strncmp(filename, "../", 3) == 0)
-			filename += 3;
-		io_print("\t\t\t<Option objectName=\"%s\" />\n", path_swapextension(filename, ".rc", ".res"));
-	}
 	else
 	{
-		io_print("\t\t\t<Option compilerVar=\"%s\" />\n", prj_is_lang("c") ? "CC" : "CPP");
+		/* Default is C++ (compilerVar=CPP) */
+		if (prj_is_lang("c"))
+			io_print("\t\t\t<Option compilerVar=\"CC\" />\n");
+		
 		if (!is_cpp(filename))
 		{
 			io_print("\t\t\t<Option compile=\"0\" />\n");

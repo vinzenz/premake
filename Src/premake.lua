@@ -8,7 +8,8 @@ package.target   = "premake"
 	package.buildflags = 
 	{ 
 		"no-64bit-checks",
-		"static-runtime" 
+		"static-runtime",
+		"extra-warnings"
 	}
 
 	package.config["Release"].buildflags = 
@@ -19,13 +20,11 @@ package.target   = "premake"
 	}
 
 
--- Defined Symbols
+-- Avoid VS2005 warnings
 
-	package.defines =
-	{
-		"_CRT_SECURE_NO_DEPRECATE"   -- avoid VS2005 warnings
-	}
-	
+	if (target == "vs2005") then
+		package.defines = { "_CRT_SECURE_NO_DEPRECATE" }
+	end
 
 -- Libraries
 

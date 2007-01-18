@@ -1,4 +1,4 @@
-project.name     = "Premake"
+project.name = "Premake"
 
 -- Options
 
@@ -6,7 +6,7 @@ project.name     = "Premake"
 
 -- Project Settings
 
-	project.bindir   = "bin"
+	project.bindir = "bin"
 
 	dopackage("Src")
 	if (options["with-tests"]) then
