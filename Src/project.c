@@ -214,7 +214,6 @@ const char* prj_get_libdir()
 
 const char* prj_get_libdir_for(int i)
 {
-	Package*   pkg = prj_get_package();
 	PkgConfig* cfg = prj_get_config_for(i);
 	if (cfg->libdir != NULL)
 	{

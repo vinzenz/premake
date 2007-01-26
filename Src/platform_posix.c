@@ -26,6 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <ctype.h>
 #include "io.h"
 #include "path.h"
 #include "util.h"
@@ -94,9 +95,7 @@ int platform_findlib(const char* name, char* buffer, int len)
 	while (!feof(file))
 	{
 		/* Read a line and trim off any trailing whitespace */
-		char linebuffer[4096];
 		char* ptr;
-
 		fgets(buffer, 4096, file);
 		ptr = &buffer[strlen(buffer) - 1];
 		while (isspace(*ptr))
