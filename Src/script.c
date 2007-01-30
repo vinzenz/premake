@@ -394,14 +394,14 @@ static int export_pkgconfig(Package* package, int tbl)
 		export_list(tbl, obj, "linkoptions",  &config->linkopts);
 		export_list(tbl, obj, "resoptions",   &config->resopts);
 		export_list(tbl, obj, "links",        &config->links);
+		export_list(tbl, obj, "prebuildcommands", &config->prebuildcmds);
+		export_list(tbl, obj, "prelinkcommands", &config->prelinkcmds);
+		export_list(tbl, obj, "postbuildcommands", &config->postbuildcmds);
 
 		/* Resource lists are really two combined */
 		export_list(tbl, obj, "defines", &config->resdefines);
 		export_append_list(tbl, obj, "resdefines", &config->resdefines);
 		export_list(tbl, obj, "includepaths", &config->respaths);
-		export_list(tbl, obj, "prebuildcommands", &config->prebuildcmds);
-		export_list(tbl, obj, "prelinkcommands", &config->prelinkcmds);
-		export_list(tbl, obj, "postbuildcommands", &config->postbuildcmds);
 		export_append_list(tbl, obj, "respaths", &config->respaths);
 
 		/* Build the file list */
