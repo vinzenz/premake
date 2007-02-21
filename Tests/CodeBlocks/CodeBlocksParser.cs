@@ -64,13 +64,11 @@ namespace Premake.Tests.CodeBlocks
 
 			Match("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>");
 			Match("<CodeBlocks_project_file>");
-			Match("\t<FileVersion major=\"1\" minor=\"5\" />");
+			Match("\t<FileVersion major=\"1\" minor=\"6\" />");
 			Match("\t<Project>");
 			Match("\t\t<Option title=\"" + package.Name + "\" />");
 			Match("\t\t<Option pch_mode=\"2\" />");
-			Match("\t\t<Option default_target=\"\" />");
 			Match("\t\t<Option compiler=\"gcc\" />");
-			Match("\t\t<Option virtualFolders=\"\" />");
 			Match("\t\t<Build>");
 
 			package.Language = "c++";
@@ -228,11 +226,13 @@ namespace Premake.Tests.CodeBlocks
 					}
 
 					ArrayList resPaths = new ArrayList();
-					Match("\t\t\t\t<ResourceCompiler>");
-					while (!Match("\t\t\t\t</ResourceCompiler>", true))
+					if (Match("\t\t\t\t<ResourceCompiler>", true))
 					{
-						matches = Regex("\t\t\t\t\t<Add directory=\"(.+?)\" />");
-						resPaths.Add(matches[0]);
+						while (!Match("\t\t\t\t</ResourceCompiler>", true))
+						{
+							matches = Regex("\t\t\t\t\t<Add directory=\"(.+?)\" />");
+							resPaths.Add(matches[0]);
+						}
 					}
 
 					config.BuildFlags = (string[])buildFlags.ToArray(typeof(string));
@@ -264,12 +264,10 @@ namespace Premake.Tests.CodeBlocks
 					resname = resname.Replace(".rc", ".res");
 
 					Match("\t\t\t<Option compilerVar=\"WINDRES\" />");
-					Match("\t\t\t<Option objectName=\"" + resname + "\" />");
 				}
 				else
 				{
-					matches = Regex("\t\t\t<Option compilerVar=\"(.+?)\" />");
-					if (matches[0] == "CC")
+					if (Match("\t\t\t<Option compilerVar=\"CC\" />", true))
 						package.Language = "c";
 
 					if (!name.EndsWith(".c") && !name.EndsWith(".cpp"))

@@ -687,7 +687,9 @@ const char* prj_get_pkgscript()
 
 
 /************************************************************************
- * Return the target for the active object
+ * Return the target for the active object. There are a couple of 
+ * variants here; at some point I need to walk through all the usages
+ * and see if I can merge these into one method.
  ***********************************************************************/
 
 const char* prj_get_target()
@@ -794,6 +796,31 @@ const char* prj_get_target_for(int i)
 	strcat(buffer, extension);
 
 	return buffer;
+}
+
+const char* prj_get_relativetarget_for(int i)
+{
+	char backpath[8192];
+	const char* target;
+
+	/* Get the path back to the main project so I have a common
+	 * point of reference between myself and this dependency */
+	strcpy(backpath, path_build(prj_get_pkgpath(), prj_get_path()));
+
+	/* Append the path to the dependent project */
+	if (strlen(backpath) > 0)
+		strcat(backpath, "/");
+	strcat(backpath, prj_get_pkgpath_for(i));
+
+	/* Append the path from the dependent project to its output dir */
+	if (strlen(backpath) > 0)
+		strcat(backpath, "/");
+	strcat(backpath, prj_get_target_for(i));
+
+	/* Now convert that to a relative path from here */
+	target = path_build("", backpath);
+	if (target[0] == '/') ++target;
+	return target;
 }
 
 const char* prj_get_target_raw()

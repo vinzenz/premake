@@ -162,7 +162,9 @@ static const char* listFiles(const char* filename)
 	io_print("\t\t<Unit filename=\"%s\">\n", filename);
 	
 	if (matches(path_getextension(filename), ".rc"))
+	{
 		io_print("\t\t\t<Option compilerVar=\"WINDRES\" />\n");
+	}
 	else
 	{
 		/* Default is C++ (compilerVar=CPP) */

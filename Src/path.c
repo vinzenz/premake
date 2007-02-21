@@ -79,6 +79,8 @@ const char* path_absolute(const char* path)
  * Build a path to get from `from` to `to`
  ***********************************************************************/
 
+#include <stdio.h>
+
 const char* path_build(const char* from, const char* to)
 {
 	char fromFull[8192];

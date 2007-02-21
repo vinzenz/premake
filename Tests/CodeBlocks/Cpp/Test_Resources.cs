@@ -34,6 +34,7 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		public void Test_UsesIncludePaths()
 		{
 			_script.Append("package.includepaths = { 'include' }");
+			_script.Replace("somefile.txt", "somefile.rc");
 			_expects.Package[0].Config[0].ResPaths = new string[] { "include" };
 			_expects.Package[0].Config[1].ResPaths = new string[] { "include" };
 			Run();
@@ -43,6 +44,7 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		public void Test_UsesResourcePaths()
 		{
 			_script.Append("package.respaths = { 'resources' }");
+			_script.Replace("somefile.txt", "somefile.rc");
 			_expects.Package[0].Config[0].ResPaths = new string[] { "resources" };
 			_expects.Package[0].Config[1].ResPaths = new string[] { "resources" };
 			Run();
@@ -53,6 +55,7 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		{
 			_script.Append("package.includepaths = { 'include' }");
 			_script.Append("package.respaths = { 'resources' }");
+			_script.Replace("somefile.txt", "somefile.rc");
 			_expects.Package[0].Config[0].ResPaths = new string[] { "include", "resources" };
 			_expects.Package[0].Config[1].ResPaths = new string[] { "include", "resources" };
 			Run();
