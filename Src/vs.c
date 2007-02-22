@@ -578,7 +578,7 @@ int vs_write_cpp()
 					if (prj_get_numlinks() > 0)
 					{
 						tag_attr_open("AdditionalDependencies");
-						print_list(prj_get_links(), "", ".lib", " ", vs_filter_links);
+						print_list(prj_get_links(), "", "", " ", vs_filter_links);
 						tag_attr_close();
 					}
 
@@ -674,15 +674,17 @@ const char* vs_filter_links(const char* name)
 		const char* lang = prj_get_language_for(i);
 		if (matches(lang, "c") || matches(lang, "c++"))
 		{
-			strcpy(g_buffer, prj_get_libdir_for(i));
-			return path_combine(g_buffer, prj_get_targetname_for(i));
+			return prj_get_relativetarget_for(i);
 		}
 		else
 			return NULL;
 	}
 	else
 	{
-		return name;
+		strcpy(g_buffer, name);
+		strcat(g_buffer, ".lib");
+		return g_buffer;
+//		return name;
 	}
 }
 
