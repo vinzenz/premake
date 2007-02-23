@@ -478,7 +478,8 @@ static const char* listSiblingRefs(const char* name)
 	{
 		if (matches(prj_get_language_for(i), "c#"))
 		{
-			return prj_get_target_for(i);
+			// return prj_get_target_for(i);
+			return prj_get_relativetarget_for(i);
 		}
 	}
 	return NULL;
@@ -498,7 +499,8 @@ static const char* listReferenceDeps(const char* name)
 	int i = prj_find_package(name);
 	if (i >= 0)
 	{
-		return prj_get_target_for(i);
+		// return prj_get_target_for(i);
+		return prj_get_relativetarget_for(i);
 	}
 
 	return NULL;
