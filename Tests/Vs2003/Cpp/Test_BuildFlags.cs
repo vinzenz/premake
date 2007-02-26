@@ -177,6 +177,15 @@ namespace Premake.Tests.Vs2003.Cpp
 		}
 
 		[Test]
+		public void Test_SehExceptions_Ignored()
+		{
+			_script.Append("package.buildflags = { 'seh-exceptions' }");
+			_expects.Package[0].Config[0].BuildFlags = new string[] { };
+			_expects.Package[0].Config[1].BuildFlags = new string[] { "optimize", "no-symbols" };
+			Run();
+		}
+
+		[Test]
 		public void Test_StaticRuntime()
 		{
 			_script.Append("package.buildflags = { 'static-runtime' }");

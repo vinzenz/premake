@@ -366,6 +366,9 @@ namespace Premake.Tests.Vs2005
 				if (Match("\t\t\t\tExceptionHandling=\"false\"", true))
 					buildFlags.Add("no-exceptions");
 
+				if (Match("\t\t\t\tExceptionHandling=\"2\"", true))
+					buildFlags.Add("seh-exceptions");
+
 				if (optimization > 0)
 					Match("\t\t\t\tStringPooling=\"true\"", true);
 

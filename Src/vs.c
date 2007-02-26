@@ -524,6 +524,9 @@ int vs_write_cpp()
 				if (prj_has_flag("no-exceptions"))
 					tag_attr("ExceptionHandling=\"%s\"", S_FALSE);
 
+				if (prj_has_flag("seh-exceptions") && version > VS2003)
+					tag_attr("ExceptionHandling=\"2\"");
+
 				if (debug && !prj_has_flag("managed"))
 					tag_attr("BasicRuntimeChecks=\"3\"");
 

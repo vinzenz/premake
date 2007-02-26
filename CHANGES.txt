@@ -6,7 +6,8 @@ Premake Changelog
 * Added `target` global variable to script environment
 * Added build flag `no-edit-and-continue`
 * Added build flags `native-wchar` and `no-native-wchar`
-* Added build flags `no-manifest`
+* Added build flag `no-manifest`
+* Added build flag `seh-exceptions` (VS2005 only)
 * Added `resdefines`, `respaths`, and `resoptions`
 * Added `prebuildcommands`, `prelinkcommands`, and `postbuildcommands`
 * Added `pchheader` and `pchsource` (Visual Studio only)

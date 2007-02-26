@@ -177,6 +177,15 @@ namespace Premake.Tests.Vs2005.Cpp
 		}
 
 		[Test]
+		public void Test_SehExceptions()
+		{
+			_script.Append("package.buildflags = { 'seh-exceptions' }");
+			_expects.Package[0].Config[0].BuildFlags = new string[] { "seh-exceptions" };
+			_expects.Package[0].Config[1].BuildFlags = new string[] { "seh-exceptions", "optimize", "no-symbols" };
+			Run();
+		}
+
+		[Test]
 		public void Test_Unicode()
 		{
 			_script.Append("package.buildflags = { 'unicode' }");
