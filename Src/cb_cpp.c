@@ -51,7 +51,7 @@ int cb_cpp()
 		prj_select_config(i);
 
 		io_print("\t\t\t<Target title=\"%s\">\n", prj_get_cfgname());
-		io_print("\t\t\t\t<Option output=\"%s\" />\n", prj_get_target());
+		io_print("\t\t\t\t<Option output=\"%s\" prefix_auto=\"0\" extension_auto=\"0\" />\n", prj_get_target());
 		io_print("\t\t\t\t<Option object_output=\"%s\" />\n", prj_get_objdir());
 
 		if (prj_is_kind("winexe")) 

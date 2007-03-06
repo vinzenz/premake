@@ -91,7 +91,7 @@ namespace Premake.Tests.CodeBlocks
 					config.BuildOptions = "";
 					config.LinkOptions = "";
 
-					matches = Regex("\t\t\t\t<Option output=\"(.+?)\" />");
+					matches = Regex("\t\t\t\t<Option output=\"(.+?)\" prefix_auto=\"0\" extension_auto=\"0\" />");
 					config.Target = Path.GetFileName(matches[0]).Replace('\\', '/');
 					config.OutDir = Path.GetDirectoryName(matches[0]).Replace('\\', '/'); ;
 					config.OutFile = Path.GetFileName(matches[0]).Replace('\\', '/'); ;
