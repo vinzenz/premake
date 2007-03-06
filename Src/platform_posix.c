@@ -217,7 +217,7 @@ MaskHandle platform_mask_open(const char* mask)
 
 int platform_mkdir(const char* path)
 {
-	return (mkdir(path, 0755) == 0);
+	return (mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0);
 }
 
 
