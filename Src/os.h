@@ -16,10 +16,10 @@
  **********************************************************************/
 
 /* Determine the current OS. I'm not sure how to reliably detect Windows
- * but since it is the most command I use is as the default */
+ * but since it is the most common I use is as the default */
 #if defined(__linux__)
 #define PLATFORM_POSIX 1
-#elif defined(__FreeBSD) || defined(__NetBSD__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #define PLATFORM_POSIX 1
 #elif defined(__APPLE__) && defined(__MACH__)
 #define PLATFORM_POSIX 1
