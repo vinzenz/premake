@@ -3,6 +3,6 @@ cd incoming
 bin
 prompt
 mput premake-src-*.zip
-mput premake-linux-*.tar.gz
+mput premake-*.tar.gz
 quit
 
