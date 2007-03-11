@@ -1,6 +1,7 @@
 PREMAKE
+Build Script Generation
 
-Copyright (C) 2002-2006 by Jason Perkins
+Copyright (C) 2002-2007 by Jason Perkins
 Distributed under the GNU General Public License, see LICENSE.txt
 
 The Lua language and runtime library is (C) TeCGraf, PUC-Rio.
