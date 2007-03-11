@@ -217,7 +217,17 @@ const char* prj_get_libdir_for(int i)
 	PkgConfig* cfg = prj_get_config_for(i);
 	if (cfg->libdir != NULL)
 	{
-		return cfg->libdir;
+		const char* target;
+
+		Package* pkg = prj_get_package_for(i);
+		strcpy(buffer, path_build(my_pkg->path, pkg->path));
+		strcat(buffer, "/");
+		strcat(buffer, cfg->libdir);
+
+		/* Now convert that to a relative path from here */
+		target = path_build("", buffer);
+		if (target[0] == '/') ++target;
+		return target;
 	}
 	else
 	{
@@ -807,7 +817,7 @@ const char* prj_get_relativetarget_for(int i)
 	 * point of reference between myself and this dependency */
 	strcpy(backpath, path_build(prj_get_pkgpath(), prj_get_path()));
 
-	/* Append the path to the dependent project */
+	/* Append the path to the dependent project library */
 	if (strlen(backpath) > 0)
 		strcat(backpath, "/");
 	strcat(backpath, prj_get_pkgpath_for(i));
