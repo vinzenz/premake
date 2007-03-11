@@ -203,9 +203,11 @@ static const char* filterLinks(const char* name)
 		const char* lang = prj_get_language_for(i);
 		if (matches(lang, "c++") || matches(lang, "c"))
 		{
-			// const char* linkPath = prj_get_target_for(i);
-			// return path_getbasename(linkPath);
-			return prj_get_relativetarget_for(i);
+			const char* target;
+			target = prj_get_target_for(i);
+			// target = path_getbasename(target);
+			// target = prj_get_relativetarget_for(i);
+			return target;
 		}
 		else
 		{

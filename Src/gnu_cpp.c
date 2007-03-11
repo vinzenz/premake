@@ -316,7 +316,9 @@ static const char* filterLinks(const char* name)
 		const char* lang = prj_get_language_for(i);
 		if (matches(lang, "c++") || matches(lang, "c"))
 		{
-			return prj_get_relativetarget_for(i);
+			const char* target;
+			target = prj_get_target_for(i);
+			return target;
 		}
 		else
 		{
@@ -459,7 +461,7 @@ static const char* listLinkerDeps(const char* name)
 	int i = prj_find_package(name);
 	if (i >= 0)
 	{
-		return prj_get_relativetarget_for(i);
+		return prj_get_target_for(i);
 	}
 
 	return NULL;

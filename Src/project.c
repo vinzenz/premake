@@ -190,7 +190,17 @@ const char* prj_get_bindir_for(int i)
 	PkgConfig* cfg = prj_get_config_for(i);
 	if (cfg->bindir != NULL)
 	{
-		return cfg->bindir;
+		const char* target;
+
+		Package* pkg = prj_get_package_for(i);
+		strcpy(buffer, path_build(my_pkg->path, pkg->path));
+		strcat(buffer, "/");
+		strcat(buffer, cfg->bindir);
+
+		/* Now convert that to a relative path from here */
+		target = path_build("", buffer);
+		if (target[0] == '/') ++target;
+		return target;
 	}
 	else
 	{
