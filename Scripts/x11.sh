@@ -84,7 +84,7 @@ unix2dos Src/Premake.dsp
 unix2dos Src/Premake.vcproj
 
 cd ..
-zip -r9 ../premake-src-$1.zip Premake-$1/*
+zip -r9 premake-src-$1.zip Premake-$1/*
 
 
 #####################################################################
@@ -96,7 +96,6 @@ echo "BUILDING RELEASE BINARY..."
 echo ""
 
 cd Premake-$1
-premake --target gnu
 make CONFIG=Release
 
 
