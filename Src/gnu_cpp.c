@@ -115,6 +115,8 @@ int gnu_cpp()
 		io_print("  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)");
 		if (prj_is_kind("dll") && (g_cc == NULL || matches(g_cc, "gcc")))
 			io_print(" -shared");
+		if (prj_is_kind("winexe"))
+			io_print(" -mwindows");
 		if (prj_has_flag("no-symbols"))
 			io_print(" -s");
 		if (os_is("macosx") && prj_has_flag("dylib"))
