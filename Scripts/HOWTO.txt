@@ -19,3 +19,4 @@
 10. Announce on website and mailing list
 
 11. Update README and premake.c on trunk to version "+"
+

@@ -1,7 +1,7 @@
 Premake Changelog
 -----------------
 
-3.3 (in progress)
+3.3
 * Added support for prebuild, prelink, and postbuild commands
 * Added `target` global variable to script environment
 * Added build flag `no-edit-and-continue`
@@ -21,6 +21,7 @@ Premake Changelog
 * Bug: "gnu" clean rule doesn't work in cmd.exe
 * Improved behavior of Linux findlib()
 * Updated Code::Blocks support to latest project version (major="1" minor="6")
+* Patch 1681666: GNU targets always show the console if kind = 'winexe'
 
 3.2
 * Added support for Code::Blocks
