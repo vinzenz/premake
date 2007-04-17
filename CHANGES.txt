@@ -1,6 +1,9 @@
 Premake Changelog
 -----------------
 
+3.4 (in progress)
+* Added App.config support to GNU makefiles
+
 3.3
 * Added support for prebuild, prelink, and postbuild commands
 * Added `target` global variable to script environment

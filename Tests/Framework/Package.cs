@@ -16,6 +16,7 @@ namespace Premake.Tests.Framework
 		public ConfigCollection Config;
 		public FileCollection File;
 		public ArrayList CopyLocal;
+		public string HasAppConfigRule;
 
 		public Package()
 		{
@@ -39,6 +40,7 @@ namespace Premake.Tests.Framework
 			Test(this.ScriptName, actual.ScriptName, "Package script name");
 			Test(this.Compiler,   actual.Compiler,   "Package compiler");
 			Test(this.DefFile,    actual.DefFile,    "Exports .def file");
+			Test(this.HasAppConfigRule, actual.HasAppConfigRule, "App.config build rule");
 
 			this.Config.CompareTo(actual.Config);
 			this.File.CompareTo(actual.File);

@@ -80,9 +80,7 @@ void platform_getuuid(char* uuid)
 	if (CoCreateGuid == NULL)
 	{
 		HMODULE hOleDll = LoadLibrary("OLE32.DLL");
-		void* func = GetProcAddress(hOleDll, "CoCreateGuid");
-		CoCreateGuid = (int(__stdcall*)(char*))func;
-//		*((void**)&CoCreateGuid) = (void*)GetProcAddress(hOleDll, "CoCreateGuid");
+		CoCreateGuid = (int(__stdcall*)(char*))GetProcAddress(hOleDll, "CoCreateGuid");
 	}
 	CoCreateGuid((char*)uuid);
 }

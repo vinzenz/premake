@@ -618,6 +618,8 @@ namespace Premake.Tests.Gnu
 			Match("");
 			Match("all: \\");
 			Match("\t$(OUTDIR)/$(TARGET) \\");
+			if (Match("\t$(OUTDIR)/$(TARGET).config \\", true))
+				package.HasAppConfigRule = "yes";
 			foreach (SourceFile file in package.File)
 			{
 				if (file.BuildAction == "Content")
@@ -627,9 +629,15 @@ namespace Premake.Tests.Gnu
 
 			Match("$(OUTDIR)/$(TARGET): $(SOURCES) $(EMBEDDEDFILES) $(LINKEDFILES) $(COPYLOCALFILES) $(DEPS)");
 			Match("\t-@$(CMD_MKOUTDIR)");
-
 			Match("\t@$(CSC) /nologo /out:$@ /lib:$(BINDIR) $(FLAGS) $(COMPILECOMMAND)");
 			Match("");
+
+			if (package.HasAppConfigRule == "yes")
+			{
+				Match("$(OUTDIR)/$(TARGET).config: App.config");
+				Match("\t@cp $^ $@");
+				Match("");
+			}
 
 			foreach (SourceFile file in package.File)
 			{

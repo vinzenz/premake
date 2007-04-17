@@ -48,6 +48,8 @@ int gnu_cs()
 	const char* csc;
 	const char* resgen;
 	int i;
+	const char** files;
+	const char* appConfigName;
 
 	/* Figure out what I'm building */
 	prj_select_config(0);
@@ -132,6 +134,18 @@ int gnu_cs()
 	io_print("ifndef CONFIG\n");
 	io_print("  CONFIG=%s\n", prj_get_cfgname());
 	io_print("endif\n\n");
+
+	/* Figure out if I have an App.config file */
+	appConfigName = NULL;
+	files = prj_get_files();
+	for (i = 0; files[i] != NULL; ++i)
+	{
+		if (matches(files[i], "App.config") || matches(files[i], "app.config"))
+		{
+			appConfigName = files[i];
+			break;
+		}
+	}
 
 	/* Specify the build tools */
 	io_print("CSC := %s\n", csc);
@@ -242,6 +256,10 @@ int gnu_cs()
 	io_print(".PHONY: clean\n\n");
 	io_print("all: \\\n");
 	io_print("\t$(OUTDIR)/$(TARGET) \\\n");
+	if (appConfigName != NULL)
+	{
+		io_print("\t$(OUTDIR)/$(TARGET).config \\\n");
+	}
 	print_list(prj_get_files(), "\t", " \\\n", "", listContentTargets);
 	io_print("\n");
 
@@ -249,6 +267,13 @@ int gnu_cs()
 	io_print("$(OUTDIR)/$(TARGET): $(SOURCES) $(EMBEDDEDFILES) $(LINKEDFILES) $(COPYLOCALFILES) $(DEPS)\n");
 	io_print("\t-@$(CMD_MKOUTDIR)\n");
 	io_print("\t@$(CSC) /nologo /out:$@ /lib:$(BINDIR) $(FLAGS) $(COMPILECOMMAND)\n\n");
+
+	/* The App.config rule */
+	if (appConfigName != NULL)
+	{
+		io_print("$(OUTDIR)/$(TARGET).config: %s\n", appConfigName);
+		io_print("\t@cp $^ $@\n\n");
+	}
 
 	/* Write rules to copy content files */
 	print_list(prj_get_files(), "", "", "", listContentRules);

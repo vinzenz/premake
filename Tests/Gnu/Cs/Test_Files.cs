@@ -66,5 +66,13 @@ namespace Premake.Tests.Gnu.Cs
 			_expects.Package[0].File.Add("../Help/file2.cs");
 			Run("--os linux");
 		}
+
+		[Test]
+		public void AddsCopyRuleForAppConfig()
+		{
+			_script.Replace("'somefile.txt'", "'App.config'");
+			_expects.Package[0].HasAppConfigRule = "yes";
+			Run("--os linux");
+		}
 	}
 }
