@@ -27,6 +27,7 @@
 #include "Lua/ldebug.h"
 
 static lua_State*  L;
+static char        projectDirectory[8192];
 static const char* currentScript = NULL;
 static int         in_command = 0;
 
@@ -211,6 +212,9 @@ int script_run(const char* filename)
 {
 	char scriptname[8192];
 	int result;
+
+	/* remember where I started; I'll need this for matchfiles() later */
+	strcpy(projectDirectory, io_getcwd());
 
 	strcpy(scriptname, filename);
 	if (!io_fileexists(scriptname))
@@ -1190,6 +1194,7 @@ static void doFileScan(lua_State* L, char* path, int recursive, int findFiles)
 static int doFileMatching(lua_State* L, int recursive, int findFiles)
 {
 	char path[8192];
+	char prjPath[4096];
 	const char* pkgPath;
 	const char* filename;
 	int pathlen, i;
@@ -1204,9 +1209,18 @@ static int doFileMatching(lua_State* L, int recursive, int findFiles)
 		pkgPath = lua_tostring(L, -1);
 		lua_pop(L, 2);
 
-		/* If path is same as current, I can ignore it */
+		/* If path is same as current, ignore it. Otherwise, adjust it to 
+		 * account for the fact that the package script directory is now
+		 * current, and not the main project script directory. */
 		if (path_compare(path_getdir(currentScript), pkgPath))
+		{
+			prjPath[0] = '\0';
 			pkgPath = "";
+		}
+		else
+		{
+			strcpy(prjPath, path_build(".", projectDirectory));
+		}
 	}
 
 	/* Create a table to hold the results */
@@ -1215,14 +1229,19 @@ static int doFileMatching(lua_State* L, int recursive, int findFiles)
 	/* Scan each mask */
 	for (i = 1; i < lua_gettop(L); ++i)
 	{
+		const char* maskWithPath;
 		const char* mask = luaL_checkstring(L, i);
-		const char* maskWithPath = path_combine(pkgPath, mask);
+
+		strcpy(path, path_combine(prjPath, pkgPath));
+		maskWithPath = path_combine(path, mask);
 		strcpy(path, maskWithPath);
+
 		doFileScan(L, path, recursive, findFiles);
 	}
 
 	/* Remove the base package path from all files */
-	pathlen = strlen(pkgPath);
+	strcpy(path, path_combine(prjPath, pkgPath));
+	pathlen = strlen(path);
 	if (pathlen > 0) pathlen++;
 	for (i = 1; i <= luaL_getn(L, -1); ++i)
 	{

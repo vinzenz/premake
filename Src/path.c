@@ -88,8 +88,8 @@ const char* path_build(const char* from, const char* to)
 	int start, i;
 
 	/* Retrieve the full path to both locations */
-	strcpy(fromFull, path_absolute(from));
-	strcpy(toFull,   path_absolute(to));
+	strcpy(fromFull, path_translate(path_absolute(from), "unix"));
+	strcpy(toFull,   path_translate(path_absolute(to), "unix"));
 
 	/* Append a separator to both */
 	strcat(fromFull, "/");
