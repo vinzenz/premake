@@ -10,13 +10,15 @@
 
 6. Create new file release on SourceForge
 
-7. Move branch to tag
+7. Update download page on premake.sourceforge.net
 
-8. Update online documentation
+8. Move branch to tag
 
-9. Add new group to SourceForge tracker
+9. Update online documentation
 
-10. Announce on website and mailing list
+10. Add new group to SourceForge tracker
 
-11. Update README and premake.c on trunk to version "+"
+11. Announce on website and mailing list
+
+12. Update README and premake.c on trunk to version "+"
 
