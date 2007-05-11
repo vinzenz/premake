@@ -57,6 +57,7 @@ static int         lf_getname(lua_State* L);
 static int         lf_matchdirs(lua_State* L);
 static int         lf_matchfiles(lua_State* L);
 static int         lf_matchrecursive(lua_State* L);
+static int         lf_mkdir(lua_State* L);
 static int         lf_newfileconfig(lua_State* L);
 static int         lf_newpackage(lua_State* L);
 static int         lf_panic(lua_State* L);
@@ -122,6 +123,10 @@ int script_init()
 
 	lua_pushstring(L, "getcwd");
 	lua_pushcfunction(L, lf_getcwd);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "mkdir");
+	lua_pushcfunction(L, lf_mkdir);
 	lua_settable(L, -3);
 
 	lua_pushstring(L, "rmdir");
@@ -1404,6 +1409,15 @@ static int lf_panic(lua_State* L)
 
 	return 0;
 }
+
+
+static int lf_mkdir(lua_State* L)
+{
+	const char* dir = luaL_check_string(L, 1);
+	io_mkdir(dir);
+	return 0;
+}
+
 
 static int lf_rmdir(lua_State* L)
 {
