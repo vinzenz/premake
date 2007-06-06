@@ -31,15 +31,58 @@ namespace Premake.Tests.Vs2002.Cpp
 		#endregion
 
 		[Test]
-		public void Test_SetOnPackage()
+		public void PchDefaultsToAuto()
 		{
-			_script.Replace("'somefile.txt'", "'MyPch.h','MyPch.cpp'");
-			_script.Append("package.pchheader = 'MyPch.h'");
-			_script.Append("package.pchsource = 'MyPch.cpp'");
-			_expects.Package[0].Config[0].PchHeader = "MyPch.h";
-			_expects.Package[0].Config[0].PchSource = "MyPch.cpp";
-			_expects.Package[0].Config[1].PchHeader = "MyPch.h";
-			_expects.Package[0].Config[1].PchSource = "MyPch.cpp";
+			_expects.Package[0].Config[0].Pch = "auto";
+			_expects.Package[0].Config[1].Pch = "auto";
+			Run();
+		}
+
+		[Test]
+		public void NoPchTurnsItOff()
+		{
+			_script.Append("package.buildflags = {'no-pch'}");
+			_expects.Package[0].Config[0].Pch = "off";
+			_expects.Package[0].Config[1].Pch = "off";
+			Run();
+		}
+
+		[Test]
+		public void PchOnWhenPchHeaderIsSet()
+		{
+			_script.Append("package.pchheader='stdafx.h'");
+			_expects.Package[0].Config[0].Pch = "on";
+			_expects.Package[0].Config[1].Pch = "on";
+			Run();
+		}
+
+		[Test]
+		public void PchHeaderIsSet()
+		{
+			_script.Append("package.pchheader='stdafx.h'");
+			_expects.Package[0].Config[0].PchHeader = "stdafx.h";
+			_expects.Package[0].Config[1].PchHeader = "stdafx.h";
+			Run();
+		}
+
+		[Test]
+		public void PchSourceIsSet()
+		{
+			_script.Replace("'somefile.txt'", "'stdafx.cpp'");
+			_script.Append("package.pchheader = 'stdafx.h'");
+			_script.Append("package.pchsource = 'stdafx.cpp'");
+			_expects.Package[0].Config[0].PchSource = "stdafx.cpp";
+			_expects.Package[0].Config[1].PchSource = "stdafx.cpp";
+			Run();
+		}
+
+		[Test]
+		public void PchOffWithFlagAndHeader()
+		{
+			_script.Append("package.buildflags = {'no-pch'}");
+			_script.Append("package.pchheader='stdafx.h'");
+			_expects.Package[0].Config[0].Pch = "off";
+			_expects.Package[0].Config[1].Pch = "off";
 			Run();
 		}
 	}

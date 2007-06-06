@@ -14,6 +14,7 @@ namespace Premake.Tests.Framework
 		public string Target;
 		public string OutFile;
 		public string Kind;
+		public string Pch;
 		public string[] IncludePaths;
 		public string[] Defines;
 		public string[] LibPaths;
@@ -51,6 +52,7 @@ namespace Premake.Tests.Framework
 			Test(this.PchHeader,    actual.PchHeader,    "PCH Header");
 			Test(this.PchSource,    actual.PchSource,    "PCH Source");
 			Test(this.ResOptions,   actual.ResOptions,   "Resource options");
+			Test(this.Pch,          actual.Pch,          "Precompiled headers");
 
 			TestList(this.IncludePaths, actual.IncludePaths, "Include paths");
 			TestList(this.Defines,      actual.Defines,      "Defined symbols");

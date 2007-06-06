@@ -392,9 +392,11 @@ namespace Premake.Tests.Vs2005
 				if (matches != null)
 					buildFlags.Add(matches[0] == "true" ? "native-wchar" : "no-native-wchar");
 
+				config.Pch = "off";
 				matches = Regex("\t\t\t\tUsePrecompiledHeader=\"([0-9])\"");
 				if (matches[0] == "2")
 				{
+					config.Pch = "on";
 					matches = Regex("\t\t\t\tPrecompiledHeaderThrough=\"(.+?)\"");
 					config.PchHeader = matches[0];
 				}

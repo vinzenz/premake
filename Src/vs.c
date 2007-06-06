@@ -553,7 +553,10 @@ int vs_write_cpp()
 				}
 				else
 				{
-					tag_attr("UsePrecompiledHeader=\"%d\"", version < VS2005 ? 2 : 0);
+					int value = version < VS2005 ? 2 : 0;
+					if (prj_has_flag("no-pch"))
+						value = 0;
+					tag_attr("UsePrecompiledHeader=\"%d\"", value);
 				}
 
 				tag_attr("WarningLevel=\"%d\"", prj_has_flag("extra-warnings") ? 4 : 3);
@@ -696,7 +699,7 @@ const char* vs_filter_links(const char* name)
 
 void vs_list_files(const char* path, int stage)
 {
-	const char* pchSource = prj_get_pch_source();
+	const char* pchSource = prj_has_pch() ? prj_get_pch_source() : NULL;
 
 	const char* ptr = path;
 	while (strncmp(ptr, "../", 3) == 0)

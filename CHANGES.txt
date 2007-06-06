@@ -2,6 +2,7 @@ Premake Changelog
 -----------------
 
 3.4 (in progress)
+* Added `no-pch` flag to suppress precompiled headers
 * Added App.config support to GNU makefiles
 * Add os.mkdir() to script environment
 * Bug 531878: Problems with relative paths

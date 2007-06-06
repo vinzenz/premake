@@ -632,7 +632,7 @@ const char* prj_get_pkgfilename_for(int i, const char* extension)
 
 int prj_has_pch()
 {
-	return (my_cfg->pchHeader != NULL);
+	return (!prj_has_flag("no-pch") && my_cfg->pchHeader != NULL);
 }
 
 const char* prj_get_pch_header()
