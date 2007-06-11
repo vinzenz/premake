@@ -98,7 +98,7 @@ int sharpdev_cs()
 	io_print("  <DeploymentInformation target=\"\" script=\"\" strategy=\"File\" />\n");
 	  
 	 /* Configurations */
-	io_print("  <Configurations active=\"%s\">\n", prj_get_cfgname());
+	io_print("  <Configurations active=\"%s\">\n", xmlEscape(prj_get_cfgname()));
 
 	for (i = 0; i < prj_get_numconfigs(); ++i)
 	{
@@ -108,7 +108,7 @@ int sharpdev_cs()
 
 		optimized = prj_has_flag("optimize") || prj_has_flag("optimize-size") || prj_has_flag("optimize-speed");
 
-		io_print("    <Configuration runwithwarnings=\"%s\" name=\"%s\">\n", prj_has_flag("fatal-warnings") ? "False" : "True", prj_get_cfgname());
+		io_print("    <Configuration runwithwarnings=\"%s\" name=\"%s\">\n", prj_has_flag("fatal-warnings") ? "False" : "True", xmlEscape(prj_get_cfgname()));
 		io_print("      <CodeGeneration runtime=\"%s\" compiler=\"%s\" compilerversion=\"\" ", runtime, csc);
 		io_print("warninglevel=\"4\" nowarn=\"\" ");  /* C# defaults to highest warning level */
 		io_print("includedebuginformation=\"%s\" ", prj_has_flag("no-symbols") ? "False" : "True"); 
@@ -131,9 +131,9 @@ int sharpdev_cs()
 		io_print("assembly=\"%s\" ", path_getbasename(prj_get_target()));
 		io_print("executeScript=\"\" ");
 		io_print("executeBeforeBuild=\"");
-		print_list(prj_get_prebuildcommands(), "", "", " | ", NULL);
+		print_list(prj_get_prebuildcommands(), "", "", " | ", xmlEscapeList);
 		io_print("\" executeAfterBuild=\"");
-		print_list(prj_get_postbuildcommands(), "", "", " | ", NULL);
+		print_list(prj_get_postbuildcommands(), "", "", " | ", xmlEscapeList);
 		io_print("\" executeBeforeBuildArguments=\"\" ");
 		io_print("executeAfterBuildArguments=\"\" ");
 		io_print("/>\n");		

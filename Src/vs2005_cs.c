@@ -38,7 +38,7 @@ int vs2005_cs()
 
 	/* Write default configuration */
 	prj_select_config(0);
-	io_print("    <Configuration Condition=\" '$(Configuration)' == '' \">%s</Configuration>\n", prj_get_cfgname());
+	io_print("    <Configuration Condition=\" '$(Configuration)' == '' \">%s</Configuration>\n", xmlEscape(prj_get_cfgname()));
 	io_print("    <Platform Condition=\" '$(Platform)' == '' \">AnyCPU</Platform>\n");
 	io_print("    <ProductVersion>8.0.50727</ProductVersion>\n");
 	io_print("    <SchemaVersion>2.0</SchemaVersion>\n");
@@ -67,7 +67,7 @@ int vs2005_cs()
 	{
 		prj_select_config(c);
 
-		io_print("  <PropertyGroup Condition=\" '$(Configuration)|$(Platform)' == '%s|AnyCPU' \">\n", prj_get_cfgname());
+		io_print("  <PropertyGroup Condition=\" '$(Configuration)|$(Platform)' == '%s|AnyCPU' \">\n", xmlEscape(prj_get_cfgname()));
 
 		if (!prj_has_flag("no-symbols"))
 		{
@@ -87,7 +87,7 @@ int vs2005_cs()
 		io_print("    <OutputPath>%s\\</OutputPath>\n", prj_get_outdir());
 
 		io_print("    <DefineConstants>");
-		print_list(prj_get_defines(), "", "", ";", NULL);
+		print_list(prj_get_defines(), "", "", ";", xmlEscapeList);
 		io_print("</DefineConstants>\n");
 
 		io_print("    <ErrorReport>prompt</ErrorReport>\n");

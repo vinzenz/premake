@@ -83,7 +83,7 @@ int monodev_cs()
 	io_print("<Project name=\"%s\" fileversion=\"2.0\" language=\"C#\" ctype=\"DotNetProject\">\n", prj_get_pkgname());
 
 	prj_select_config(0);
-	io_print("  <Configurations active=\"%s\">\n", prj_get_cfgname());
+	io_print("  <Configurations active=\"%s\">\n", xmlEscape(prj_get_cfgname()));
 	for (i = 0; i < prj_get_numconfigs(); ++i)
 	{
 		int optimized;
@@ -91,7 +91,7 @@ int monodev_cs()
 		prj_select_config(i);
 		optimized = prj_has_flag("optimize") || prj_has_flag("optimize-size") || prj_has_flag("optimize-speed");
 
-		io_print("    <Configuration name=\"%s\" ctype=\"DotNetProjectConfiguration\">\n", prj_get_cfgname());
+		io_print("    <Configuration name=\"%s\" ctype=\"DotNetProjectConfiguration\">\n", xmlEscape(prj_get_cfgname()));
 
 		io_print("      <Output directory=\"%s\" ", prj_get_outdir());
 		prj_select_config(0);
@@ -102,13 +102,13 @@ int monodev_cs()
 		if (prj_get_numprebuildcommands() > 0)
 		{
 			io_print(" executeBeforeBuild=\"");
-			print_list(prj_get_prebuildcommands(), "", "", " &amp;&amp; ", NULL);
+			print_list(prj_get_prebuildcommands(), "", "", " &amp;&amp; ", xmlEscapeList);
 			io_print("\"");
 		}
 		if (prj_get_numpostbuildcommands() > 0)
 		{
 			io_print(" executeAfterBuild=\"");
-			print_list(prj_get_postbuildcommands(), "", "", " &amp;&amp; ", NULL);
+			print_list(prj_get_postbuildcommands(), "", "", " &amp;&amp; ", xmlEscapeList);
 			io_print("\"");
 		}
 		io_print(" debugmode=\"%s\" target=\"%s\" />\n", prj_has_flag("no-symbols") ? "False" : "True", kind);
@@ -119,7 +119,7 @@ int monodev_cs()
 		io_print(" unsafecodeallowed=\"%s\"", prj_has_flag("unsafe") ? "True" : "False");
 		io_print(" generateoverflowchecks=\"%s\"", optimized ? "False" : "True");
 		io_print(" definesymbols=\"");
-			print_list(prj_get_defines(), "", "", ";", NULL);
+			print_list(prj_get_defines(), "", "", ";", xmlEscapeList);
 			io_print("\"");
 		io_print(" generatexmldocumentation=\"False\"");
 		io_print(" ctype=\"CSharpCompilerParameters\" />\n");

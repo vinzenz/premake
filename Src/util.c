@@ -218,3 +218,59 @@ void print_source_tree(const char* path, void (*cb)(const char*, int))
 	cb(buffer, WST_CLOSEGROUP);
 }
 
+
+/************************************************************************
+ * Replace special XML characters.
+ ***********************************************************************/
+
+const char* xmlEscape(const char* value)
+{
+	const char* ptr;
+	int len;
+
+	len = 0;
+	buffer[0] = '\0';
+	for (ptr = value; *ptr != '\0'; ++ptr)
+	{
+		switch (*ptr)
+		{
+		case '\"':
+			strcat(buffer, "&quot;");
+			len += 6;
+			break;
+
+		case '&':
+			strcat(buffer, "&amp;");
+			len += 5;
+			break;
+
+		case '\'':
+			strcat(buffer, "&apos;");
+			len += 6;
+			break;
+
+		case '<':
+			strcat(buffer, "&lt;");
+			len += 4;
+			break;
+
+		case '>':
+			strcat(buffer, "&gt;");
+			len += 4;
+			break;
+
+		default:
+			buffer[len++] = *ptr;
+			buffer[len] = '\0';
+		}
+	}
+
+	return buffer;
+}
+
+
+const char* xmlEscapeList(const char* item, void* data)
+{
+	(data);
+	return xmlEscape(item);
+}

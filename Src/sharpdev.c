@@ -110,14 +110,14 @@ static int writeCombine()
 	for (i = 0; i < prj_get_numconfigs(); ++i)
 	{
 		prj_select_config(i);
-		io_print("    <Configuration name=\"%s\">\n", prj_get_cfgname());
+		io_print("    <Configuration name=\"%s\">\n", xmlEscape(prj_get_cfgname()));
 
 		/* List all packages under this configuration */
 		prj_select_config(0);
 		for(j = 0; j < prj_get_numpackages(); j++)
 		{
 			prj_select_package(j);
-			io_print("      <Entry name=\"%s\" configurationname=\"%s\" build=\"False\" />\n", prj_get_pkgname(), prj_get_cfgname());
+			io_print("      <Entry name=\"%s\" configurationname=\"%s\" build=\"False\" />\n", prj_get_pkgname(), xmlEscape(prj_get_cfgname()));
 		}
 
 		io_print("    </Configuration>\n");

@@ -111,9 +111,9 @@ static int vs2002_write_solution()
 	{
 		prj_select_config(i);
 		if (vs_getversion() == VS2002)
-			io_print("\t\tConfigName.%d = %s\n", i, prj_get_cfgname());
+			io_print("\t\tConfigName.%d = %s\n", i, xmlEscape(prj_get_cfgname()));
 		else
-			io_print("\t\t%s = %s\n", prj_get_cfgname(), prj_get_cfgname());
+			io_print("\t\t%s = %s\n", xmlEscape(prj_get_cfgname()), xmlEscape(prj_get_cfgname()));
 	}
 	io_print("\tEndGlobalSection\n");
 
@@ -143,8 +143,8 @@ static int vs2002_write_solution()
 
 			/* I may actually be writing the wrong thing for VS2002-2003, but has
 			 * seemed to work for this long so I am going to leave it alone */
-			io_print("\t\t{%s}.%s.ActiveCfg = %s|%s\n", data->projGuid, prj_get_cfgname(), prj_get_cfgname(), data->projType);
-			io_print("\t\t{%s}.%s.Build.0 = %s|%s\n", data->projGuid, prj_get_cfgname(), prj_get_cfgname(), data->projType);
+			io_print("\t\t{%s}.%s.ActiveCfg = %s|%s\n", data->projGuid, xmlEscape(prj_get_cfgname()), xmlEscape(prj_get_cfgname()), data->projType);
+			io_print("\t\t{%s}.%s.Build.0 = %s|%s\n", data->projGuid, xmlEscape(prj_get_cfgname()), xmlEscape(prj_get_cfgname()), data->projType);
 		}
 	}
 	io_print("\tEndGlobalSection\n");

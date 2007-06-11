@@ -106,14 +106,14 @@ int vs2002_cs()
 		optimize = prj_has_flag("optimize") || prj_has_flag("optimize-size") || prj_has_flag("optimize-speed");
 
 		io_print("\t\t\t\t<Config\n");
-		io_print("\t\t\t\t\tName = \"%s\"\n", prj_get_cfgname());
+		io_print("\t\t\t\t\tName = \"%s\"\n", xmlEscape(prj_get_cfgname()));
 		io_print("\t\t\t\t\tAllowUnsafeBlocks = \"%s\"\n", prj_has_flag("unsafe") ? "true" : "false");
 		io_print("\t\t\t\t\tBaseAddress = \"285212672\"\n");
 		io_print("\t\t\t\t\tCheckForOverflowUnderflow = \"false\"\n");
 		io_print("\t\t\t\t\tConfigurationOverrideFile = \"\"\n");
 
 		io_print("\t\t\t\t\tDefineConstants = \"");
-		print_list(prj_get_defines(), "", "", ";", NULL);
+		print_list(prj_get_defines(), "", "", ";", xmlEscapeList);
 		io_print("\"\n");
 
 		io_print("\t\t\t\t\tDocumentationFile = \"\"\n");
@@ -180,7 +180,7 @@ int vs2002_cs()
 			prj_select_config(i);
 
 			io_print("\t\t\t\t<Config\n");
-			io_print("\t\t\t\t\tName = \"%s\"\n", prj_get_cfgname());
+			io_print("\t\t\t\t\tName = \"%s\"\n", xmlEscape(prj_get_cfgname()));
 			io_print("\t\t\t\t\tEnableASPDebugging = \"false\"\n");
 			io_print("\t\t\t\t\tEnableASPXDebugging = \"false\"\n");
 			io_print("\t\t\t\t\tEnableUnmanagedDebugging = \"false\"\n");

@@ -28,3 +28,6 @@ int         matches(const char* str0, const char* str1);
 void        print_list(const char** list, const char* prefix, const char* postfix, const char* infix, const char* (*func)(const char*));
 void        print_source_tree(const char* path, void (*cb)(const char*, int));
 int         startsWith(const char* haystack, const char* needle);
+
+const char* xmlEscape(const char* value);
+const char* xmlEscapeList(const char* item, void* data);

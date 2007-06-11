@@ -7,6 +7,7 @@ Premake Changelog
 * Add os.mkdir() to script environment
 * Bug 531878: Problems with relative paths
 * Bug 1723867: Config-specific post-build on GNU target (Benoit Miller)
+* Bug 1596826: XML targets doesn't escape xml entities
 * Patch 1733674: PCH supoort for Code::Block targets (Ryan Pusztai)
 
 3.3
