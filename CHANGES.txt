@@ -5,6 +5,7 @@ Premake Changelog
 * Added `no-pch` flag to suppress precompiled headers
 * Added App.config support to GNU makefiles
 * Add os.mkdir() to script environment
+* Feature 1520182: Enhanced file-handling functions
 * Bug 531878: Problems with relative paths
 * Bug 1723867: Config-specific post-build on GNU target (Benoit Miller)
 * Bug 1596826: XML targets doesn't escape xml entities

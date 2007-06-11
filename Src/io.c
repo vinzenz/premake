@@ -45,6 +45,23 @@ int io_copyfile(const char* src, const char* dest)
 }
 
 
+int io_direxists(const char* path)
+{
+	struct stat buf;
+	if (stat(path, &buf) == 0)
+	{
+		if (buf.st_mode & S_IFDIR)
+			return 1;
+		else
+			return 0;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+
 int io_fileexists(const char* path)
 {
 	struct stat buf;

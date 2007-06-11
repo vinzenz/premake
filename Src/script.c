@@ -45,6 +45,7 @@ static int         lf_chdir(lua_State* L);
 static int         lf_copyfile(lua_State* L);
 static int         lf_docommand(lua_State* L);
 static int         lf_dopackage(lua_State* L);
+static int         lf_direxists(lua_State* L);
 static int         lf_fileexists(lua_State* L);
 static int         lf_findlib(lua_State* L);
 static int         lf_getbasename(lua_State* L);
@@ -91,6 +92,7 @@ int script_init()
 	lua_register(L, "copyfile",   lf_copyfile);
 	lua_register(L, "docommand",  lf_docommand);
 	lua_register(L, "dopackage",  lf_dopackage);
+	lua_register(L, "direxists",  lf_direxists);
 	lua_register(L, "fileexists", lf_fileexists);
 	lua_register(L, "findlib",    lf_findlib);
 	lua_register(L, "matchdirs",  lf_matchdirs);
@@ -111,6 +113,10 @@ int script_init()
 
 	lua_pushstring(L, "copyfile");
 	lua_pushcfunction(L, lf_copyfile);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "direxists");
+	lua_pushcfunction(L, lf_direxists);
 	lua_settable(L, -3);
 
 	lua_pushstring(L, "fileexists");
@@ -1067,6 +1073,15 @@ static int lf_dopackage(lua_State* L)
 }
 
 
+static int lf_direxists(lua_State* L)
+{
+	const char* path = luaL_check_string(L, 1);
+	int result = io_direxists(path);
+	lua_pushboolean(L, result);
+	return 1;
+}
+
+
 static int lf_fileexists(lua_State* L)
 {
 	const char* path = luaL_check_string(L, 1);
@@ -1143,6 +1158,14 @@ static int lf_getname(lua_State* L)
 	const char* result = path_getname(path);
 	lua_pushstring(L, result);
 	return 1;
+}
+
+
+static int lf_isdir(lua_State* L)
+{
+	const char* dir = luaL_check_string(L, 1);
+	io_mkdir(dir);
+	return 0;
 }
 
 
