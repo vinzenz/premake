@@ -38,10 +38,15 @@ int cb_cpp()
 	io_print("\t<FileVersion major=\"1\" minor=\"6\" />\n");
 	io_print("\t<Project>\n");
 	io_print("\t\t<Option title=\"%s\" />\n", prj_get_pkgname());
-	io_print("\t\t<Option pch_mode=\"2\" />\n");
-/*	io_print("\t\t<Option default_target=\"\" />\n"); */
+
+	/* Select the default configuration because prj_has_pch() requires it. */
+	prj_select_config(0);
+	if (prj_has_pch())
+	{
+		io_print("\t\t<Option pch_mode=\"2\" />\n");
+	}
+
 	io_print("\t\t<Option compiler=\"gcc\" />\n");
-/*	io_print("\t\t<Option virtualFolders=\"\" />\n"); */
 	io_print("\t\t<Build>\n");
 
 	for (i = 0; i < prj_get_numconfigs(); ++i)
@@ -96,6 +101,15 @@ int cb_cpp()
 			print_opt("-O3");
 		if (prj_has_flag("optimize") && !prj_has_flag("optimize-size") && !prj_has_flag("optimize-speed"))
 			print_opt("-O");
+
+		if (prj_has_pch())
+		{
+			/* Warns you if your pch file is out of date */
+			print_opt("-Winvalid-pch");
+			/* Force include the pch header so the user doesn't need to */
+			io_print("\t\t\t\t\t<Add option=\"-include &quot;%s&quot;\" />\n", prj_get_pch_header());
+		}
+		
 		print_list(prj_get_defines(), "\t\t\t\t\t<Add option=\"-D", "\" />\n", "", NULL);
 		print_list(prj_get_buildoptions(), "\t\t\t\t\t<Add option=\"", "\" />\n", "", NULL);
 		print_list(prj_get_incpaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL); 
@@ -173,8 +187,17 @@ static const char* listFiles(const char* filename)
 		
 		if (!is_cpp(filename))
 		{
-			io_print("\t\t\t<Option compile=\"0\" />\n");
-			io_print("\t\t\t<Option link=\"0\" />\n");
+			/* Look for the specified pch header */
+			if (prj_has_pch() && matches(filename, prj_get_pch_header()))
+			{
+				io_print("\t\t\t<Option compile=\"1\" />\n");
+				io_print("\t\t\t<Option weight=\"0\" />\n");
+			}
+			/*else
+			{
+				io_print("\t\t\t<Option compile=\"0\" />\n");
+				io_print("\t\t\t<Option link=\"0\" />\n");
+			}*/
 		}
 	}
 	

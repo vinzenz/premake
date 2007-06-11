@@ -6,7 +6,8 @@ Premake Changelog
 * Added App.config support to GNU makefiles
 * Add os.mkdir() to script environment
 * Bug 531878: Problems with relative paths
-* Bug 1723867: Config-specific post-build steps broken on GNU target
+* Bug 1723867: Config-specific post-build on GNU target (Benoit Miller)
+* Patch 1733674: PCH supoort for Code::Block targets (Ryan Pusztai)
 
 3.3
 * Added support for prebuild, prelink, and postbuild commands
