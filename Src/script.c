@@ -1212,6 +1212,8 @@ static int doFileMatching(lua_State* L, int recursive, int findFiles)
 		lua_pushstring(L, "path");
 		lua_gettable(L, -2);
 		pkgPath = lua_tostring(L, -1);
+		if (pkgPath == NULL)
+			pkgPath = "";
 		lua_pop(L, 2);
 
 		/* If path is same as current, ignore it. Otherwise, adjust it to 
