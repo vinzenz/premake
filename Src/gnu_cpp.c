@@ -151,6 +151,33 @@ int gnu_cpp()
 			io_print("$(%s) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)", prj_is_lang("c") ? "CC" : "CXX");
 		io_print("\n");
 
+		/* Pre-build commands */
+		if (prj_get_numprebuildcommands() > 0)
+		{
+			io_print("\n  define prebuildcmd\n");
+			io_print("\t@echo Running pre-build commands...\n");
+			print_list(prj_get_prebuildcommands(), "\t", "\n", "", NULL);
+			io_print("  endef\n");
+		}
+
+		/* Pre-link commands */
+		if (prj_get_numprelinkcommands() > 0)
+		{
+			io_print("\n  define prelinkcmd\n");
+			io_print("\t@echo Running pre-link commands...\n");
+			print_list(prj_get_prelinkcommands(), "\t", "\n", "", NULL);
+			io_print("  endef\n");
+		}	
+
+		/* Post-build commands */
+		if (prj_get_numpostbuildcommands() > 0)
+		{
+			io_print("\n  define postbuildcmd\n");
+			io_print("\t@echo Running post-build commands...\n");
+			print_list(prj_get_postbuildcommands(), "\t", "\n", "", NULL);
+			io_print("  endef\n");
+		}
+
 		io_print("endif\n\n");
 	}
 
@@ -225,46 +252,21 @@ int gnu_cpp()
 	io_print("\t%s$(BLDCMD)\n", prefix);
 	
 	if (prj_get_numpostbuildcommands() > 0)
-		io_print("\t$(postbuild)\n");
+		io_print("\t$(postbuildcmd)\n");
 
 	io_print("\n");
 	
 	if (prj_get_numprebuildcommands() > 0)
 	{
 		io_print("prebuild:\n");
-		io_print("\t@echo Running pre-build commands\n");
-		print_list(prj_get_prebuildcommands(), "\t", "\n", "", NULL);
-		io_print("\n");
+		io_print("\t$(prebuildcmd)\n\n");
 	}
 	
 	if (prj_get_numprelinkcommands() > 0)
 	{
 		io_print("prelink:\n");
-		io_print("\t@echo Running pre-link commands\n");
-		print_list(prj_get_prelinkcommands(), "\t", "\n", "", NULL);
-		io_print("\n");
+		io_print("\t$(prelinkcmd)\n\n");
 	}	
-
-	if (prj_get_numpostbuildcommands() > 0)
-	{
-		io_print("define postbuild\n");
-		io_print("\t@echo Running post-build commands\n");
-		print_list(prj_get_postbuildcommands(), "\t", "\n", "", NULL);
-		io_print("endef\n\n");
-	}
-	
-/*
-	if (prj_is_kind("lib"))
-	{
-		io_print("\t%sar -cr $@ $^\n", prefix);
-		io_print("\t%sranlib $@\n", prefix);
-	}
-	else
-	{
-		io_print("\t%s$(%s) -o $@ $(OBJECTS) $(LDFLAGS) $(RESOURCES)\n", prefix, prj_is_lang("c") ? "CC" : "CXX");
-	}
-	io_print("\n");
-*/
 
 	if (os_is("macosx") && prj_is_kind("winexe"))
 	{

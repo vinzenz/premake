@@ -6,6 +6,7 @@ Premake Changelog
 * Added App.config support to GNU makefiles
 * Add os.mkdir() to script environment
 * Bug 531878: Problems with relative paths
+* Bug 1723867: Config-specific post-build steps broken on GNU target
 
 3.3
 * Added support for prebuild, prelink, and postbuild commands
