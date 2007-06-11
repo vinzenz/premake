@@ -591,7 +591,7 @@ static const char* listResourceBuildSteps(const char* name)
 		strcat(buffer, ": ");
 		strcat(buffer, name);
 		strcat(buffer, "\n\t-@if [ ! -d $(OBJDIR) ]; then mkdir -p $(OBJDIR); fi");
-		strcat(buffer, "\n\t$(RESGEN) $^ $@\n\n");
+		strcat(buffer, "\n\t@$(RESGEN) $^ $@\n\n");
 		return buffer;
 	}
 	else
