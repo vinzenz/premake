@@ -1,4 +1,4 @@
-user anonymous jason379@users.sourceforge.net
+user anonymous starkos@users.sourceforge.net
 cd incoming
 bin
 prompt

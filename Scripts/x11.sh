@@ -55,7 +55,7 @@ echo ""
 echo "RETRIEVING SOURCE CODE FROM REPOSITORY..."
 echo ""
 
-svn export https://svn.sourceforge.net/svnroot/premake/Branches/$1 Premake-$1
+svn export https://premake.svn.sourceforge.net/svnroot/premake/branches/$1 Premake-$1
 
 echo ""
 echo "REMOVING PRIVATE FILES..."
@@ -75,8 +75,8 @@ echo "PACKAGING SOURCE CODE..."
 echo ""
 
 premake --os linux --target gnu
-premake --target vs6
-premake --target vs2002
+premake --os windows --target vs6
+premake --os windows --target vs2002
 
 unix2dos Premake.dsw
 unix2dos Premake.sln
@@ -119,7 +119,7 @@ echo "Upload packages to SourceForge?"
 read line
 if [ $line = "y" ]; then
 	echo "Uploading to SourceForge..."
-	ftp -n upload.sourceforge.net < ftp_x11.txt
+	ftp -n -p upload.sourceforge.net < ftp_x11.txt
 fi
 
 
