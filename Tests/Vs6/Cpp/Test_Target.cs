@@ -83,6 +83,16 @@ namespace Premake.Tests.Vs6.Cpp
 			Run();
 		}
 
+		[Test]
+		public void TargetAppliedToStaticLib()
+		{
+			_script.Replace("'exe'", "'lib'");
+			_script.Append("package.target = 'MyLib'");
+			_expects.Package[0].Config[0	].Target = "MyLib.lib";
+			_expects.Package[0].Config[1].Target = "MyLib.lib";
+			Run();
+		}
+
 		#endregion
 
 		#region Custom Target Tests

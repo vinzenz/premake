@@ -11,7 +11,8 @@ Premake Changelog
 * Bug 1596826: XML targets doesn't escape xml entities
 * Bug 1600155: Core dump due to newpackage() and matchfiles()
 * Bug 1608895: resgen command shown
-* Patch 1733674: PCH supoort for Code::Block targets (Ryan Pusztai)
+* Bug 1639730: Output filename is not set
+* Patch 1733674: PCH support for Code::Block targets (Ryan Pusztai)
 
 3.3
 * Added support for prebuild, prelink, and postbuild commands

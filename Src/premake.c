@@ -325,7 +325,7 @@ void showUsage()
 		puts("");
 
 		for (i = 0; i < prj_get_numoptions(); ++i)
-		{
+		{	
 			prj_select_option(i);
 			printf(" --%-15s %s\n", prj_get_optname(), prj_get_optdesc());
 		}

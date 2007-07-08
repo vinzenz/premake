@@ -383,7 +383,15 @@ namespace Premake.Tests.Vs6
 				{
 					config.Kind = "lib";
 					Match("# ADD BASE LIB32 /nologo");
-					Match("# ADD LIB32 /nologo");
+					matches = Regex("# ADD LIB32 /nologo /out:\"(.+)\"", true);
+					if (matches != null)
+					{
+						config.Target = matches[0];
+					}
+					else
+					{
+						Match("# ADD LIB32 /nologo");
+					}
 				}
 				else
 				{

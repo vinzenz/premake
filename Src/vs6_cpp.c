@@ -162,7 +162,9 @@ int vs6_cpp()
 		{
 			io_print("LINK32=link.exe -lib\n");
 			io_print("# ADD BASE LIB32 /nologo\n");
-			io_print("# ADD LIB32 /nologo\n");
+			io_print("# ADD LIB32 /nologo");
+			io_print(" /out:\"%s\"\n", prj_get_target());
+
 		}
 		else
 		{
