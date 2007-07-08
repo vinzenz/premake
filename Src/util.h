@@ -30,4 +30,3 @@ void        print_source_tree(const char* path, void (*cb)(const char*, int));
 int         startsWith(const char* haystack, const char* needle);
 
 const char* xmlEscape(const char* value);
-const char* xmlEscapeList(const char* item, void* data);

@@ -267,10 +267,3 @@ const char* xmlEscape(const char* value)
 
 	return buffer;
 }
-
-
-const char* xmlEscapeList(const char* item, void* data)
-{
-	(data);
-	return xmlEscape(item);
-}

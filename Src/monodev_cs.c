@@ -102,13 +102,13 @@ int monodev_cs()
 		if (prj_get_numprebuildcommands() > 0)
 		{
 			io_print(" executeBeforeBuild=\"");
-			print_list(prj_get_prebuildcommands(), "", "", " &amp;&amp; ", xmlEscapeList);
+			print_list(prj_get_prebuildcommands(), "", "", " &amp;&amp; ", xmlEscape);
 			io_print("\"");
 		}
 		if (prj_get_numpostbuildcommands() > 0)
 		{
 			io_print(" executeAfterBuild=\"");
-			print_list(prj_get_postbuildcommands(), "", "", " &amp;&amp; ", xmlEscapeList);
+			print_list(prj_get_postbuildcommands(), "", "", " &amp;&amp; ", xmlEscape);
 			io_print("\"");
 		}
 		io_print(" debugmode=\"%s\" target=\"%s\" />\n", prj_has_flag("no-symbols") ? "False" : "True", kind);
@@ -119,7 +119,7 @@ int monodev_cs()
 		io_print(" unsafecodeallowed=\"%s\"", prj_has_flag("unsafe") ? "True" : "False");
 		io_print(" generateoverflowchecks=\"%s\"", optimized ? "False" : "True");
 		io_print(" definesymbols=\"");
-			print_list(prj_get_defines(), "", "", ";", xmlEscapeList);
+			print_list(prj_get_defines(), "", "", ";", xmlEscape);
 			io_print("\"");
 		io_print(" generatexmldocumentation=\"False\"");
 		io_print(" ctype=\"CSharpCompilerParameters\" />\n");

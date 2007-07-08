@@ -1161,12 +1161,12 @@ static int lf_getname(lua_State* L)
 }
 
 
-static int lf_isdir(lua_State* L)
-{
-	const char* dir = luaL_check_string(L, 1);
-	io_mkdir(dir);
-	return 0;
-}
+// static int lf_isdir(lua_State* L)
+// {
+//	const char* dir = luaL_check_string(L, 1);
+//	io_mkdir(dir);
+//	return 0;
+// }
 
 
 static int debugging = 0;

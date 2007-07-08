@@ -87,7 +87,7 @@ int vs2005_cs()
 		io_print("    <OutputPath>%s\\</OutputPath>\n", prj_get_outdir());
 
 		io_print("    <DefineConstants>");
-		print_list(prj_get_defines(), "", "", ";", xmlEscapeList);
+		print_list(prj_get_defines(), "", "", ";", xmlEscape);
 		io_print("</DefineConstants>\n");
 
 		io_print("    <ErrorReport>prompt</ErrorReport>\n");

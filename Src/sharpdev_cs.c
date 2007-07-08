@@ -131,9 +131,9 @@ int sharpdev_cs()
 		io_print("assembly=\"%s\" ", path_getbasename(prj_get_target()));
 		io_print("executeScript=\"\" ");
 		io_print("executeBeforeBuild=\"");
-		print_list(prj_get_prebuildcommands(), "", "", " | ", xmlEscapeList);
+		print_list(prj_get_prebuildcommands(), "", "", " | ", xmlEscape);
 		io_print("\" executeAfterBuild=\"");
-		print_list(prj_get_postbuildcommands(), "", "", " | ", xmlEscapeList);
+		print_list(prj_get_postbuildcommands(), "", "", " | ", xmlEscape);
 		io_print("\" executeBeforeBuildArguments=\"\" ");
 		io_print("executeAfterBuildArguments=\"\" ");
 		io_print("/>\n");		

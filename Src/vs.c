@@ -398,7 +398,7 @@ int vs_write_cpp()
 				if (prj_get_numprebuildcommands() > 0)
 				{
 					tag_attr_open("CommandLine");
-					print_list(prj_get_prebuildcommands(), "", "", "&#x0D;&#x0A;", xmlEscapeList);
+					print_list(prj_get_prebuildcommands(), "", "", "&#x0D;&#x0A;", xmlEscape);
 					tag_attr_close();
 				}				
 				break;
@@ -428,13 +428,13 @@ int vs_write_cpp()
 				if (prj_get_numresoptions() > 0)
  				{
 					tag_attr_open("AdditionalOptions");
-					print_list(prj_get_resoptions(), "", "", " ", xmlEscapeList);
+					print_list(prj_get_resoptions(), "", "", " ", xmlEscape);
 					tag_attr_close();
 				}
 				if (prj_get_numdefines() > 0 || prj_get_numresdefines() > 0)
 				{
 					tag_attr_open("PreprocessorDefinitions");
-					print_list(prj_get_resdefines(), "", "", ";", xmlEscapeList);
+					print_list(prj_get_resdefines(), "", "", ";", xmlEscape);
 					tag_attr_close();
 				}
 				if (prj_get_numincpaths() > 0 || prj_get_numrespaths() > 0)
@@ -450,7 +450,7 @@ int vs_write_cpp()
 				if (prj_get_numprelinkcommands() > 0)
 				{
 					tag_attr_open("CommandLine");
-					print_list(prj_get_prelinkcommands(), "", "", "&#x0D;&#x0A;", xmlEscapeList);
+					print_list(prj_get_prelinkcommands(), "", "", "&#x0D;&#x0A;", xmlEscape);
 					tag_attr_close();
 				}				
 				break;
@@ -481,7 +481,7 @@ int vs_write_cpp()
 				if (prj_get_numpostbuildcommands() > 0)
 				{
 					tag_attr_open("CommandLine");
-					print_list(prj_get_postbuildcommands(), "", "", "&#x0D;&#x0A;", xmlEscapeList);
+					print_list(prj_get_postbuildcommands(), "", "", "&#x0D;&#x0A;", xmlEscape);
 					tag_attr_close();
 				}				
 				break;
@@ -491,7 +491,7 @@ int vs_write_cpp()
 				if (prj_get_numbuildoptions() > 0)
 				{
 					tag_attr_open("AdditionalOptions");
-					print_list(prj_get_buildoptions(), "", "", " ", xmlEscapeList);
+					print_list(prj_get_buildoptions(), "", "", " ", xmlEscape);
 					tag_attr_close();
 				}
 
@@ -513,7 +513,7 @@ int vs_write_cpp()
 				if (prj_get_numdefines() > 0)
 				{
 					tag_attr_open("PreprocessorDefinitions");
-					print_list(prj_get_defines(), "", "", ";", xmlEscapeList);
+					print_list(prj_get_defines(), "", "", ";", xmlEscape);
 					tag_attr_close();
 				}
 

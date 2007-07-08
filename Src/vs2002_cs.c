@@ -113,7 +113,7 @@ int vs2002_cs()
 		io_print("\t\t\t\t\tConfigurationOverrideFile = \"\"\n");
 
 		io_print("\t\t\t\t\tDefineConstants = \"");
-		print_list(prj_get_defines(), "", "", ";", xmlEscapeList);
+		print_list(prj_get_defines(), "", "", ";", xmlEscape);
 		io_print("\"\n");
 
 		io_print("\t\t\t\t\tDocumentationFile = \"\"\n");
