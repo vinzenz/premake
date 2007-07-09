@@ -930,3 +930,15 @@ int prj_getlistsize(void** list)
 	}
 	return count;
 }
+
+
+int prj_has_guid()
+{
+	return (my_pkg->guid != NULL);
+}
+
+
+const char* prj_get_guid()
+{
+	return my_pkg->guid;
+}

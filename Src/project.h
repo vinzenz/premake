@@ -72,6 +72,7 @@ typedef struct tagPackage
 	const char*  lang;
 	const char*  objdir;
 	const char*  url;
+	const char*  guid;
 	PkgConfig**  configs;
 	void*        data;
 } Package;
@@ -178,4 +179,5 @@ void**       prj_newlist(int len);
 void         prj_freelist(void** list);
 int          prj_getlistsize(void** list);
 
-
+int          prj_has_guid();
+const char*  prj_get_guid();

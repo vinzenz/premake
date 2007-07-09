@@ -59,5 +59,12 @@ namespace Premake.Tests.Vs2003
 			Run();
 		}
 
+		[Test]
+		public void CanSetProjectGuidWithoutBrackets()
+		{
+			_script.Append("package.guid = 'A5F26200-7A60-4726-AB0D-5D4D5B82B939'");
+			_expects.Package[0].ID = "A5F26200-7A60-4726-AB0D-5D4D5B82B939";
+			Run();
+		}
 	}
 }

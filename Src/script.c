@@ -489,6 +489,7 @@ int script_export()
 		package->lang   = tbl_getstring(obj, "language");
 		package->objdir = tbl_getstring(obj, "objdir");
 		package->url    = tbl_getstring(obj, "url");
+		package->guid   = tbl_getstring(obj, "guid");
 		package->data   = NULL;
 
 		export_pkgconfig(package, obj);

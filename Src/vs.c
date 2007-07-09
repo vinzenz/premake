@@ -231,7 +231,15 @@ void vs_assign_guids()
 		prj_select_package(p);
 		prj_set_data(data);
 
-		generateUUID(data->projGuid);
+		if (prj_has_guid())
+		{
+			strncpy(data->projGuid, prj_get_guid(), 37);
+			data->projGuid[37] = '\0';
+		}
+		else
+		{
+			generateUUID(data->projGuid);
+		}
 
 		prj_select_config(0);
 		if (version == VS2005 && prj_is_kind("aspnet"))
