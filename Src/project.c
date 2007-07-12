@@ -942,3 +942,28 @@ const char* prj_get_guid()
 {
 	return my_pkg->guid;
 }
+
+
+int prj_has_libpath(const char* path)
+{
+	const char** libpath;
+	
+	if (path == NULL || strlen(path) == 0)
+		return 1;
+
+	libpath = prj_get_libpaths();
+	while (*libpath)
+	{
+		if (matches(*libpath, path))
+			return 1;
+		libpath++;
+	}
+
+	if (matches(prj_get_libdir(), path))
+		return 1;
+
+	if (matches(prj_get_bindir(), path))
+		return 1;
+
+	return 0;
+}

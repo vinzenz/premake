@@ -164,6 +164,7 @@ const char*  prj_get_url();
 int          prj_has_file(const char* name);
 int          prj_has_flag(const char* flag);
 int          prj_has_flag_for(int i, const char* flag);
+int          prj_has_libpath(const char* path);
 int          prj_has_pch();
 int          prj_is_buildaction(const char* action);
 int          prj_is_kind(const char* kind);

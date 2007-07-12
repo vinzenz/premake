@@ -21,6 +21,7 @@
 #include "cb.h"
 
 static const char* filterLinks(const char* name);
+static const char* filterLinksForPaths(const char* name);
 static const char* listFiles(const char* name);
 static void print_opt(const char* opt);
 
@@ -119,7 +120,12 @@ int cb_cpp()
 		if (prj_has_flag("no-symbols"))
 			print_opt("-s");
 		print_list(prj_get_linkoptions(), "\t\t\t\t\t<Add option=\"", "\" />\n", "", NULL);
+
+		io_print("\t\t\t\t\t<Add directory=\"%s\" />\n", prj_get_bindir());
+		if (!matches(prj_get_bindir(), prj_get_libdir()))
+			io_print("\t\t\t\t\t<Add directory=\"%s\" />\n", prj_get_libdir());
 		print_list(prj_get_libpaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL);
+		print_list(prj_get_links(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", filterLinksForPaths);
 		print_list(prj_get_links(), "\t\t\t\t\t<Add library=\"", "\" />\n", "", filterLinks);
 		io_print("\t\t\t\t</Linker>\n");
         
@@ -226,11 +232,8 @@ static const char* filterLinks(const char* name)
 		const char* lang = prj_get_language_for(i);
 		if (matches(lang, "c++") || matches(lang, "c"))
 		{
-			const char* target;
-			target = prj_get_target_for(i);
-			// target = path_getbasename(target);
-			// target = prj_get_relativetarget_for(i);
-			return target;
+			const char* target = prj_get_target_for(i);
+			return path_getname(target);
 		}
 		else
 		{
@@ -241,4 +244,24 @@ static const char* filterLinks(const char* name)
 	{
 		return name;
 	}
+}
+
+
+static const char* filterLinksForPaths(const char* name)
+{
+	int i = prj_find_package(name);
+	if (i >= 0)
+	{
+		const char* lang = prj_get_language_for(i);
+		if (matches(lang, "c++") || matches(lang, "c"))
+		{
+			const char* target = prj_get_target_for(i);
+			const char* dir = path_getdir(target);
+			if (!prj_has_libpath(dir))
+			{
+				return dir;
+			}
+		}
+	}
+	return NULL;
 }

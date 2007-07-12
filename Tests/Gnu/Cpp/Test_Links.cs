@@ -59,6 +59,5 @@ namespace Premake.Tests.Gnu.Cpp
 			_expects.Package[0].Config[1].Links = new string[] { "pkglib", "liba" };
 			Run();
 		}
-
 	}
 }

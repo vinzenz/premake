@@ -12,6 +12,7 @@ Premake Changelog
 * Bug 1600155: Core dump due to newpackage() and matchfiles()
 * Bug 1608895: resgen command shown
 * Bug 1639730: Output filename is not set
+* Bug 1729227: non-portable executable with relative library path
 * Patch 1733674: PCH support for Code::Block targets (Ryan Pusztai)
 * Patch 1746563: Ability to specify GUID for VS targets (Ryan Pusztai)
 

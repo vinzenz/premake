@@ -65,6 +65,8 @@ int gnu_cpp()
 	/* Process the build configurations */
 	for (i = 0; i < prj_get_numconfigs(); ++i)
 	{
+		const char** links;
+
 		prj_select_config(i);
 
 		io_print("ifeq ($(CONFIG),%s)\n", prj_get_cfgname());
@@ -317,12 +319,29 @@ static const char* filterLinks(const char* name)
 	int i = prj_find_package(name);
 	if (i >= 0)
 	{
+		/* is a sibling */
 		const char* lang = prj_get_language_for(i);
 		if (matches(lang, "c++") || matches(lang, "c"))
 		{
+			const char* dir;
 			const char* target;
 			target = prj_get_target_for(i);
-			return target;
+
+			strcpy(g_buffer, "");
+
+			/* Add -L if path to sibling libraries, so they don't get
+			 * encoded in this linking binary (see bug #1729227) */
+			dir = path_getdir(target);
+			if (!prj_has_libpath(dir))
+			{
+				strcat(g_buffer, "-L");
+				strcat(g_buffer, dir);
+				strcat(g_buffer, " ");
+			}
+
+			strcat(g_buffer, "-l");
+			strcat(g_buffer, path_getbasename(prj_get_target_for(i)));
+			return g_buffer;
 		}
 		else
 		{
@@ -331,6 +350,7 @@ static const char* filterLinks(const char* name)
 	}
 	else
 	{
+		/* is not a sibling, just output directly */
 		strcpy(g_buffer, "-l");
 		strcat(g_buffer, name);
 		return g_buffer;
