@@ -65,8 +65,6 @@ int gnu_cpp()
 	/* Process the build configurations */
 	for (i = 0; i < prj_get_numconfigs(); ++i)
 	{
-		const char** links;
-
 		prj_select_config(i);
 
 		io_print("ifeq ($(CONFIG),%s)\n", prj_get_cfgname());
@@ -340,7 +338,7 @@ static const char* filterLinks(const char* name)
 			}
 
 			strcat(g_buffer, "-l");
-			strcat(g_buffer, path_getbasename(prj_get_target_for(i)));
+			strcat(g_buffer, prj_get_targetname_for(i));
 			return g_buffer;
 		}
 		else

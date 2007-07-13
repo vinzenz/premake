@@ -232,7 +232,7 @@ static const char* filterLinks(const char* name)
 		const char* lang = prj_get_language_for(i);
 		if (matches(lang, "c++") || matches(lang, "c"))
 		{
-			const char* target = prj_get_target_for(i);
+			const char* target = prj_get_targetname_for(i);
 			return path_getname(target);
 		}
 		else
