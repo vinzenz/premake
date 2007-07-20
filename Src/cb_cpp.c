@@ -80,7 +80,10 @@ int cb_cpp()
 		if (prj_is_kind("dll"))
 		{
 			io_print("\t\t\t\t<Option createDefFile=\"0\" />\n");
-			io_print("\t\t\t\t<Option createStaticLib=\"0\" />\n");
+			if (prj_has_flag("no-import-lib"))
+				io_print("\t\t\t\t<Option createStaticLib=\"0\" />\n");
+			else
+				io_print("\t\t\t\t<Option createStaticLib=\"1\" />\n");
 		}
 
 		io_print("\t\t\t\t<Compiler>\n");
@@ -123,7 +126,7 @@ int cb_cpp()
 
 		io_print("\t\t\t\t\t<Add directory=\"%s\" />\n", prj_get_bindir());
 		if (!matches(prj_get_bindir(), prj_get_libdir()))
-			io_print("\t\t\t\t\t<Add directory=\"%s\" />\n", prj_get_libdir());
+		io_print("\t\t\t\t\t<Add directory=\"%s\" />\n", prj_get_libdir());
 		print_list(prj_get_libpaths(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", NULL);
 		print_list(prj_get_links(), "\t\t\t\t\t<Add directory=\"", "\" />\n", "", filterLinksForPaths);
 		print_list(prj_get_links(), "\t\t\t\t\t<Add library=\"", "\" />\n", "", filterLinks);

@@ -114,7 +114,24 @@ int gnu_cpp()
 		/* Write linker flags */
 		io_print("  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)");
 		if (prj_is_kind("dll") && (g_cc == NULL || matches(g_cc, "gcc")))
+		{
 			io_print(" -shared");
+			if (!prj_has_flag("no-import-lib"))
+			{
+				const char* str;
+
+				io_print(" -Wl,--out-implib=\"%s", prj_get_libdir());
+				if (prj_get_prefix() == NULL)
+					str = "lib";
+				else
+					str = prj_get_prefix();
+
+				if (prj_has_importlibname())
+					io_print("/%s%s.a\"", str, prj_get_importlibname());
+				else
+					io_print("/%s%s.a\"", str, path_getbasename(prj_get_target()));
+			}
+		}
 		if (prj_is_kind("winexe"))
 			io_print(" -mwindows");
 		if (prj_has_flag("no-symbols"))

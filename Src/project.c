@@ -967,3 +967,14 @@ int prj_has_libpath(const char* path)
 
 	return 0;
 }
+
+
+int prj_has_importlibname()
+{
+	return (my_cfg->implibname != NULL);
+}
+
+const char* prj_get_importlibname()
+{
+	return my_cfg->implibname;
+}

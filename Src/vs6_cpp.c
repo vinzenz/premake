@@ -315,7 +315,10 @@ static void writeLinkFlags()
 			if (strlen(str) > 0)
 				io_print("/%s", str);
 		}
-		io_print("/%s.lib\"", path_getbasename(prj_get_target()));
+		if (prj_has_importlibname())
+			io_print("/%s.lib\"", prj_get_importlibname());
+		else
+			io_print("/%s.lib\"", path_getbasename(prj_get_target())); 
 	}
 
 	io_print(" /out:\"%s\"", prj_get_target());

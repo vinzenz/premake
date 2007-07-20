@@ -636,7 +636,10 @@ int vs_write_cpp()
 							if (strlen(str) > 0)
 								io_print("/%s", str);
 						}
-						io_print("/%s.lib", path_getbasename(prj_get_target()));
+						if (prj_has_importlibname())
+							io_print("/%s.lib", prj_get_importlibname());
+						else
+							io_print("/%s.lib", path_getbasename(prj_get_target()));
 						tag_attr_close();
 					}
 					tag_attr("TargetMachine=\"1\"");

@@ -33,8 +33,8 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		[Test]
 		public void Test_NoLibPaths()
 		{
-			_expects.Package[0].Config[0].LibPaths = new string[] { };
-			_expects.Package[0].Config[1].LibPaths = new string[] { };
+			_expects.Package[0].Config[0].LibPaths = new string[] { "." };
+			_expects.Package[0].Config[1].LibPaths = new string[] { "." };
 			Run();
 		}
 
@@ -42,8 +42,8 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		public void Test_PathsOnPackage()
 		{
 			_script.Append("package.libpaths = { '../src', '../include' }");
-			_expects.Package[0].Config[0].LibPaths = new string[] { "../src", "../include" };
-			_expects.Package[0].Config[1].LibPaths = new string[] { "../src", "../include" };
+			_expects.Package[0].Config[0].LibPaths = new string[] { ".", "../src", "../include" };
+			_expects.Package[0].Config[1].LibPaths = new string[] { ".", "../src", "../include" };
 			Run();
 		}
 
@@ -52,8 +52,8 @@ namespace Premake.Tests.CodeBlocks.Cpp
 		{
 			_script.Append("package.config['Debug'].libpaths = { '../debug' }");
 			_script.Append("package.config['Release'].libpaths = { '../release' }");
-			_expects.Package[0].Config[0].LibPaths = new string[] { "../debug" };
-			_expects.Package[0].Config[1].LibPaths = new string[] { "../release" };
+			_expects.Package[0].Config[0].LibPaths = new string[] { ".", "../debug" };
+			_expects.Package[0].Config[1].LibPaths = new string[] { ".", "../release" };
 			Run();
 		}
 			
@@ -63,8 +63,8 @@ namespace Premake.Tests.CodeBlocks.Cpp
 			_script.Append("package.libpaths = { '../package' }");
 			_script.Append("package.config['Debug'].libpaths = { '../debug' }");
 			_script.Append("package.config['Release'].libpaths = { '../release' }");
-			_expects.Package[0].Config[0].LibPaths = new string[] { "../package", "../debug" };
-			_expects.Package[0].Config[1].LibPaths = new string[] { "../package", "../release" };
+			_expects.Package[0].Config[0].LibPaths = new string[] { ".", "../package", "../debug" };
+			_expects.Package[0].Config[1].LibPaths = new string[] { ".", "../package", "../release" };
 			Run();
 		}
 	}

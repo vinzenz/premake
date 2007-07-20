@@ -15,6 +15,7 @@ Premake Changelog
 * Bug 1729227: non-portable executable with relative library path
 * Patch 1733674: PCH support for Code::Block targets (Ryan Pusztai)
 * Patch 1746563: Ability to specify GUID for VS targets (Ryan Pusztai)
+* Patch 1754867: Creating import lib of different name (Ryan Pusztai)
 
 3.3
 * Added support for prebuild, prelink, and postbuild commands

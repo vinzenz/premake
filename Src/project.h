@@ -60,6 +60,7 @@ typedef struct tagPkgConfig
 	const char*  kind;
 	const char*  pchHeader;
 	const char*  pchSource;
+	const char*  implibname;
 	FileConfig** fileconfigs;
 } PkgConfig;
 
@@ -182,3 +183,6 @@ int          prj_getlistsize(void** list);
 
 int          prj_has_guid();
 const char*  prj_get_guid();
+
+int          prj_has_importlibname();
+const char*  prj_get_importlibname();

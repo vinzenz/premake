@@ -67,7 +67,7 @@ namespace Premake.Tests.CodeBlocks
 			Match("\t<FileVersion major=\"1\" minor=\"6\" />");
 			Match("\t<Project>");
 			Match("\t\t<Option title=\"" + package.Name + "\" />");
-			Match("\t\t<Option pch_mode=\"2\" />");
+			Match("\t\t<Option pch_mode=\"2\" />", true);
 			Match("\t\t<Option compiler=\"gcc\" />");
 			Match("\t\t<Build>");
 
@@ -272,8 +272,8 @@ namespace Premake.Tests.CodeBlocks
 
 					if (!name.EndsWith(".c") && !name.EndsWith(".cpp"))
 					{
-						Match("\t\t\t<Option compile=\"0\" />");
-						Match("\t\t\t<Option link=\"0\" />");
+//						Match("\t\t\t<Option compile=\"0\" />");
+//						Match("\t\t\t<Option link=\"0\" />");
 					}
 				}
 
