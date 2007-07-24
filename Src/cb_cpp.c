@@ -39,14 +39,7 @@ int cb_cpp()
 	io_print("\t<FileVersion major=\"1\" minor=\"6\" />\n");
 	io_print("\t<Project>\n");
 	io_print("\t\t<Option title=\"%s\" />\n", prj_get_pkgname());
-
-	/* Select the default configuration because prj_has_pch() requires it. */
-	prj_select_config(0);
-	if (prj_has_pch())
-	{
-		io_print("\t\t<Option pch_mode=\"2\" />\n");
-	}
-
+	io_print("\t\t<Option pch_mode=\"2\" />\n");
 	io_print("\t\t<Option compiler=\"gcc\" />\n");
 	io_print("\t\t<Build>\n");
 
