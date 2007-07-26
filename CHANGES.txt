@@ -13,6 +13,7 @@ Premake Changelog
 * Bug 1608895: resgen command shown
 * Bug 1639730: Output filename is not set
 * Bug 1729227: non-portable executable with relative library path
+* Bug 1559951: default clean rule removes package dir
 * Patch 1733674: PCH support for Code::Block targets (Ryan Pusztai)
 * Patch 1746563: Ability to specify GUID for VS targets (Ryan Pusztai)
 * Patch 1754867: Creating import lib of different name (Ryan Pusztai)

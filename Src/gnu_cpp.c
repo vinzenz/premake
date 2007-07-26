@@ -296,9 +296,10 @@ int gnu_cpp()
 	io_print("\t@echo Cleaning %s\n", prj_get_pkgname());
 	io_print("ifeq ($(MKDIR_TYPE),posix)\n");
 	if (os_is("macosx") && prj_is_kind("winexe"))
-		io_print("\t-%srm -rf $(OUTDIR)/$(TARGET).app $(OBJDIR)\n", prefix);
+		io_print("\t-%srm -rf $(OUTDIR)/$(TARGET).app\n", prefix);
 	else
-		io_print("\t-%srm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)\n", prefix);
+		io_print("\t-%srm -f $(OUTDIR)/$(TARGET)\n", prefix);
+	io_print("\t-%srm -rf $(OBJDIR)\n", prefix);
 	io_print("else\n");
 	io_print("\t-%sif exist $(subst /,\\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\\,$(OUTDIR)/$(TARGET))\n", prefix);
 	io_print("\t-%sif exist $(subst /,\\,$(OBJDIR)) del /q $(subst /,\\,$(OBJDIR))\n", prefix);

@@ -387,12 +387,13 @@ namespace Premake.Tests.Gnu
 			Match("ifeq ($(MKDIR_TYPE),posix)");
 			if (isMac)
 			{
-				Match("\t-@rm -rf $(OUTDIR)/$(TARGET).app $(OBJDIR)");
+				Match("\t-@rm -rf $(OUTDIR)/$(TARGET).app");
 			}
 			else
 			{
-				Match("\t-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)");
+				Match("\t-@rm -f $(OUTDIR)/$(TARGET)");
 			}
+			Match("\t-@rm -rf $(OBJDIR)");
 			Match("else");
 			Match("\t-@if exist $(subst /,\\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\\,$(OUTDIR)/$(TARGET))");
 			Match("\t-@if exist $(subst /,\\,$(OBJDIR)) del /q $(subst /,\\,$(OBJDIR))");
