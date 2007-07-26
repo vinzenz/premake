@@ -8,6 +8,9 @@
 
 5. Run Linux packaging script
 
+  (note - VS project files created on Linux aren't working)
+  (must recreate source package on Windows after the fact)
+
 6. Create new file release on SourceForge
 
 7. Update download page on premake.sourceforge.net

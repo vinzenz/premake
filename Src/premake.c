@@ -2,7 +2,7 @@
  * Premake - premake.c
  * The program entry point.
  *
- * Copyright (c) 2002-2005 Jason Perkins and the Premake project
+ * Copyright (c) 2002-2007 Jason Perkins and the Premake project
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -31,7 +31,7 @@
 #include "vs2005.h"
 
 const char* DEFAULT   = "premake.lua";
-const char* VERSION   = "3.3+svn";
+const char* VERSION   = "3.4-rc1";
 const char* COPYRIGHT = "Copyright (C) 2002-2007 Jason Perkins and the Premake Project";
 const char* HELP_MSG  = "Type 'premake --help' for help";
 
