@@ -22,9 +22,7 @@ package.target   = "premake"
 
 -- Avoid VS2005 warnings
 
-	if (target == "vs2005") then
-		package.defines = { "_CRT_SECURE_NO_DEPRECATE" }
-	end
+	package.defines = { "_CRT_SECURE_NO_DEPRECATE" }
 
 -- Libraries
 

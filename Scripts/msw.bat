@@ -35,7 +35,7 @@ echo.
 echo Did you update CHANGES.txt?
 pause
 echo.
-echo Are 'svn' and 'zip' on the path?
+echo Are 'svn' and '7z' on the path?
 pause
 echo.
 echo Okay, ready to build the Windows binary packages for version %1!
@@ -75,7 +75,7 @@ echo CREATING PACKAGE...
 echo.
 
 cd bin
-zip -j9 ..\..\premake-win32-%1.zip premake.exe
+7z a -tzip ..\..\premake-win32-%1.zip premake.exe
 
 
 rem ***********************************************************
