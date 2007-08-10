@@ -272,6 +272,8 @@ int gnu_cs()
 	if (appConfigName != NULL)
 	{
 		io_print("$(OUTDIR)/$(TARGET).config: %s\n", appConfigName);
+		io_print("\t@echo Copying %s\n", appConfigName);
+		io_print("\t-@(CMD_MKOUTDIR)\n");
 		io_print("\t@cp $^ $@\n\n");
 	}
 
@@ -473,7 +475,7 @@ static const char* listCopyLocalFiles(const char* name)
 	const char* path = findLocalAssembly(name);
 	if (path != NULL)
 	{
-		sprintf(buffer, "$(BINDIR)/%s.dll", name);
+		sprintf(buffer, "$(OUTDIR)/%s.dll", name);
 		return buffer;
 	}
 	return NULL;
@@ -571,7 +573,7 @@ static const char* listCopyLocalRules(const char* name)
 	const char* path = findLocalAssembly(name);
 	if (path != NULL)
 	{
-		sprintf(buffer, "$(BINDIR)/%s.dll: %s\n\t@echo Copying %s.dll\n\t-@cp $^ $@\n\n", name, path, name);
+		sprintf(buffer, "$(OUTDIR)/%s.dll: %s\n\t@echo Copying %s.dll\n\t-@(CMD_MKOUTDIR)\n\t-@cp $^ $@\n\n", name, path, name);
 		return buffer;
 	}
 	return NULL;

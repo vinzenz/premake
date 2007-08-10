@@ -636,6 +636,8 @@ namespace Premake.Tests.Gnu
 			if (package.HasAppConfigRule == "yes")
 			{
 				Match("$(OUTDIR)/$(TARGET).config: App.config");
+				Match("\t@echo Copying App.config");
+				Match("\t-@(CMD_MKOUTDIR)");
 				Match("\t@cp $^ $@");
 				Match("");
 			}

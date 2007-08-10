@@ -50,7 +50,7 @@ echo.
 echo RETRIEVING SOURCE CODE FROM REPOSITORY...
 echo.
 
-svn export https://svn.sourceforge.net/svnroot/premake/Branches/%1 Premake-%1
+svn export https://premake.svn.sourceforge.net/svnroot/premake/branches/%1 Premake-%1
 
 
 rem ***********************************************************
