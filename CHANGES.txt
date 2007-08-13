@@ -1,10 +1,11 @@
 Premake Changelog
 -----------------
 
-3.4 (in progress)
+3.4
 * Added `no-pch` flag to suppress precompiled headers
 * Added App.config support to GNU makefiles
 * Add os.mkdir() to script environment
+* Makefile now creates target directory before copying .NET references
 * Feature 1520182: Enhanced file-handling functions
 * Bug 531878: Problems with relative paths
 * Bug 1723867: Config-specific post-build on GNU target (Benoit Miller)
