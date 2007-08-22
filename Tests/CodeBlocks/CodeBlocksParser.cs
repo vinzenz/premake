@@ -269,6 +269,8 @@ namespace Premake.Tests.CodeBlocks
 				{
 					if (Match("\t\t\t<Option compilerVar=\"CC\" />", true))
 						package.Language = "c";
+					else
+						Match("\t\t\t<Option compilerVar=\"CPP\" />", true);
 
 					if (!name.EndsWith(".c") && !name.EndsWith(".cpp"))
 					{

@@ -183,9 +183,11 @@ static const char* listFiles(const char* filename)
 	}
 	else
 	{
-		/* Default is C++ (compilerVar=CPP) */
-		if (prj_is_lang("c"))
-			io_print("\t\t\t<Option compilerVar=\"CC\" />\n");
+ 		/* Default is C++ (compilerVar=CPP) */
+ 		if (prj_is_lang("c"))
+ 			io_print("\t\t\t<Option compilerVar=\"CC\" />\n");
+		else
+			io_print("\t\t\t<Option compilerVar=\"CPP\" />\n");
 		
 		if (!is_cpp(filename))
 		{
@@ -195,11 +197,6 @@ static const char* listFiles(const char* filename)
 				io_print("\t\t\t<Option compile=\"1\" />\n");
 				io_print("\t\t\t<Option weight=\"0\" />\n");
 			}
-			/*else
-			{
-				io_print("\t\t\t<Option compile=\"0\" />\n");
-				io_print("\t\t\t<Option link=\"0\" />\n");
-			}*/
 		}
 	}
 	

@@ -1,5 +1,7 @@
 Premake Changelog
 -----------------
+3.5 (in progress)
+* Patch 1771977: Ability to compile C source as C++ in Code::Blocks (Ryan Pusztai)
 
 3.4
 * Added `no-pch` flag to suppress precompiled headers
