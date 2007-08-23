@@ -848,11 +848,12 @@ static int tbl_getlen(int tbl)
 
 static int tbl_getlen_deep(int tbl)
 {
-	int size, i;
+	int size, i, n;
 	lua_getref(L, tbl);
 
 	size = 0;
-	for (i = 1; i <= luaL_getn(L, -1); ++i)
+	n = luaL_getn(L, -1);
+	for (i = 1; i <= n; ++i)
 	{
 		lua_rawgeti(L, -1, i);
 		if (lua_istable(L, -1))
@@ -1227,7 +1228,7 @@ static int doFileMatching(lua_State* L, int recursive, int findFiles)
 	char prjPath[4096];
 	const char* pkgPath;
 	const char* filename;
-	int pathlen, i;
+	int pathlen, i, n;
 
 	/* Get the current package path */
 	pkgPath = "";
@@ -1275,7 +1276,8 @@ static int doFileMatching(lua_State* L, int recursive, int findFiles)
 	strcpy(path, path_combine(prjPath, pkgPath));
 	pathlen = strlen(path);
 	if (pathlen > 0) pathlen++;
-	for (i = 1; i <= luaL_getn(L, -1); ++i)
+	n = luaL_getn(L, -1);
+	for (i = 1; i <= n; ++i)
 	{
 		lua_rawgeti(L, -1, i);
 		filename = lua_tostring(L, -1);
