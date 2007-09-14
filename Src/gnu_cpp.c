@@ -115,8 +115,10 @@ int gnu_cpp()
 		io_print("  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)");
 		if (prj_is_kind("dll") && (g_cc == NULL || matches(g_cc, "gcc")))
 		{
-			io_print(" -shared");
-			if (!prj_has_flag("no-import-lib"))
+			if (!os_is("macosx"))
+				io_print(" -shared");
+			
+			if (!prj_has_flag("no-import-lib") && !os_is("macosx"))
 			{
 				const char* str;
 
