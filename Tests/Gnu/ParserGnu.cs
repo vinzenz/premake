@@ -637,7 +637,7 @@ namespace Premake.Tests.Gnu
 			{
 				Match("$(OUTDIR)/$(TARGET).config: App.config");
 				Match("\t@echo Copying App.config");
-				Match("\t-@(CMD_MKOUTDIR)");
+				Match("\t-@$(CMD_MKOUTDIR)");
 				Match("\t@cp $^ $@");
 				Match("");
 			}
