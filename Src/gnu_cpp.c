@@ -118,7 +118,11 @@ int gnu_cpp()
 			if (!os_is("macosx"))
 				io_print(" -shared");
 			
-			if (!prj_has_flag("no-import-lib") && !os_is("macosx"))
+			/* Originally submitted by Ryan
+			 * Should only be applied on Windows (currently applied everywhere)
+			 * Will break current portability of Makefiles
+			 * Need to think about this more before re-enabling
+			if (!prj_has_flag("no-import-lib"))
 			{
 				const char* str;
 
@@ -133,6 +137,7 @@ int gnu_cpp()
 				else
 					io_print("/%s%s.a\"", str, path_getbasename(prj_get_target()));
 			}
+			*/
 		}
 		if (prj_is_kind("winexe"))
 			io_print(" -mwindows");
