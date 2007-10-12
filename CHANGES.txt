@@ -2,6 +2,7 @@ Premake Changelog
 -----------------
 3.5 (in progress)
 * Prevent creation of import libraries on OS X
+* Added "lib" prefix to OS X dylib targets
 * Patch 1771977: Ability to compile C source as C++ in Code::Blocks (Ryan Pusztai)
 * Patch 1771168: luaL_getn speed optimization (Richard O'Grady)
 

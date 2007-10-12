@@ -770,18 +770,13 @@ const char* prj_get_target_for(int i)
 
 	else if (os_is("macosx") && matches(cfg->kind, "dll"))
 	{
+		if (cfg->prefix == NULL)
+			strcat(buffer, "lib");
+		strcat(buffer, filename);
 		if (prj_has_flag_for(i, "dylib"))
-		{
-			strcat(buffer, filename);
 			extension = "dylib";
-		}
 		else
-		{
-			if (cfg->prefix == NULL)
-				strcat(buffer, "lib");
-			strcat(buffer, filename);
 			extension = "so";
-		}
 	}
 
 	else
