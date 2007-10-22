@@ -139,8 +139,16 @@ int gnu_cpp()
 		}
 		if (prj_is_kind("winexe"))
 			io_print(" -mwindows");
+
+		/* OS X has a bug, see http://lists.apple.com/archives/Darwin-dev/2006/Sep/msg00084.html */
 		if (prj_has_flag("no-symbols"))
-			io_print(" -s");
+		{
+			if (os_is("macosx"))
+				io_print(" -Wl,-x");
+			else
+				io_print(" -s");
+		}
+
 		if (os_is("macosx") && prj_has_flag("dylib"))
 			io_print(" -dynamiclib -flat_namespace");
 		print_list(prj_get_linkoptions(), " ", "", "", NULL);
