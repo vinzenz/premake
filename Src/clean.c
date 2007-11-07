@@ -46,6 +46,7 @@ int clean()
 	/* MonoDevelop */
 	io_remove(path_join(prj_get_path(), prj_get_name(), "mdsx"));
 	io_remove(path_join(prj_get_path(), prj_get_name(), "mds"));
+	io_remove(path_join(prj_get_path(), prj_get_name(), "userprefs"));
 	io_remove(path_join(prj_get_path(), "make", "sh"));
 
 	/* Code::Blocks */
