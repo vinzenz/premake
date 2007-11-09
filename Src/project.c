@@ -184,9 +184,12 @@ const char* prj_get_bindir()
 	}
 }
 
+/*
+ * Get the relative directory FROM the current package TO the
+ * binary output directory of the specified package.
+ */
 const char* prj_get_bindir_for(int i)
 {
-	Package*   pkg = prj_get_package();
 	PkgConfig* cfg = prj_get_config_for(i);
 	if (cfg->bindir != NULL)
 	{
@@ -204,7 +207,10 @@ const char* prj_get_bindir_for(int i)
 	}
 	else
 	{
-		strcpy(buffer, path_build(pkg->path, cfg->prjConfig->bindir));
+//		strcpy(buffer, path_build(my_pkg->path, prj_get_path()));
+//		strcpy(buffer, "/");
+//		strcpy(buffer, cfg->prjConfig->bindir);
+		strcpy(buffer, path_build(my_pkg->path, my_cfg->prjConfig->bindir));
 		return buffer;
 	}
 }
@@ -813,8 +819,18 @@ const char* prj_get_target_for(int i)
 	return buffer;
 }
 
+/*
+ * Okay - I need to start documenting these functions better; I
+ * can't remember what does what any more. This functions gets
+ * the path FROM the current package directory TO the target of
+ * the specified package. As you can see, I got off on the wrong
+ * track here, and I'm trying to get it back.
+ */
 const char* prj_get_relativetarget_for(int i)
 {
+	return prj_get_target_for(i);
+
+#if OBSOLETE
 	char backpath[8192];
 	const char* target;
 
@@ -836,6 +852,7 @@ const char* prj_get_relativetarget_for(int i)
 	target = path_build("", backpath);
 	if (target[0] == '/') ++target;
 	return target;
+#endif
 }
 
 const char* prj_get_target_raw()
