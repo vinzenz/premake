@@ -175,7 +175,7 @@ const char* platform_mask_getname(MaskHandle data)
 int platform_mask_getnext(MaskHandle data)
 {
 	const char* mask = path_getname(data->mask);
-
+	
 	if (data->handle == NULL)
 		return 0;
 		
@@ -192,8 +192,12 @@ int platform_mask_getnext(MaskHandle data)
 
 int platform_mask_isfile(MaskHandle data)
 {
+	/* Converting to absolute removes any directories from
+	 * the path that haven't been created yet (see below) */
 	struct stat info;
-	if (stat(platform_mask_getname(data), &info) == 0)
+	const char* name = platform_mask_getname(data);
+	name = path_absolute(name);
+	if (stat(name, &info) == 0)
 	{
 		return S_ISREG(info.st_mode);
 	}
@@ -206,11 +210,18 @@ MaskHandle platform_mask_open(const char* mask)
 	const char* path = path_getdir(mask);
 	if (strlen(path) == 0)
 		path = ".";
-		
+	
 	MaskHandle data = ALLOCT(struct PlatformMaskData);
-	data->handle = opendir(path);
 	data->mask = (char*)malloc(strlen(mask) + 1);
 	strcpy(data->mask, mask);
+	
+	/* Converting to absolute path removes any directories
+	 * from the path that haven't been created yet. Can
+	 * happen if package.path = (something) where (something)
+	 * doesn't exist at the time the script is running. */
+	path = path_absolute(path);
+	data->handle = opendir(path);
+	
 	return data;
 }
 

@@ -1176,16 +1176,26 @@ static int debugging = 0;
 
 static void doFileScan(lua_State* L, char* path, int recursive, int findFiles)
 {
-	MaskHandle handle;
+	MaskHandle handle = io_mask_open(path);
 
-	if (debugging) puts(path);
+	if (debugging) {
+		printf("Debug: file mask is %s (%s)\n", path, handle != NULL ? "ok" : "NOT FOUND");
+	}
 	
-	handle = io_mask_open(path);
 	while (io_mask_getnext(handle))
 	{
-		if ((findFiles && io_mask_isfile(handle)) || (!findFiles && !io_mask_isfile(handle)))
+		const char* name = io_mask_getname(handle);
+		int isfile = io_mask_isfile(handle);
+
+		if (debugging) {
+			printf("Debug: matched %s (%s)\n", name, isfile ? "file" : "directory");
+		}
+
+		if ((findFiles && isfile) || (!findFiles && !isfile))
 		{
-			const char* name = io_mask_getname(handle);
+			if (debugging) {
+				printf("Debug: adding %s\n", name);
+			}
 			lua_pushstring(L, name);
 			lua_rawseti(L, -2, luaL_getn(L, -2) + 1);
 		}
