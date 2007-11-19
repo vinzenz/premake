@@ -5,6 +5,10 @@ Premake Changelog
 * Improved handling of dylibs on OS X
 * Patch 1771977: Ability to compile C source as C++ in Code::Blocks (Ryan Pusztai)
 * Patch 1771168: luaL_getn speed optimization (Richard O'Grady)
+* Bug 1804810: out-implib not present in linux gnu compler toolchain
+* Bug 1806949: .Net reference paths are broken when bindir is specified
+* Bug 1806960: Make clean does not remove .mdb files
+* Bug 1831389: Makefiles stored in subdirs contain no targets on first run
 
 3.4
 * Added `no-pch` flag to suppress precompiled headers
