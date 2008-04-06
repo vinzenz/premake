@@ -1,8 +1,0 @@
-user anonymous starkos@users.sourceforge.net
-cd incoming
-bin
-prompt
-mput premake-src-*.zip
-mput premake-*.tar.gz
-quit
-
