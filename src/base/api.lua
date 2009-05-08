@@ -122,6 +122,7 @@
 		{
 			kind  = "dirlist",
 			scope = "config",
+			usagecopy = true,
 		},
 		
 		kind =
