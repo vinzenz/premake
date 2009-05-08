@@ -406,8 +406,162 @@
 		end		
 	end
 		
-	
-		
+--
+-- Retrieves the list of projects that this configuration links to. This will recursively
+-- resolve links.
+--
+	local function getlinks(dstArray, foundList, cfg, cfgname)
+		local foundPrjs = {};
+		for _, linkName in ipairs(cfg.links) do
+			local name = linkName:lower()
+			local theProj = nil;
+			local theUseProj = nil;
+			for _, prj in ipairs(cfg.project.solution.projects) do
+				if (prj.name:lower() == name) then
+					if(prj.usage) then
+						theUseProj = prj;
+					else
+						theProj = prj;
+					end
+				end
+			end
+
+			if((not theProj) and theUseProj) then theProj = theUseProj end
+
+			if((not foundList[name]) and theProj) then
+				foundList[name] = true;
+				table.insert(dstArray, theProj);
+				table.insert(foundPrjs, theProj);
+			end
+		end
+
+		for _, prj in ipairs(foundPrjs) do
+			getlinks(dstArray, foundList, prj.__configs[cfgname], cfgname);
+		end
+	end
+
+--
+-- Retrieves the list of projects that this configuration links to. This will recursively
+-- resolve links.
+--
+	local function getlinkprojects(cfg, cfgname)
+		local dstArray = {};
+		local foundList = {};
+		foundList[cfg.project.name:lower()] = true;
+
+		getlinks(dstArray, foundList, cfg, cfgname);
+
+		return dstArray;
+	end
+
+--
+-- Copies the field from dstCfg to srcCfg. Will not copy the field if
+-- it is set to be usagecopyonly and the source project is not usage.
+--
+	local function copydependentfield(srcCfg, dstCfg, strSrcField, bIsProjUsageOnly)
+		local srcField = premake.fields[strSrcField];
+
+		if((not srcField.usagecopy) and (not srcField.usagecopyonly)) then return end;
+
+		if(srcField.usagecopyonly and (not bIsProjUsageOnly) ) then
+			return
+		end
+
+		local strDstField = strSrcField;
+
+		if type(srcCfg[strSrcField]) == "table" then
+			--handle paths.
+			if (srcField.kind == "dirlist" or srcField.kind == "filelist") and
+				(not nofixup[strSrcField]) then
+				for i,p in ipairs(srcCfg[strSrcField]) do
+					table.insert(dstCfg[strDstField],
+						path.rebase(p, srcCfg.project.location, dstCfg.project.location))
+				end
+			else
+				for i,p in ipairs(srcCfg[strSrcField]) do
+					table.insert(dstCfg[strDstField], p)
+				end
+			end
+		else
+			if(srcField.kind == "path" and (not nofixup[strSrcField])) then
+				dstCfg[strDstField] = path.rebase(srcCfg[strSrcField],
+					prj.location, dstCfg.project.location);
+			else
+				dstCfg[strDstField] = srcCfg[strSrcField];
+			end
+		end
+	end
+
+--
+-- For the configuration in those projects that corresponds to ours, take all
+-- fields marked "depend" and copy them into the fields that the "depend" designation
+-- specifies. The copy operation may need to do path fixup.
+-- However, if the field is marked as "external only", then these will only be copied
+-- to the dependency if the source configuration's project is defined as "external".
+--
+
+	local function resolvedependencies(cfg, cfgname, linkToProjs)
+		for _, prj in ipairs(linkToProjs) do
+
+			local bIsUsageOnlyProj = prj.usage;
+			local srcPrj = iif(bIsUsageOnlyProj, prj, prj.usageProj);
+
+			if(srcPrj) then
+				local srcCfg = srcPrj.__configs[cfgname];
+
+				if(prj ~= cfg.project) then
+					for name, field in pairs(premake.fields) do
+						if(srcCfg[name]) then
+
+							copydependentfield(srcCfg, cfg, name, bIsUsageOnlyProj)
+						end
+					end
+				end
+			end
+		end
+	end
+
+--
+-- Returns true if the given link name is the name of one of the configuration's
+-- projects.
+--
+	local function islinkusageproj(cfg, linkName)
+		local name = linkName:lower()
+		local bFound = false;
+		for _, prj in ipairs(cfg.project.solution.projects) do
+			if (prj.name:lower() == name) then
+
+				--We can return false if we find a name match that is not a usage project.
+				--We can only return true if we have searched all projects and found no matches.
+				if(not prj.usage) then
+					return false;
+				else
+					bFound = true;
+				end
+			end
+		end
+
+		return bFound;
+	end
+
+--
+-- Removes all usage project links.
+--
+	local function removeusagelinks(cfg, cfgname)
+		local removeList = {};
+		for index, linkName in ipairs(cfg.links) do
+			local name = linkName:lower()
+			if(islinkusageproj(cfg, linkName)) then
+				table.insert(removeList, 1, index);	--Add in reverse order.
+			end
+		end
+
+		for _, index in ipairs(removeList) do
+			table.remove(cfg.links, index);
+		end
+	end
+
+
 --
 -- Takes the configuration information stored in solution->project->block
 -- hierarchy and flattens it all down into one object per configuration.
@@ -442,6 +596,58 @@
 		-- assign unique object directories to each configuration
 		builduniquedirs()
 		
+
+		-- Find link-dependent projects for the configurations, resolving all
+		-- dependencies into a single list for each configuration.
+		-- The projects in the table are non-usage projects if at all possible. That is
+		-- if there is a non-usage project with the name, then it will be
+		-- in the list instead of a usage project with that name.
+		local linkTable = {};
+		for slnIx, sln in ipairs(_SOLUTIONS) do
+			local projTable = {};
+			table.insert(linkTable, projTable);
+			for prjIx, prj in ipairs(sln.projects) do
+				local cfgTable = {};
+				table.insert(projTable, cfgTable);
+				if(not prj.usage) then
+					for cfgname, cfg in pairs(prj.__configs) do
+						cfgTable[cfgname] = getlinkprojects(cfg, cfgname);
+					end
+				end
+			end
+		end
+
+		-- Remove link-dependencies to purely usage projects from each non-usage project's
+		-- links field.
+		-- Apply all values in each configuration from the linked project configuration to the
+		-- the destination configuration. However, do not apply fields defined as
+		-- "usagecopyonly" if the project is not a usage probject.
+		for slnIx, sln in ipairs(_SOLUTIONS) do
+			for prjIx, prj in ipairs(sln.projects) do
+				if(not prj.usage) then
+					for cfgname, cfg in pairs(prj.__configs) do
+						removeusagelinks(cfg, cfgname)
+						resolvedependencies(cfg, cfgname, linkTable[slnIx][prjIx][cfgname])
+					end
+				end
+			end
+		end
+
+
+		-- Remove all projects defined as usage.
+		for _, sln in ipairs(_SOLUTIONS) do
+			local removeList = {};
+			for index, prj in ipairs(sln.projects) do
+				if(prj.usage) then
+					table.insert(removeList, 1, index); --Add in reverse order.
+				end
+			end
+
+			for _, index in ipairs(removeList) do
+				table.remove(sln.projects, index);
+			end
+		end
+
 		-- walk it again and build the targets and unique directories
 		buildtargets(cfg)
 
