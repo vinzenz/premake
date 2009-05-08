@@ -43,7 +43,32 @@
 			if result then return result end
 		end
 	end
-	
+
+--
+-- Scan the well-known locations for a header file.
+--
+	function os.findheader(name)
+		local path, incs
+		incs = configuration().includedirs or {}
+		path = os.getenv("PATH")
+
+		if not os.is("windows") then
+			-- Search in 'std' gcc dirs
+			path = (path or "") .. ":/usr/include:/usr/local/include"
+		end
+
+		if path ~= nil then
+			table.insert(incs, path)
+		end
+
+
+		for _, path in ipairs(incs) do
+			local result = os.pathsearch(name, path)
+			if result then return result end
+		end
+
+		-- todo: fall back to just attempting to actully compile it?
+	end
 	
 	
 --
