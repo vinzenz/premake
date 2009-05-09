@@ -152,7 +152,7 @@
 		{
 			kind  = "dirlist",
 			scope = "config",
-			usagecopyonly = true,
+			usagecopy = true,
 		},
 		
 		linkoptions =
@@ -172,7 +172,7 @@
 				end
 				return value
 			end,
-			usagecopyonly = true,
+			usagecopy = true,
 		},
 		
 		location =
