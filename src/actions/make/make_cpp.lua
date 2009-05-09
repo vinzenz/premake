@@ -70,7 +70,7 @@
 		
 		_p('$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)')
 		_p('\t@echo Linking %s', prj.name)
-		_p('\t@$(LINKCMD)')
+		_p('\t$(SILENT) $(LINKCMD)')
 		_p('\t$(POSTBUILDCMDS)')
 		_p('')
 		
