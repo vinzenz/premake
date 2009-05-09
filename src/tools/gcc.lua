@@ -94,7 +94,7 @@
 	function premake.gcc.getcflags(cfg)
 		local result = table.translate(cfg.flags, cflags)
 		table.insert(result, platforms[cfg.platform].flags)
-		if cfg.system ~= "windows" and cfg.kind == "SharedLib" then
+		if cfg.kind == "SharedLib" then
 			table.insert(result, "-fPIC")
 		end
 		return result		
