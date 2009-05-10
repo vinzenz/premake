@@ -252,3 +252,27 @@
 			return result
 		end
 	end
+
+--
+-- Expand ~/ or ~foo/ in paths to an absolute path suitable for searching on
+--
+	function path.expand(p)
+		-- Windows doesn't know about home dirs, no-op
+		if _OS == "windows" then return p end
+		if not p then return p end
+
+		local user = p:match("^(~[^/]*)/")
+		if not user then return p end
+
+		if user == "~" then
+			local home = os.getenv('HOME')
+			return p:gsub("^~", home)
+		end
+
+		-- else its some users home dir: "~foo/bar"
+		p = p:gsub("\\", "\\\\")
+				 :gsub('"', '\\"')
+				 :gsub(';', '\\')
+
+		return os.capture( ('echo "%s"'):format(p) )
+	end
