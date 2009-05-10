@@ -195,3 +195,17 @@
 		builtin_rmdir(p)
 	end
 	
+--
+-- Capture and return the output of running a command
+--
+  function os.capture(cmd, raw)
+    -- Does anything not have io.popen?
+    local f = assert(io.popen(cmd, 'r'))
+    local s = assert(f:read('*a'))
+    f:close()
+    if raw then return s end
+    s = string.gsub(s, '^%s+', '')
+    s = string.gsub(s, '%s+$', '')
+    return s
+  end
+
