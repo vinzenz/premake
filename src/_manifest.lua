@@ -19,6 +19,7 @@
 		"base/configs.lua",
 		"base/api.lua",
 		"base/cmdline.lua",
+		"base/compile_check.lua",
 		"tools/dotnet.lua",
 		"tools/gcc.lua",
 		"tools/msc.lua",

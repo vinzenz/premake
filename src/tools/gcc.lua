@@ -192,3 +192,49 @@
 		end
 		return result
 	end
+
+--
+-- Method used during configure checks. Attempts to compile the file
+--
+	function premake.gcc._compile(options)
+		local self = premake.gcc
+		local cmd
+
+		if not options.working_dir or not options.source then
+			error("gcc._compile needs a working_dir and source options", 0)
+		end
+
+		if not options.target then
+			if os.is("windows") then
+				options.target = "premake_test.exe"
+			else
+				options.target = "premake_test"
+			end
+		end
+		dump(options)
+		
+		-- First work out if we are compiling C or C++
+		if path.getextension(file) == ".c" then
+			cmd = { self.cc }
+		else
+			cmd = { self.cxx }
+		end
+
+		cmd = table.join( cmd, {
+			"-o",
+			path.join(options.working_dir, options.target)
+		} )
+
+		if options.includedirs then
+			cmd = table.join(cmd, self.getincludedirs(options.includedirs))
+		end
+
+		if options.defines then
+			cmd = table.join(cmd, self.getincludedirs(options.defines))
+		end
+
+
+		cmd = table.join(cmd, " ")
+		premake.compiler.log("Running: %s\n", cmd)
+
+	end
