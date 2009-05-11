@@ -19,8 +19,8 @@
 		local result = iif (path.isabsolute(p), nil, os.getcwd())
 		
 		-- split up the supplied relative path and tackle it bit by bit
-		for _,part in ipairs(p:explode("/", true)) do
-			if (part == "") then
+		for n,part in ipairs(p:explode("/", true)) do
+			if (part == "" and n == 1) then
 				result = "/"
 			elseif (part == "..") then
 				result = path.getdirectory(result)
