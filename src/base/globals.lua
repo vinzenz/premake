@@ -1,7 +1,7 @@
 --
 -- globals.lua
 -- Global tables and variables, replacements and extensions to Lua's global functions.
--- Copyright (c) 2002-2008 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2009 Jason Perkins and the Premake project
 --
 	
 	
@@ -19,12 +19,6 @@
 
 	premake = { }
 	
-
--- The list of registered actions and options
-
-	premake.actions = { }
-	premake.options = { }
-
 
 -- The list of supported platforms; also update list in cmdline.lua
 
@@ -44,7 +38,7 @@
 		},
 		Universal = 
 		{ 
-			cfgsuffix       = "unix",
+			cfgsuffix       = "univ",
 		},
 		Universal32 = 
 		{ 
@@ -59,13 +53,13 @@
 			cfgsuffix       = "ps3",
 			iscrosscompiler = true,
 			nosharedlibs    = true,
-			targetstyle     = "ps3",
+			namestyle       = "PS3",
 		},
 		Xbox360 = 
 		{ 
 			cfgsuffix       = "xbox360",
 			iscrosscompiler = true,
-			targetstyle     = "windows",
+			namestyle       = "windows",
 		},
 	}
 

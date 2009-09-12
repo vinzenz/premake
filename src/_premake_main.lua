@@ -1,7 +1,7 @@
 --
 -- _premake_main.lua
 -- Script-side entry point for the main program logic.
--- Copyright (c) 2002-2008 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2009 Jason Perkins and the Premake project
 --
 
 
@@ -9,52 +9,6 @@
 	local shorthelp     = "Type 'premake4 --help' for help"
 	local versionhelp   = "premake4 (Premake Build Script Generator) %s"
 	
-
-
---
--- Fire a particular action. Generates the output files from the templates
--- listed in the action descriptor, and calls any registered handler functions.
---
-
-	local function doaction(name)
-		local action = premake.actions[name]
-		
-		-- walk the session objects and generate files from the templates
-		local function generatefiles(this, templates)
-			if (not templates) then return end
-			for _,tmpl in ipairs(templates) do
-				local output = true
-				if (tmpl[3]) then
-					output = tmpl[3](this)
-				end
-				if (output) then
-					local fname = path.getrelative(os.getcwd(), premake.getoutputname(this, tmpl[1]))
-					printf("Generating %s...", fname)
-					local f, err = io.open(fname, "wb")
-					if (not f) then
-						error(err, 0)
-					end
-					io.output(f)
-					
-					-- call the template function to generate the output
-					tmpl[2](this)
-
-					io.output():close()
-				end
-			end
-		end
-
-		for _,sln in ipairs(_SOLUTIONS) do
-			generatefiles(sln, action.solutiontemplates)			
-			for prj in premake.eachproject(sln) do
-				generatefiles(prj, action.projecttemplates)
-			end
-		end
-		
-		if (action.execute) then
-			action.execute()
-		end
-	end
 
 
 --
@@ -108,6 +62,20 @@
 			end
 		end
 		
+
+		-- Some actions imply a particular operating system. Set it early so
+		-- it can be picked up by the scripts.
+
+		local action = premake.action.current()
+		if action then
+			_OS = action.os or _OS
+		end
+
+		
+		-- Seed the random number generator so actions don't have to do it themselves
+		
+		math.randomseed(os.time())
+		
 		
 		-- If there is a project script available, run it to get the
 		-- project information, available options and actions, etc.
@@ -149,11 +117,12 @@
 		-- Validate the command-line arguments. This has to happen after the
 		-- script has run to allow for project-specific options
 		
-		if (not premake.actions[_ACTION]) then
-			error("Error: no such action '".._ACTION.."'", 0)
+		action = premake.action.current()
+		if (not action) then
+			error("Error: no such action '" .. _ACTION .. "'", 0)
 		end
 
-		ok, err = premake.checkoptions()
+		ok, err = premake.option.validate(_OPTIONS)
 		if (not ok) then error("Error: " .. err, 0) end
 		
 
@@ -178,8 +147,8 @@
 		
 		
 		-- Hand over control to the action
-		printf("Running action '%s'...", _ACTION)
-		doaction(_ACTION)
+		printf("Running action '%s'...", action.trigger)
+		premake.action.call(action.trigger)
 
 		print("Done.")
 		return 0

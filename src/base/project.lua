@@ -4,6 +4,24 @@
 -- Copyright (c) 2002-2009 Jason Perkins and the Premake project
 --
 
+	premake.project = { }
+	
+
+--
+-- Builds and returns a tree from the project file structure.
+--
+
+	function premake.project.buildsourcetree(prj)
+		local tr = premake.tree.new(prj.name)
+		tr.project = prj
+		
+		for _, fname in ipairs(prj.files) do
+			local node = premake.tree.add(tr, fname)
+		end
+		
+		return tr
+	end
+
 
 --
 -- Returns an iterator for a set of build configuration settings. If a platform is
@@ -173,9 +191,7 @@
 
 	function premake.getconfig(prj, cfgname, pltname)
 		-- might have the root configuration, rather than the actual project
-		if prj.project then 
-			prj = prj.project 
-		end
+		prj = prj.project or prj
 
 		-- if platform is not included in the solution, use general settings instead
 		if pltname == "Native" or not table.contains(prj.solution.platforms or {}, pltname) then
@@ -212,24 +228,57 @@
 	
 	
 --
--- Returns a list of sibling projects on which the specified 
--- configuration depends. This is used to specify project
--- dependencies, usually within a solution.
+-- Returns a list of sibling projects on which the specified project depends. 
+-- This is used to list dependencies within a solution or workspace. Must 
+-- consider all configurations because Visual Studio does not support per-config
+-- project dependencies.
+--
+-- @param prj
+--    The project to query.
+-- @returns
+--    A list of dependent projects, as an array of objects.
 --
 
-	function premake.getdependencies(cfg)
+	function premake.getdependencies(prj)
+		-- make sure I've got the project and not root config
+		prj = prj.project or prj
+		
 		local results = { }
-		for _, link in ipairs(cfg.links) do
-			local prj = premake.findproject(link)
-			if (prj) then
-				table.insert(results, prj)
+		for _, cfg in pairs(prj.__configs) do
+			for _, link in ipairs(cfg.links) do
+				local dep = premake.findproject(link)
+				if dep and not table.contains(results, dep) then
+					table.insert(results, dep)
+				end
 			end
 		end
+
 		return results
 	end
 
 
 
+--
+-- Uses information from a project (or solution) to format a filename.
+--
+-- @param prj
+--    A project or solution object with the file naming information.
+-- @param pattern
+--    A naming pattern. The sequence "%%" will be replaced by the
+--    project name.
+-- @returns
+--    A filename matching the specified pattern, with a relative path
+--    from the current directory to the project location.
+--
+
+	function premake.project.getfilename(prj, pattern)
+		local fname = pattern:gsub("%%%%", prj.name)
+		fname = path.join(prj.location, fname)
+		return path.getrelative(os.getcwd(), fname)
+	end
+	
+	
+	
 --
 -- Returns a list of link targets. Kind may be one of:
 --   siblings     - linkable sibling projects
@@ -245,21 +294,25 @@
 --   object    - return the project object of the dependency
 --	
 	
-	function premake.getlinks(cfg, kind, part)
+ 	function premake.getlinks(cfg, kind, part)
 		-- if I'm building a list of link directories, include libdirs
 		local result = iif (part == "directory" and kind == "all", cfg.libdirs, {})
 
 		-- am I getting links for a configuration or a project?
 		local cfgname = iif(cfg.name == cfg.project.name, "", cfg.name)
 		
+		-- how should files be named?
+		local pathstyle = premake.getpathstyle(cfg)
+		local namestyle = premake.getnamestyle(cfg)
+		
 		local function canlink(source, target)
-			if (target.kind ~= "SharedLib" and target.kind ~= "StaticLib") then return false end
-			if (source.language == "C" or source.language == "C++") then
-				if (target.language ~= "C" and target.language ~= "C++") then return false end
-				return true
-			elseif (source.language == "C#") then
-				if (target.language ~= "C#") then return false end
-				return true
+			if (target.kind ~= "SharedLib" and target.kind ~= "StaticLib") then 
+				return false
+			end
+			if premake.iscppproject(source) then
+				return premake.iscppproject(target)
+			elseif premake.isdotnetproject(source) then
+				return premake.isdotnetproject(target)
 			end
 		end
 		
@@ -292,8 +345,12 @@
 					end
 				elseif (part == "fullpath") then
 					item = link
-					if premake.actions[_ACTION].targetstyle == "windows" then
-						item = item .. iif(cfg.language == "C" or cfg.language == "C++", ".lib", ".dll")
+					if namestyle == "windows" then
+						if premake.iscppproject(cfg) then
+							item = item .. ".lib"
+						elseif premake.isdotnetproject(cfg) then
+							item = item .. ".dll"
+						end
 					end
 					if item:find("/", nil, true) then
 						item = path.getrelative(cfg.basedir, item)
@@ -305,7 +362,7 @@
 			end
 
 			if item then
-				if premake.actions[_ACTION].targetstyle == "windows" and part ~= "object" then
+				if pathstyle == "windows" and part ~= "object" then
 					item = path.translate(item, "\\")
 				end
 				if not table.contains(result, item) then
@@ -320,22 +377,39 @@
 
 	
 --
--- Converts a project object and a template filespec (the first value in an
--- action's template reference) into a filename for that template's output.
--- The filespec may be either a file extension, or a function.
+-- Gets the name style for a configuration, indicating what kind of prefix,
+-- extensions, etc. should be used in target file names.
 --
-		
-	function premake.getoutputname(this, namespec)
-		local fname
-		if (type(namespec) == "function") then
-			fname = namespec(this)
-		else
-			fname = this.name .. namespec
-		end		
-		return path.join(this.location, fname)
+-- @param cfg
+--    The configuration to check.
+-- @returns
+--    The target naming style, one of "windows", "posix", or "PS3".
+--
+
+	function premake.getnamestyle(cfg)
+		return premake.platforms[cfg.platform].namestyle or premake.gettool(cfg).namestyle or "posix"
 	end
+	
 
 
+--
+-- Gets the path style for a configuration, indicating what kind of path separator
+-- should be used in target file names.
+--
+-- @param cfg
+--    The configuration to check.
+-- @returns
+--    The target path style, one of "windows" or "posix".
+--
+
+	function premake.getpathstyle(cfg)
+		if premake.action.current().os == "windows" then
+			return "windows"
+		else
+			return "posix"
+		end
+	end
+	
 
 --
 -- Assembles a target for a particular tool/system/configuration.
@@ -344,48 +418,52 @@
 --    The configuration to be targeted.
 -- @param direction
 --    One of 'build' for the build target, or 'link' for the linking target.
--- @param tool
---    The target toolset interface.
+-- @param pathstyle
+--    The path format, one of "windows" or "posix". This comes from the current
+--    action: Visual Studio uses "windows", GMake uses "posix", etc.
+-- @param namestyle
+--    The file naming style, one of "windows" or "posix". This comes from the
+--    current tool: GCC uses "posix", MSC uses "windows", etc.
 -- @param system
---    The target operating system; if nil will use current OS settings.
+--    The target operating system, which can modify the naming style. For example,
+--    shared libraries on Mac OS X use a ".dylib" extension.
 -- @returns
 --    An object with these fields:
 --      basename  - the target with no directory or file extension
 --      name      - the target name and extension, with no directory
 --      directory - relative path to the target, with no file name
+--      root      - the root target, primarily for Mac OS X (MyProject.app, etc.)
+--      rootdir   - the root target directory, for Mac OS X (MyProject.app, etc.)
 --      fullpath  - directory, name, and extension
 --
 
-	function premake.gettarget(cfg, direction, style, system)
-		if not system then system = os.get() end
+	function premake.gettarget(cfg, direction, pathstyle, namestyle, system)
 		if system == "bsd" then system = "linux" end		
 
+		-- Fix things up based on the current system
 		local kind = cfg.kind
-		local decorations = premake.platforms[cfg.platform].targetstyle or style
-
 		if premake.iscppproject(cfg) then
 			-- On Windows, shared libraries link against a static import library
-			if (style == "windows" or system == "windows") and kind == "SharedLib" and direction == "link" then
+			if (namestyle == "windows" or system == "windows") and kind == "SharedLib" and direction == "link" then
 				kind = "StaticLib"
 			end
-			
-			-- Linux name conventions only apply to static libs on windows (by user request)
-			if style == "linux" and system == "windows" and kind ~= "StaticLib" then
-				decorations = "windows"
+
+			-- Posix name conventions only apply to static libs on windows (by user request)
+			if namestyle == "posix" and system == "windows" and kind ~= "StaticLib" then
+				namestyle = "windows"
 			end
-		else
-			-- .NET always uses Windows naming conventions
-			decorations = "windows"
 		end
-				
+
 		-- Initialize the target components
 		local field   = iif(direction == "build", "target", "implib")
 		local name    = cfg[field.."name"] or cfg.targetname or cfg.project.name
 		local dir     = cfg[field.."dir"] or cfg.targetdir or path.getrelative(cfg.location, cfg.basedir)
+		local root    = name
+		local rootdir = dir
 		local prefix  = ""
 		local suffix  = ""
-				
-		if decorations == "windows" then
+
+		if namestyle == "windows" then
 			if kind == "ConsoleApp" or kind == "WindowedApp" then
 				suffix = ".exe"
 			elseif kind == "SharedLib" then
@@ -393,21 +471,18 @@
 			elseif kind == "StaticLib" then
 				suffix = ".lib"
 			end
-		elseif decorations == "linux" then
+		elseif namestyle == "posix" then
 			if kind == "WindowedApp" and system == "macosx" then
-				dir = path.join(dir, name .. ".app/Contents/MacOS")
+				root = name .. ".app"
+				dir = path.join(dir, root .. "/Contents/MacOS")
 			elseif kind == "SharedLib" then
 				prefix = "lib"
-				if (system == "macosx") then
-					suffix = ".dylib"
-				else
-					suffix = ".so"
-				end
+				suffix = iif(system == "macosx", ".dylib", ".so")
 			elseif kind == "StaticLib" then
 				prefix = "lib"
 				suffix = ".a"
 			end
-		elseif decorations == "ps3" then
+		elseif namestyle == "PS3" then
 			if kind == "ConsoleApp" or kind == "WindowedApp" then
 				suffix = ".elf"
 			elseif kind == "StaticLib" then
@@ -415,21 +490,24 @@
 				suffix = ".a"
 			end
 		end
-
+			
 		prefix = cfg[field.."prefix"] or cfg.targetprefix or prefix
 		suffix = cfg[field.."extension"] or cfg.targetextension or suffix
 		
+		-- build the results object
 		local result = { }
 		result.basename  = name
 		result.name      = prefix .. name .. suffix
 		result.directory = dir
+		result.root      = root
+		result.rootdir   = rootdir
 		result.fullpath  = path.join(result.directory, result.name)
 		
-		if style == "windows" then
+		if pathstyle == "windows" then
 			result.directory = path.translate(result.directory, "\\")
 			result.fullpath  = path.translate(result.fullpath,  "\\")
 		end
-
+		
 		return result
 	end
 
@@ -444,7 +522,7 @@
 			if _OPTIONS.cc then
 				return premake[_OPTIONS.cc]
 			end
-			local action = premake.actions[_ACTION]
+			local action = premake.action.current()
 			if action.valid_tools then
 				return premake[action.valid_tools.cc[1]]
 			end
@@ -509,17 +587,17 @@
 -- on the directory hierarchy.
 --
 
-	local function walksources(prj, files, fn, group, nestlevel, finished)
+	local function walksources(cfg, fn, group, nestlevel, finished)
 		local grouplen = group:len()
 		local gname = iif(group:endswith("/"), group:sub(1, -2), group)
 		
 		-- open this new group
 		if (nestlevel >= 0) then
-			fn(prj, gname, "GroupStart", nestlevel)
+			fn(cfg, gname, "GroupStart", nestlevel)
 		end
 		
 		-- scan the list of files for items which belong in this group
-		for _,fname in ipairs(files) do
+		for _,fname in ipairs(cfg.files) do
 			if (fname:startswith(group)) then
 
 				-- is there a subgroup within this item?
@@ -528,7 +606,7 @@
 					local subgroup = fname:sub(1, split)
 					if (not finished[subgroup]) then
 						finished[subgroup] = true
-						walksources(prj, files, fn, subgroup, nestlevel + 1, finished)
+						walksources(cfg, fn, subgroup, nestlevel + 1, finished)
 					end
 				end
 				
@@ -536,19 +614,19 @@
 		end
 
 		-- process all files that belong in this group
-		for _,fname in ipairs(files) do
+		for _,fname in ipairs(cfg.files) do
 			if (fname:startswith(group) and not fname:find("[^\.]/", grouplen + 1)) then
-				fn(prj, fname, "GroupItem", nestlevel + 1)
+				fn(cfg, fname, "GroupItem", nestlevel + 1)
 			end
 		end
 
 		-- close the group
 		if (nestlevel >= 0) then
-			fn(prj, gname, "GroupEnd", nestlevel)
+			fn(cfg, gname, "GroupEnd", nestlevel)
 		end
 	end
 	
 	
-	function premake.walksources(prj, files, fn)
-		walksources(prj, files, fn, "", -1, {})
+	function premake.walksources(cfg, fn)
+		walksources(cfg, fn, "", -1, {})
 	end

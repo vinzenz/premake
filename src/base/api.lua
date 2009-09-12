@@ -266,6 +266,12 @@
 			scope = "config",
 		},
 		
+		trimpaths =
+		{
+			kind = "dirlist",
+			scope = "config",
+		},
+		
 		uuid =
 		{
 			kind  = "string",
@@ -690,7 +696,7 @@
 			})
 
 			sln.name           = name
-			sln.location       = os.getcwd()
+			sln.basedir        = os.getcwd()			
 			sln.projects       = { }
 			sln.blocks         = { }
 			sln.configurations = { }
@@ -702,4 +708,26 @@
 		return premake.CurrentContainer
 	end
 
-	
+
+--
+-- Define a new action.
+--
+-- @param a
+--    The new action object.
+--
+
+	function newaction(a)
+		premake.action.add(a)
+	end
+
+
+--
+-- Define a new option.
+--
+-- @param opt
+--    The new option object.
+--
+
+	function newoption(opt)
+		premake.option.add(opt)
+	end

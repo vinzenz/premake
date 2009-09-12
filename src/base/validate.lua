@@ -1,38 +1,8 @@
 --
 -- validate.lua
 -- Tests to validate the run-time environment before starting the action.
--- Copyright (c) 2002-2008 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2009 Jason Perkins and the Premake project
 --
-
-
---
--- Validate the command-line options.
---
-
-	function premake.checkoptions()
-		for key, value in pairs(_OPTIONS) do
-			-- is this a valid option?
-			local opt = premake.options[key]
-			if (not opt) then
-				return false, "invalid option '" .. key .. "'"
-			end
-			
-			-- does it need a value?
-			if (opt.value and value == "") then
-				return false, "no value specified for option '" .. key .. "'"
-			end
-			
-			-- is the value allowed?
-			if (opt.allowed) then
-				for _, match in ipairs(opt.allowed) do
-					if (match[1] == value) then return true end
-				end
-				return false, "invalid value '" .. value .. "' for option '" .. key .. "'"
-			end
-		end
-		return true
-	end
-
 
 
 --
@@ -41,7 +11,7 @@
 --
 
 	function premake.checkprojects()
-		local action = premake.actions[_ACTION]
+		local action = premake.action.current()
 		
 		for _, sln in ipairs(_SOLUTIONS) do
 		
@@ -73,7 +43,7 @@
 					
 					-- every config must have a kind
 					if (not cfg.kind) then
-						return nil, "project '" ..prj.name .. "' needs a kind in configuration '" .. cfgname .. "'"
+						return nil, "project '" ..prj.name .. "' needs a kind in configuration '" .. cfg.name .. "'"
 					end
 				
 					-- and the action must support it
@@ -96,7 +66,7 @@
 --
 
 	function premake.checktools()
-		local action = premake.actions[_ACTION]
+		local action = premake.action.current()
 		if (not action.valid_tools) then 
 			return true 
 		end

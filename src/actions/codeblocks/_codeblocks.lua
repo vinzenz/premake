@@ -1,7 +1,7 @@
 --
 -- _codeblocks.lua
 -- Define the Code::Blocks action(s).
--- Copyright (c) 2002-2008 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2009 Jason Perkins and the Premake project
 --
 
 
@@ -18,18 +18,21 @@
 			cc   = { "gcc", "ow" },
 		},
 		
-		solutiontemplates = {
-			{ ".workspace", premake.codeblocks_workspace },
-		},
+		onsolution = function(sln)
+			premake.generate(sln, "%%.workspace", premake.codeblocks_workspace)
+		end,
 		
-		projecttemplates = {
-			{ ".cbp", premake.codeblocks_cbp },
-		},
-
-		onclean = function(solutions, projects, targets)
-			for _,name in ipairs(projects) do
-				os.remove(name .. ".depend")
-				os.remove(name .. ".layout")
-			end
+		onproject = function(prj)
+			premake.generate(prj, "%%.cbp", premake.codeblocks_cbp)
+		end,
+		
+		oncleansolution = function(sln)
+			premake.clean.file(sln, "%%.workspace")
+		end,
+		
+		oncleanproject = function(prj)
+			premake.clean.file(prj, "%%.cbp")
+			premake.clean.file(prj, "%%.depend")
+			premake.clean.file(prj, "%%.layout")
 		end
 	}

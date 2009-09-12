@@ -1,9 +1,10 @@
 --
 -- _vstudio.lua
 -- Define the Visual Studio 200x actions.
--- Copyright (c) 2008 Jason Perkins and the Premake project
+-- Copyright (c) 2008-2009 Jason Perkins and the Premake project
 --
 
+	premake.vstudio = { }
 	_VS = { }
 
 
@@ -142,29 +143,39 @@
 -- Clean Visual Studio files
 --
 
-	function _VS.onclean(solutions, projects, targets)
-		for _,name in ipairs(solutions) do
-			os.remove(name .. ".suo")
-			os.remove(name .. ".ncb")
+	function premake.vstudio.cleansolution(sln)
+		premake.clean.file(sln, "%%.sln")
+		premake.clean.file(sln, "%%.suo")
+		premake.clean.file(sln, "%%.ncb")
+		-- MonoDevelop files
+		premake.clean.file(sln, "%%.userprefs")
+		premake.clean.file(sln, "%%.usertasks")
+	end
+	
+	function premake.vstudio.cleanproject(prj)
+		local fext
+		if premake.isdotnetproject(prj) then
+			fext = ".csproj"
+		else
+			fext = ".vcproj"
 		end
 		
-		for _,name in ipairs(projects) do
-			os.remove(name .. ".csproj.user")
-			os.remove(name .. ".csproj.webinfo")
+		local fname = premake.project.getfilename(prj, "%%" .. fext)
+		os.remove(fname)
+		os.remove(fname .. ".user")
 		
-			local files = os.matchfiles(name .. ".vcproj.*.user", name .. ".csproj.*.user")
-			for _, fname in ipairs(files) do
-				os.remove(fname)
-			end
+		local userfiles = os.matchfiles(fname .. ".*.user")
+		for _, fname in ipairs(userfiles) do
+			os.remove(fname)
 		end
-		
-		for _,name in ipairs(targets) do
-			os.remove(name .. ".pdb")
-			os.remove(name .. ".idb")
-			os.remove(name .. ".ilk")
-			os.remove(name .. ".vshost.exe")
-			os.remove(name .. ".exe.manifest")
-		end		
+	end
+
+	function premake.vstudio.cleantarget(name)
+		os.remove(name .. ".pdb")
+		os.remove(name .. ".idb")
+		os.remove(name .. ".ilk")
+		os.remove(name .. ".vshost.exe")
+		os.remove(name .. ".exe.manifest")
 	end
 	
 	
@@ -175,11 +186,13 @@
 --
 
 	local function output(indent, value)
-		io.write(indent .. value .. "\r\n")
+		-- io.write(indent .. value .. "\r\n")
+		_p(indent .. value)
 	end
 	
 	local function attrib(indent, name, value)
-		io.write(indent .. "\t" .. name .. '="' .. value .. '"\r\n')
+		-- io.write(indent .. "\t" .. name .. '="' .. value .. '"\r\n')
+		_p(indent .. "\t" .. name .. '="' .. value .. '"')
 	end
 	
 	function _VS.files(prj, fname, state, nestlevel)
@@ -199,15 +212,18 @@
 			attrib(indent, "RelativePath", path.translate(fname, "\\"))
 			output(indent, "\t>")
 			if (not prj.flags.NoPCH and prj.pchsource == fname) then
-				for _, cfgname in ipairs(prj.configurations) do
-					output(indent, "\t<FileConfiguration")
-					attrib(indent, "\tName", cfgname .. "|Win32")
-					output(indent, "\t\t>")
-					output(indent, "\t\t<Tool")
-					attrib(indent, "\t\tName", "VCCLCompilerTool")
-					attrib(indent, "\t\tUsePrecompiledHeader", "1")
-					output(indent, "\t\t/>")
-					output(indent, "\t</FileConfiguration>")
+				for _, cfginfo in ipairs(prj.solution.vstudio_configs) do
+					if cfginfo.isreal then
+						local cfg = premake.getconfig(prj, cfginfo.src_buildcfg, cfginfo.src_platform)
+						output(indent, "\t<FileConfiguration")
+						attrib(indent, "\tName", cfginfo.name)
+						output(indent, "\t\t>")
+						output(indent, "\t\t<Tool")
+						attrib(indent, "\t\tName", iif(cfg.system == "Xbox360", "VCCLX360CompilerTool", "VCCLCompilerTool"))
+						attrib(indent, "\t\tUsePrecompiledHeader", "1")
+						output(indent, "\t\t/>")
+						output(indent, "\t</FileConfiguration>")
+					end
 				end
 			end
 			output(indent, "</File>")
@@ -272,26 +288,6 @@
 
 
 --
--- Return the debugging symbols level for a configuration.
--- (this should probably go in vs200x_vcproj.lua)
---
-
-	function _VS.symbols(cfg)
-		if (not cfg.flags.Symbols) then
-			return 0
-		else
-			-- Edit-and-continue does't work if optimizing or managed C++
-			if (cfg.flags.NoEditAndContinue or _VS.optimization(cfg) ~= 0 or cfg.flags.Managed) then
-				return 3
-			else
-				return 4
-			end
-		end
-	end
-
-	
-	
---
 -- Returns the Visual Studio tool ID for a given project type.
 --
 
@@ -314,7 +310,7 @@
 		trigger         = "vs2002",
 		shortname       = "Visual Studio 2002",
 		description     = "Microsoft Visual Studio 2002",
-		targetstyle     = "windows",
+		os              = "windows",
 		
 		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
 		
@@ -325,24 +321,29 @@
 			dotnet = { "msnet" },
 		},
 
-		solutiontemplates = {
-			{ ".sln",         premake.vs2002_solution },
-		},
-
-		projecttemplates = {
-			{ ".vcproj",      premake.vs200x_vcproj, function(this) return this.language ~= "C#" end },
-			{ ".csproj",      premake.vs2002_csproj, function(this) return this.language == "C#" end },
-			{ ".csproj.user", premake.vs2002_csproj_user, function(this) return this.language == "C#" end },
-		},
+		onsolution = function(sln)
+			premake.generate(sln, "%%.sln", premake.vs2002_solution)
+		end,
 		
-		onclean = _VS.onclean,
+		onproject = function(prj)
+			if premake.isdotnetproject(prj) then
+				premake.generate(prj, "%%.csproj", premake.vs2002_csproj)
+				premake.generate(prj, "%%.csproj.user", premake.vs2002_csproj_user)
+			else
+				premake.generate(prj, "%%.vcproj", premake.vs200x_vcproj)
+			end
+		end,
+		
+		oncleansolution = premake.vstudio.cleansolution,
+		oncleanproject  = premake.vstudio.cleanproject,
+		oncleantarget   = premake.vstudio.cleantarget
 	}
 
 	newaction {
 		trigger         = "vs2003",
 		shortname       = "Visual Studio 2003",
 		description     = "Microsoft Visual Studio 2003",
-		targetstyle     = "windows",
+		os              = "windows",
 
 		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
 		
@@ -353,24 +354,29 @@
 			dotnet = { "msnet" },
 		},
 
-		solutiontemplates = {
-			{ ".sln",         premake.vs2003_solution },
-		},
-
-		projecttemplates = {
-			{ ".vcproj",      premake.vs200x_vcproj, function(this) return this.language ~= "C#" end },
-			{ ".csproj",      premake.vs2002_csproj, function(this) return this.language == "C#" end },
-			{ ".csproj.user", premake.vs2002_csproj_user, function(this) return this.language == "C#" end },
-		},
+		onsolution = function(sln)
+			premake.generate(sln, "%%.sln", premake.vs2003_solution)
+		end,
 		
-		onclean = _VS.onclean,
+		onproject = function(prj)
+			if premake.isdotnetproject(prj) then
+				premake.generate(prj, "%%.csproj", premake.vs2002_csproj)
+				premake.generate(prj, "%%.csproj.user", premake.vs2002_csproj_user)
+			else
+				premake.generate(prj, "%%.vcproj", premake.vs200x_vcproj)
+			end
+		end,
+		
+		oncleansolution = premake.vstudio.cleansolution,
+		oncleanproject  = premake.vstudio.cleanproject,
+		oncleantarget   = premake.vstudio.cleantarget
 	}
 
 	newaction {
 		trigger         = "vs2005",
 		shortname       = "Visual Studio 2005",
 		description     = "Microsoft Visual Studio 2005 (SharpDevelop, MonoDevelop)",
-		targetstyle     = "windows",
+		os              = "windows",
 
 		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
 		
@@ -381,24 +387,29 @@
 			dotnet = { "msnet" },
 		},
 
-		solutiontemplates = {
-			{ ".sln",         premake.vs2005_solution },
-		},
-
-		projecttemplates = {
-			{ ".vcproj",      premake.vs200x_vcproj, function(this) return this.language ~= "C#" end },
-			{ ".csproj",      premake.vs2005_csproj, function(this) return this.language == "C#" end },
-			{ ".csproj.user", premake.vs2005_csproj_user, function(this) return this.language == "C#" end },
-		},
+		onsolution = function(sln)
+			premake.generate(sln, "%%.sln", premake.vs2005_solution)
+		end,
 		
-		onclean = _VS.onclean,
+		onproject = function(prj)
+			if premake.isdotnetproject(prj) then
+				premake.generate(prj, "%%.csproj", premake.vs2005_csproj)
+				premake.generate(prj, "%%.csproj.user", premake.vs2005_csproj_user)
+			else
+				premake.generate(prj, "%%.vcproj", premake.vs200x_vcproj)
+			end
+		end,
+		
+		oncleansolution = premake.vstudio.cleansolution,
+		oncleanproject  = premake.vstudio.cleanproject,
+		oncleantarget   = premake.vstudio.cleantarget
 	}
 
 	newaction {
 		trigger         = "vs2008",
 		shortname       = "Visual Studio 2008",
 		description     = "Microsoft Visual Studio 2008",
-		targetstyle     = "windows",
+		os              = "windows",
 
 		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
 		
@@ -409,15 +420,20 @@
 			dotnet = { "msnet" },
 		},
 
-		solutiontemplates = {
-			{ ".sln",         premake.vs2005_solution },
-		},
-
-		projecttemplates = {
-			{ ".vcproj",      premake.vs200x_vcproj, function(this) return this.language ~= "C#" end },
-			{ ".csproj",      premake.vs2005_csproj, function(this) return this.language == "C#" end },
-			{ ".csproj.user", premake.vs2005_csproj_user, function(this) return this.language == "C#" end },
-		},
+		onsolution = function(sln)
+			premake.generate(sln, "%%.sln", premake.vs2005_solution)
+		end,
 		
-		onclean = _VS.onclean,
+		onproject = function(prj)
+			if premake.isdotnetproject(prj) then
+				premake.generate(prj, "%%.csproj", premake.vs2005_csproj)
+				premake.generate(prj, "%%.csproj.user", premake.vs2005_csproj_user)
+			else
+				premake.generate(prj, "%%.vcproj", premake.vs200x_vcproj)
+			end
+		end,
+		
+		oncleansolution = premake.vstudio.cleansolution,
+		oncleanproject  = premake.vstudio.cleanproject,
+		oncleantarget   = premake.vstudio.cleantarget
 	}

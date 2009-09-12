@@ -6,7 +6,6 @@
 
 	
 	premake.gcc = { }
-	premake.gcc.targetstyle = "linux"
 	
 
 --
@@ -87,9 +86,10 @@
 --
 
 	function premake.gcc.getcppflags(cfg)
-		return platforms[cfg.platform].cppflags
+		local result = { }
+		table.insert(result, platforms[cfg.platform].cppflags)
+		return result
 	end
-
 
 	function premake.gcc.getcflags(cfg)
 		local result = table.translate(cfg.flags, cflags)
@@ -99,7 +99,6 @@
 		end
 		return result		
 	end
-
 	
 	function premake.gcc.getcxxflags(cfg)
 		local result = table.translate(cfg.flags, cxxflags)
@@ -132,7 +131,7 @@
 			end
 				
 			if cfg.system == "windows" and not cfg.flags.NoImportLib then
-				table.insert(result, '-Wl,--out-implib="'..premake.gettarget(cfg, "link", "linux").fullpath..'"')
+				table.insert(result, '-Wl,--out-implib="' .. cfg.linktarget.fullpath .. '"')
 			end
 		end
 
@@ -145,10 +144,27 @@
 		local platform = platforms[cfg.platform]
 		table.insert(result, platform.flags)
 		table.insert(result, platform.ldflags)
+		
 		return result
 	end
 		
+
+--
+-- Return a list of library search paths. Technically part of LDFLAGS but need to
+-- be separated because of the way Visual Studio calls GCC for the PS3. See bug 
+-- #1729227 for background on why library paths must be split.
+--
+
+	function premake.gcc.getlibdirflags(cfg)
+		local result = { }
+		for _, value in ipairs(premake.getlinks(cfg, "all", "directory")) do
+			table.insert(result, '-L' .. _MAKE.esc(value))
+		end
+		return result
+	end
 	
+
+
 --
 -- Returns a list of linker flags for library search directories and library
 -- names. See bug #1729227 for background on why the path must be split.
@@ -156,9 +172,6 @@
 
 	function premake.gcc.getlinkflags(cfg)
 		local result = { }
-		for _, value in ipairs(premake.getlinks(cfg, "all", "directory")) do
-			table.insert(result, '-L' .. _MAKE.esc(value))
-		end
 		for _, value in ipairs(premake.getlinks(cfg, "all", "basename")) do
 			table.insert(result, '-l' .. _MAKE.esc(value))
 		end

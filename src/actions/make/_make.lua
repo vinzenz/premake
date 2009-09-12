@@ -1,7 +1,7 @@
 --
 -- _make.lua
 -- Define the makefile action(s).
--- Copyright (c) 2002-2008 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2009 Jason Perkins and the Premake project
 --
 
 	_MAKE = { }
@@ -19,14 +19,44 @@
 			end
 			return result
 		else
+			if not value then print(debug.traceback()) end
 			local result
-			result = value:gsub(" ", "\\ ")
-			result = result:gsub("\\", "\\\\")
+			result = value:gsub("\\", "\\\\")
+			result = result:gsub(" ", "\\ ")
+			result = result:gsub("%(", "\\%(")
+			result = result:gsub("%)", "\\%)")
 			return result
 		end
 	end
 	
 
+
+--
+-- Rules for file ops based on the shell type. Can't use defines and $@ because
+-- it screws up the escaping of spaces and parethesis (anyone know a solution?)
+--
+
+	function premake.make_copyrule(source, target)
+		_p('%s: %s', target, source)
+		_p('\t@echo Copying $(notdir %s)', target)
+		_p('ifeq (posix,$(SHELLTYPE))')
+		_p('\t$(SILENT) cp -fR %s %s', source, target)
+		_p('else')
+		_p('\t$(SILENT) copy /Y $(subst /,\\\\,%s) $(subst /,\\\\,%s)', source, target)
+		_p('endif')
+	end
+
+	function premake.make_mkdirrule(var)
+		_p('\t@echo Creating %s', var)
+		_p('ifeq (posix,$(SHELLTYPE))')
+		_p('\t$(SILENT) mkdir -p %s', var)
+		_p('else')
+		_p('\t$(SILENT) mkdir $(subst /,\\\\,%s)', var)
+		_p('endif')
+		_p('')
+	end
+	
+	
 
 --
 -- Get the makefile file name for a solution or a project. If this object is the
@@ -85,23 +115,24 @@
 			dotnet = { "mono", "msnet", "pnet" },
 		},
 		
-		solutiontemplates = {
-			{
-				function(this) return _MAKE.getmakefilename(this, false) end,  
-				premake.make_solution
-			},
-		},
+		onsolution = function(sln)
+			premake.generate(sln, _MAKE.getmakefilename(sln, false), premake.make_solution)
+		end,
 		
-		projecttemplates = {
-			{ 
-				function(this) return _MAKE.getmakefilename(this, true) end,   
-				premake.make_cpp,
-				function(this) return this.language == "C" or this.language == "C++" end
-			},
-			{
-				function(this) return _MAKE.getmakefilename(this, true) end,
-				premake.make_csharp,
-				function(this) return this.language == "C#" end
-			},
-		},
+		onproject = function(prj)
+			local makefile = _MAKE.getmakefilename(prj, true)
+			if premake.isdotnetproject(prj) then
+				premake.generate(prj, makefile, premake.make_csharp)
+			else
+				premake.generate(prj, makefile, premake.make_cpp)
+			end
+		end,
+		
+		oncleansolution = function(sln)
+			premake.clean.file(sln, _MAKE.getmakefilename(sln, false))
+		end,
+		
+		oncleanproject = function(prj)
+			premake.clean.file(prj, _MAKE.getmakefilename(prj, true))
+		end
 	}

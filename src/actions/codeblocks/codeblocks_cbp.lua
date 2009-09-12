@@ -6,7 +6,7 @@
 
 	function premake.codeblocks_cbp(prj)
 		-- alias the C/C++ compiler interface
-		local cc = premake[_OPTIONS.cc]
+		local cc = premake.gettool(prj)
 		
 		_p('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>')
 		_p('<CodeBlocks_project_file>')
@@ -108,16 +108,23 @@
 		_p('\t\t</Build>')
 		
 		-- begin files block --
+		local pchheader
+		if (prj.pchheader) then
+			pchheader = path.getrelative(prj.location, prj.pchheader)
+		end
+		
 		for _,fname in ipairs(prj.files) do
 			_p('\t\t<Unit filename="%s">', premake.esc(fname))
-			if path.getextension(fname) == ".rc" then
+			if path.isresourcefile(fname) then
 				_p('\t\t\t<Option compilerVar="WINDRES" />')
 			elseif path.iscppfile(fname) then
 				_p('\t\t\t<Option compilerVar="%s" />', iif(prj.language == "C", "CC", "CPP"))
-				if (not prj.flags.NoPCH and fname == prj.pchheader) then
-					_p('\t\t\t<Option compile="1" />')
-					_p('\t\t\t<Option weight="0" />')
-				end
+			end
+			if not prj.flags.NoPCH and fname == pchheader then
+				_p('\t\t\t<Option compilerVar="%s" />', iif(prj.language == "C", "CC", "CPP"))
+				_p('\t\t\t<Option compile="1" />')
+				_p('\t\t\t<Option weight="0" />')
+				_p('\t\t\t<Add option="-x c++-header" />')
 			end
 			_p('\t\t</Unit>')
 		end

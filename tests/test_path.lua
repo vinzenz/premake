@@ -25,10 +25,11 @@
 		test.isequal("/ProjectB/bin", path.getabsolute("/ProjectA/../ProjectB/bin"))
 	end
 	
-	function T.path.getabsolute_TrailingSlash()
-		local expected = path.translate(os.getcwd(), "/") .. "/a/b/c/"
+	function T.path.getabsolute_OnTrailingSlash()
+		local expected = path.translate(os.getcwd(), "/") .. "/a/b/c"
 		test.isequal(expected, path.getabsolute("a/b/c/"))
 	end
+	
 	
 --
 -- path.getbasename() tests

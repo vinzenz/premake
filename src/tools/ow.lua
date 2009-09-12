@@ -5,7 +5,7 @@
 --
 
 	premake.ow = { }
-	premake.ow.targetstyle = "windows"
+	premake.ow.namestyle = "windows"
 	
 	
 --
@@ -57,7 +57,7 @@
 --
 
 	function premake.ow.getcppflags(cfg)
-		return ""
+		return {}
 	end
 
 	function premake.ow.getcflags(cfg)

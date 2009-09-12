@@ -1,8 +1,6 @@
 solution "PremakeTestbox"
 	configurations { "Debug", "Release" }
 	
-	objdir "obj"
-		
 -- solution level configuration
 	
 	configuration "Debug"
@@ -28,14 +26,6 @@ solution "PremakeTestbox"
 		include "CsConsoleApp"
 	end
 	
-
-
--- add to the built-in clean action
-
-	if _ACTION == "clean" then
-		os.rmdir("bin")
-	end
-
 
 
 -- add a new install action

@@ -1,19 +1,58 @@
 --
 -- tests/test_project.lua
 -- Automated test suite for the project support functions.
--- Copyright (c) 2008 Jason Perkins and the Premake project
+-- Copyright (c) 2008, 2009 Jason Perkins and the Premake project
 --
 
-
+	local _project = premake.project
+	
 	T.project = { }
 
-	local result
+	local cfg, result
 	function T.project.setup()
 		_ACTION = "gmake"
-		result = ""
+		cfg = {}
+		cfg.project = {}
+		cfg.language = "C++"
+		cfg.files = {}
+		cfg.trimpaths = {}
+		cfg.platform = "Native"
+		result = "\n"
+	end
+
+
+
+--
+-- getfilename() tests
+--
+
+	function T.project.getfilename_ReturnsRelativePath()
+		local prj = { name = "project", location = "location" }
+		local r = _project.getfilename(prj, path.join(os.getcwd(), "../filename"))
+		test.isequal("../filename", r)
 	end
 	
-	
+	function T.project.getfilename_PerformsSubstitutions()
+		local prj = { name = "project", location = "location" }
+		local r = _project.getfilename(prj, "%%.prj")
+		test.isequal("location/project.prj", r)
+	end
+
+
+
+--
+-- premake.getlinks() tests
+--
+
+	function T.project.getlinks_OnMscSystemLibs()
+		_OPTIONS.cc = "msc"
+		cfg.links = { "user32", "gdi32" }
+		result = premake.getlinks(cfg, "all", "fullpath")
+		test.isequal("user32.lib gdi32.lib", table.concat(result, " "))
+	end
+
+
+
 	
 --
 -- premake.walksources() tests
@@ -28,67 +67,71 @@
 		else
 			item = fname
 		end
-		result = result .. string.rep("-", nestlevel) .. item
+		result = result .. string.rep("-", nestlevel) .. item .. "\n"
 	end
 	
+	
 	function T.project.walksources_OnNoFiles()
-		premake.walksources({}, {}, walktest)
-		test.isequal(
-			""
+		premake.walksources(cfg, walktest)
+		test.isequal("\n"
+			.. ""
 		,result)		
 	end
 	
+	
 	function T.project.walksources_OnSingleFile()
-		local files = {
+		cfg.files = {
 			"hello.cpp"
 		}
-		premake.walksources({}, files, walktest)
-		test.isequal(
-			"hello.cpp"
+		premake.walksources(cfg, walktest)
+		test.isequal("\n"
+			.. "hello.cpp\n"
 		,result)
 	end
 	
+	
 	function T.project.walksources_OnNestedGroups()
-		local files = {
+		cfg.files = {
 			"rootfile.c",
 			"level1/level1.c",
 			"level1/level2/level2.c"
 		}
-		premake.walksources({}, files, walktest)
-		test.isequal(""
-			.. "<level1>"
-			.. "-<level1/level2>"
-			.. "--level1/level2/level2.c"
-			.. "-</level1/level2>"
-			.. "-level1/level1.c"
-			.. "</level1>"
-			.. "rootfile.c"
+		premake.walksources(cfg, walktest)
+		test.isequal("\n"
+			.. "<level1>\n"
+			.. "-<level1/level2>\n"
+			.. "--level1/level2/level2.c\n"
+			.. "-</level1/level2>\n"
+			.. "-level1/level1.c\n"
+			.. "</level1>\n"
+			.. "rootfile.c\n"
 		,result)
 	end
+	
 	
 	function T.project.walksources_OnDottedFolders()
-		local files = {
+		cfg.files = {
 			"src/lua-5.1.2/lapi.c"
 		}
-		premake.walksources({}, files, walktest)
-		test.isequal(""
-			.. "<src>"
-			.. "-<src/lua-5.1.2>"
-			.. "--src/lua-5.1.2/lapi.c"
-			.. "-</src/lua-5.1.2>"
-			.. "</src>"
+		premake.walksources(cfg, walktest)
+		test.isequal("\n"
+			.. "<src>\n"
+			.. "-<src/lua-5.1.2>\n"
+			.. "--src/lua-5.1.2/lapi.c\n"
+			.. "-</src/lua-5.1.2>\n"
+			.. "</src>\n"
 		,result)
 	end
+	
 	
 	function T.project.walksources_OnDotDotLeaders()
-		local files = {
+		cfg.files = {
 			"../src/hello.c",
 		}
-		premake.walksources({}, files, walktest)
-		test.isequal(""
-			.. "<../src>"
-			.. "-../src/hello.c"
-			.. "</../src>"
+		premake.walksources(cfg, walktest)
+		test.isequal("\n"
+			.. "<../src>\n"
+			.. "-../src/hello.c\n"
+			.. "</../src>\n"
 		,result)
 	end
-	
