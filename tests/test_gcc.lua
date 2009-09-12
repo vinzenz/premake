@@ -26,7 +26,7 @@
 		cfg.kind = "SharedLib"
 		cfg.system = "windows"
 		local r = premake.gcc.getcflags(cfg)
-		test.isequal('', table.concat(r,"|"))
+		test.isequal('-fPIC', table.concat(r,"|"))
 	end
 
 	function T.gcc.ldflags_SharedLib_Windows()

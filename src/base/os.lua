@@ -24,12 +24,8 @@
 				formats = { "lib%s.so", "%s.so" }
 				path = os.getenv("LD_LIBRARY_PATH") or ""
 		
-				local f = io.open("/etc/ld.so.conf", "r")
-				if f then
-					for line in f:lines() do
-						path = path .. ":" .. line
-					end
-					f:close()
+				for line in io.lines("/etc/ld.so.conf") do
+					path = path .. ":" .. line
 				end
 			end
 			

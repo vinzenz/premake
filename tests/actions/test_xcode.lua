@@ -204,7 +204,7 @@
 		xcode.PBXFileReference(ctx)
 		test.capture [[
 /* Begin PBXFileReference section */
-		[MyProject.app:file] /* MyProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = MyProject.app; path = ../MyProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		[MyProject:file] /* MyProject */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = MyProject; path = ../MyProject; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 		]]
 	end
@@ -492,7 +492,7 @@
 		prepare()
 		xcode.XCBuildConfiguration(ctx.targets[1], premake.getconfig(ctx.targets[1].prjnode.project, "Debug"))
 		test.capture [[
-		[MyProject.app:Debug] /* Debug */ = {
+		[MyProject:Debug] /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;

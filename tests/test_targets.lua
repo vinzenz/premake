@@ -140,7 +140,7 @@
 	function T.targets.SharedLib_Link_PosixNames_OnLinux()
 		cfg.kind = "SharedLib"
 		result = premake.gettarget(cfg, "link", "posix", "posix", "linux")
-		test.isequal([[../bin/libMyProject.dylib]], result.fullpath)
+		test.isequal([[../bin/libMyProject.so]], result.fullpath)
 	end
 
 	function T.targets.SharedLib_Build_PosixNames_OnMacOSX()
