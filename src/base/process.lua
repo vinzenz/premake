@@ -4,7 +4,7 @@
 -- Copyright (c) 2009 Vinzenz Feenstra
 -- 
 
-function premake.process = {}
+premake.process = {}
 
 --
 -- Run a process and retrieve the output from stdout, stderr and the return code of the process
