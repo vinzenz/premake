@@ -33,9 +33,9 @@
 			path = (path or "") .. ":/lib:/usr/lib:/usr/local/lib"
 		end
 
-    if paths then
-      path = path .. ":" .. paths
-    end
+        if paths then
+            path = path .. ":" .. paths
+        end
 		
 		for _, fmt in ipairs(formats) do
 			local name = string.format(fmt, libname)
@@ -57,9 +57,9 @@
 			path = (path or "") .. ":/usr/include:/usr/local/include"
 		end
 
-    if paths then
-      table.insert(incs, paths)
-    end
+        if paths then
+            table.insert(incs, paths)
+        end
 
 		if path ~= nil then
 			table.insert(incs, path)
