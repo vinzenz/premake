@@ -26,8 +26,11 @@ function premake.compiler.get_compiler()
 
     cc = premake[_OPTIONS.cc]
 
+    -- 
+    -- well it's not all about boost ;-)
     -- if still no cc, then we can't continue
-    if not cc then error("Error: boost requires a C/C++ project") end
+    -- if not cc then error("Error: boost requires a C/C++ project") end
+    -- 
 
   end
   return cc
