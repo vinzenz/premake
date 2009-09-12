@@ -57,6 +57,7 @@ static const luaL_Reg string_functions[] = {
 };
 
 
+int luaopen_ex(lua_State *);
 
 /**
  * Program entry point.
@@ -72,6 +73,9 @@ int main(int argc, const char** argv)
 	luaL_register(L, "path",   path_functions);
 	luaL_register(L, "os",     os_functions);
 	luaL_register(L, "string", string_functions);
+
+	lua_pushstring(L, "ex");
+    luaopen_ex(L);
 
 	/* push the application metadata */
 	lua_pushstring(L, LUA_COPYRIGHT);

@@ -45,7 +45,8 @@
 			"src/host/lua-5.1.4/src/luac.c",
 			"src/host/lua-5.1.4/src/print.c",
 			"src/host/lua-5.1.4/**.lua",
-			"src/host/lua-5.1.4/etc/*.c"
+			"src/host/lua-5.1.4/etc/*.c",
+            "src/host/lua-ex/**.lua"
 		}
 			
 		configuration "Debug"
@@ -64,12 +65,14 @@
 		configuration "linux"
 			defines     { "LUA_USE_LINUX" }
 			links       { "m", "dl" } 
+            excludes  { "src/host/lua-ex/w32api/**.c" }
 			
 		configuration "macosx"
 			defines     { "LUA_USE_MACOSX" }
+            excludes  { "src/host/lua-ex/w32api/**.c" }
 
-
-
+        configuration "windows"
+            excludes  { "src/host/lua-ex/posix/**.c" }
 --
 -- A more thorough cleanup.
 --
