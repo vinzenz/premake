@@ -1,3 +1,12 @@
+-------
+ 4.2.vinzenz (in progress)
+-------
+- Merged changes from Ash Berlin's repository on github 
+- Added lua-ex - introduces additional functionality to lua (important for our changes: spawn)
+  so we can actually execute processes and read from stdout, stderr and write to stdin individually
+  and retrieve the return code of an executable
+- Fixed test set errors 
+
 -----
  4.2 (in progress)
 -----
