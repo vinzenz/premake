@@ -9,172 +9,172 @@
 
 
 --
--- Preprocess the project information, building a project tree and associating Xcode
--- specific metadata with projects, files, and targets.
+-- Create a solution tree corresponding to what is shown in the Xcode project 
+-- browser pane, with nodes for files and folders, resources, frameworks, and
+-- products.
 --
 -- @param sln
 --    The solution being generated.
 -- @returns
---    A context object with these properties:
---    root    - a tree containing the solution, projects, and all files with metadata.
---    targets - a list of binary targets with metadata
+--    A tree, loaded with metadata, which mirrors Xcode's view of the solution.
 --
 
-	function xcode.buildcontext(sln)
-		local ctx = { }
+	function xcode.buildtree(sln)
+		local node
 		
-		-- create the project tree
-		ctx.root = tree.new(sln.name)
-		ctx.root.id = xcode.newid(ctx.root)
-		
+		-- create a solution level node and add each project to it; remember which
+		-- node goes with which project for later reference
+		local tr = tree.new(sln.name)
+		local prjnodes = {}
 		for prj in premake.eachproject(sln) do
-			-- build the project tree and add it to the solution
-			local prjnode = premake.project.buildsourcetree(prj)
-			tree.insert(ctx.root, prjnode)
-
-			-- add virtual groups for resources and frameworks
-			prjnode.resources = tree.insert(prjnode, tree.new("Resources"))
-			prjnode.resources.stageid = xcode.newid(prjnode, "resources")
-			prjnode.frameworks = tree.insert(prjnode, tree.new("Frameworks"))
-			prjnode.frameworks.stageid = xcode.newid(prjnode, "frameworks")
-			
-			-- first pass over the tree to handle resource files. Localized files create a new
-			-- virtual group under resources, with a list of the languages encountered. Other
-			-- resources are simply moved into the resources group.
-			tree.traverse(prjnode, {
-				onleaf = function(node)
-					-- only look at resources
-					if xcode.getfilecategory(node.name) ~= "Resources" then return end
-					-- don't process the resources group (which I'm building)
-					if node.parent == prjnode.resources then return end
-					
-					if xcode.islocalized(node) then
-						-- create a virtual group for this file and add each language under it
-						if not prjnode.resources.children[node.name] then
-							local group = tree.new(node.name)
-							group.languages = { }
-							prjnode.resources.children[node.name] = group
-							tree.insert(prjnode.resources, group)
-						end
-						local lang = path.getbasename(node.parent.name)
-						prjnode.resources.children[node.name].languages[lang] = node
-					else						
-						-- remove it from the files area
-						tree.remove(node)
-						-- add it to the resources area
-						tree.insert(prjnode.resources, node)
-						
-						-- make a note of key files
-						if node.name == "Info.plist" then
-							prjnode.infoplist = node
-						end						
-					end
-				end
-			})
-
-			-- Create a "Frameworks" group in the project and add any linked frameworks to it
-			for _, link in ipairs(prj.links) do
-				if xcode.isframework(link) then
-					tree.add(prjnode.frameworks, link)
-				end
-			end
-
-			-- Second pass over the tree to finish configuring things
-			tree.traverse(prjnode, {
-				onnode = function(node)
-					-- assign IDs to all nodes in the tree
-					node.id = xcode.newid(node)
-
-					-- Premake is setup for the idea of a solution file referencing multiple project files,
-					-- but Xcode uses a single file for everything. Convert the file paths from project
-					-- location relative to solution (the one Xcode file) location relative to compensate.
-					if node.path then
-						node.path = xcode.rebase(prj, node.path)
-					end
-				end,
-				
-				onleaf = function(node)					
-					-- assign a build ID to buildable files
-					if xcode.getfilecategory(node.name) and not xcode.islocalized(node) then
-						node.buildid = xcode.newid(node, "build")
-					end
-				end
-			}, true)
+			prjnodes[prj] = tree.insert(tr, premake.project.buildsourcetree(prj))
 		end
 
-		-- Targets live outside the main source tree. In general there is one target per Premake
-		-- project; projects with multiple kinds require multiple targets, one for each kind
-		ctx.targets = { }
-		for _, prjnode in ipairs(ctx.root.children) do
-			-- keep track of which kinds have already been created
-			local kinds = { }
-			for cfg in premake.eachconfig(prjnode.project) do
-				if not table.contains(kinds, cfg.kind) then					
-					-- create a new target
-					local t = tree.new(cfg.buildtarget.root)
-					table.insert(ctx.targets, t)
-					t.prjnode = prjnode
-					t.cfg = cfg
-					t.id = xcode.newid(t, "target")
-					t.fileid = xcode.newid(t, "file")
-					t.sourcesid = xcode.newid(t, "sources")
+		-- if there is only one project, use that as the tree root instead of the
+		-- solution. This avoids an otherwise empty level in the tree
+		if #tr.children == 1 then
+			tr = tr.children[1]
+			tr.parent = nil
+			tr.solution = sln
+		end
 
-					-- mark this kind as done
-					table.insert(kinds, cfg.kind)
+		-- convert localized resources from their filesystem layout (English.lproj/MainMenu.xib)
+		-- to Xcode's display layout (MainMenu.xib/English).
+		tree.traverse(tr, {
+			onbranch = function(node)
+				if path.getextension(node.name) == ".lproj" then
+					local lang = path.getbasename(node.name)  -- "English", "French", etc.
+					
+					-- create a new language group for each file it contains
+					for _, filenode in ipairs(node.children) do
+						local grpnode = node.parent.children[filenode.name]
+						if not grpnode then
+							grpnode = tree.insert(node.parent, tree.new(filenode.name))
+							grpnode.kind = "vgroup"
+						end
+						
+						-- convert the file node to a language node and add to the group
+						filenode.name = path.getbasename(lang)
+						tree.insert(grpnode, filenode)
+					end
+					
+					-- remove this directory from the tree
+					tree.remove(node)
+				end
+			end
+		})
+		
+		-- the special folder "Frameworks" lists all of the frameworks used in the solution.
+		-- Only add it to the tree if there are frameworks in use.
+		tr.frameworks = tree.new("Frameworks")
+		frameworks = { }  -- remember which frameworks have already been added
+		for prj in premake.eachproject(sln) do
+			for cfg in premake.eachconfig(prj) do
+				for _, link in ipairs(cfg.links) do
+					local name = path.getname(link)
+					if xcode.isframework(name) and not frameworks[name] then
+						frameworks[name] = name
+						node = tree.insert(tr.frameworks, tree.new(name))
+						node.path = link
+					end
 				end
 			end
 		end
 		
-		-- Create IDs for configuration section and configuration blocks for each
-		-- target, as well as a root level configuration
-		local function assigncfgs(n)
-			n.cfgsectionid = xcode.newid(n, "cfgsec")
-			n.cfgids = { }
-			for _, cfgname in ipairs(sln.configurations) do
-				n.cfgids[cfgname] = xcode.newid(n, cfgname)
+		if #tr.frameworks.children > 0 then 
+			tree.insert(tr, tr.frameworks)
+		end
+		
+		-- the special folder "Products" lists all of the generated targets, one target
+		-- for each target kind (ConsoleApp, SharedLibrary, etc.) produced by a project.
+		tr.products = tree.insert(tr, tree.new("Products"))
+		for prj in premake.eachproject(sln) do
+			local kinds = {}  -- remember which kinds have already been added
+			for cfg in premake.eachconfig(prj) do
+				if not kinds[cfg.kind] then
+					kinds[cfg.kind] = true
+					node = tree.insert(tr.products, tree.new(path.getname(cfg.buildtarget.bundlepath)))
+					node.kind = "product"
+					node.prjnode = prjnodes[prj]
+					node.cfg  = cfg
+					node.path = cfg.buildtarget.fullpath
+					node.targetid   = xcode.newid(node, "target")
+					node.cfgsection = xcode.newid(node, "cfg")
+					node.resstageid = xcode.newid(node, "rez")
+					node.sourcesid  = xcode.newid(node, "src")
+					node.fxstageid  = xcode.newid(node, "fxs")
+					
+					-- assign IDs for each configuration
+					node.configids = {}
+					for _, cfgname in ipairs(sln.configurations) do
+						node.configids[cfgname] = xcode.newid(node, cfgname)
+					end
+				end
 			end
 		end
-		assigncfgs(ctx.root)
-		for _, target in ipairs(ctx.targets) do
-			assigncfgs(target)
+		
+		-- also assign solution-level configuration IDs
+		tr.configids = {}
+		for _, cfgname in ipairs(sln.configurations) do
+			tr.configids[cfgname] = xcode.newid(node, cfgname)
 		end
-
-		-- If this solution has only a single project, use that project as the root
-		-- of the source tree to avoid the otherwise empty solution node. If there are
-		-- multiple projects, keep the solution node as the root so each project can
-		-- have its own top-level group for its files.
-		ctx.prjroot = iif(#ctx.root.children == 1, ctx.root.children[1], ctx.root)
-
-		return ctx
+		
+		-- Final setup
+		local prjnode
+		tree.traverse(tr, {
+			onnode = function(node)
+				if node.project then
+					prjnode = node
+				end
+				
+				-- assign IDs to every node in the tree
+				node.id = xcode.newid(node)
+				
+				-- assign build IDs to buildable files
+				if xcode.getbuildcategory(node) then
+					node.buildid = xcode.newid(node, "build")
+				end
+											
+				-- Premake is setup for the idea of a solution file referencing multiple project files,
+				-- but Xcode uses a single file for everything. Convert the file paths from project
+				-- location relative to solution (the one Xcode file) location relative to compensate.
+				if node.path then
+					node.path = xcode.rebase(prjnode.project, node.path)
+				end
+				
+				-- remember key files that are needed elsewhere
+				if node.name == "Info.plist" then
+					prjnode.infoplist = node
+				end						
+			end
+		}, true)
+		
+		return tr
 	end
 
-
-
+	
 --
--- Return the Xcode category (for lack of a better term) for a file, such 
--- as "Sources" or "Resources".
+-- Return the Xcode build category for a given file, based on the file extension.
 --
--- @param fname
---    The file name to identify.
+-- @param node
+--    The node to identify.
 -- @returns
---    An Xcode file category, string.
+--    An Xcode build category, one of "Sources", "Resources", "Frameworks", or nil.
 --
 
-	function xcode.getfilecategory(fname)
+	function xcode.getbuildcategory(node)
 		local categories = {
 			[".c"] = "Sources",
 			[".cc"] = "Sources",
 			[".cpp"] = "Sources",
 			[".cxx"] = "Sources",
 			[".framework"] = "Frameworks",
-			[".lproj"] = "Resources",
 			[".m"] = "Sources",
-			[".plist"] = "Resources",
 			[".strings"] = "Resources",
 			[".nib"] = "Resources",
 			[".xib"] = "Resources",
 		}
-		return categories[path.getextension(fname)]
+		return categories[path.getextension(node.name)]
 	end
 
 
@@ -187,7 +187,7 @@
 --    An Xcode file type, string.
 --
 
-	function xcode.getfiletype(fname)
+	function xcode.getfiletype(node)
 		local types = {
 			[".c"]         = "sourcecode.c.c",
 			[".cc"]        = "sourcecode.cpp.cpp",
@@ -204,88 +204,55 @@
 			[".plist"]     = "text.plist.xml",
 			[".xib"]       = "file.xib",
 		}
-		return types[path.getextension(fname)] or "text"
+		return types[path.getextension(node.path)] or "text"
 	end
 
 
 --
 -- Return the Xcode product type, based target kind.
 --
--- @param kind
---    The target kind to identify.
+-- @param node
+--    The product node to identify.
 -- @returns
 --    An Xcode product type, string.
 --
 
-	function xcode.getproducttype(kind)
+	function xcode.getproducttype(node)
 		local types = {
-			ConsoleApp = "com.apple.product-type.tool",
+			ConsoleApp  = "com.apple.product-type.tool",
 			WindowedApp = "com.apple.product-type.application",
+			StaticLib   = "com.apple.product-type.library.static",
+			SharedLib   = "com.apple.product-type.library.dynamic",
 		}
-		return types[kind]
+		return types[node.cfg.kind]
 	end
 
 
 --
 -- Return the Xcode target type, based on the target file extension.
 --
--- @param kind
---    The target kind to identify.
+-- @param node
+--    The product node to identify.
 -- @returns
 --    An Xcode target type, string.
 --
 
-	function xcode.gettargettype(kind)
+	function xcode.gettargettype(node)
 		local types = {
-			ConsoleApp = "compiled.mach-o.executable",
+			ConsoleApp  = "\"compiled.mach-o.executable\"",
 			WindowedApp = "wrapper.application",
+			StaticLib   = "archive.ar",
+			SharedLib   = "\"compiled.mach-o.dylib\"",
 		}
-		return types[kind]
-	end
-
-
---
--- Returns true if a file is "buildable" and should go in the build section.
---
-
-	function xcode.isbuildable(node)
-		if not node.buildid then
-			return false
-		end
-		if xcode.islocalized(node) then
-			return false
-		end
-		local x = path.getextension(node.name)
-		if x == ".plist" then
-			return false
-		end
-		return true
-	end
-
-
---
--- Returns true if a node represents a localized file.
---
-
-	function xcode.islocalized(node)
-		if path.getextension(node.name) == ".lproj" then
-			return true
-		end
-		if xcode.getfilecategory(node.name) ~= "Resources" then
-			return false
-		end
-		if not node.parent.path then
-			return false
-		end
-		if path.getextension(node.parent.path) ~= ".lproj" then
-			return false
-		end
-		return true
+		return types[node.cfg.kind]
 	end
 
 
 --
 -- Returns true if the file name represents a framework.
+--
+-- @param fname
+--    The name of the file to test.
 --
 
 	function xcode.isframework(fname)
@@ -294,7 +261,9 @@
 
 
 --
--- Retrieves a unique 12 byte ID for an object.
+-- Retrieves a unique 12 byte ID for an object. This function accepts and ignores two
+-- parameters 'node' and 'usage', which are used by an alternative implementation of
+-- this function for testing.
 --
 -- @returns
 --    A 24-character string representing the 12 byte ID.
@@ -329,11 +298,13 @@
 	end
 
 
---
--- BEGIN SECTION GENERATORS
---
 
-	function xcode.header()
+---------------------------------------------------------------------------
+-- Section generator functions, in the same order in which they appear
+-- in the .pbxproj file
+---------------------------------------------------------------------------
+
+	function xcode.Header()
 		_p('// !$*UTF8*$!')
 		_p('{')
 		_p('\tarchiveVersion = 1;')
@@ -345,84 +316,73 @@
 	end
 
 
-	function xcode.PBXBuildFile(ctx)
-		local resources
+	function xcode.PBXBuildFile(tr)
 		_p('/* Begin PBXBuildFile section */')
-		tree.traverse(ctx.root, {
-			onleaf = function(node)
-				if xcode.isbuildable(node) then
+		tree.traverse(tr, {
+			onnode = function(node)
+				if node.buildid then
 					_p(2,'%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };', 
-						node.buildid, node.name, xcode.getfilecategory(node.name), node.id, node.name)
+						node.buildid, node.name, xcode.getbuildcategory(node), node.id, node.name)
 				end
 			end
 		})
 		_p('/* End PBXBuildFile section */')
 		_p('')
 	end
-
 	
-	function xcode.PBXFileReference(ctx)
-		_p('/* Begin PBXFileReference section */')
-		tree.traverse(ctx.root, {
-			onleaf = function(node)
-				-- I'm only listing files here, so ignore any nodes without a path
-				if not node.path then return end
 
-				-- Munge up the file details depending on the type of file. First up: localized resources.
-				-- These appear in the node tree as [English.lproj/MainMenu.xib]. They are represented in
-				-- the Xcode project tree as [MainMenu.xib/English].
-				local nodename, nodepath, encoding, source
-				if xcode.islocalized(node) then
-					nodename = path.getbasename(node.parent.name)
-					nodepath = path.join(tree.getlocalpath(node.parent), node.name)
-					
-				-- Frameworks. I need to figure out how to locate these; I'm hardcoding to the system path
-				-- just to get things working for now but obviously this needs to change
-				elseif xcode.isframework(node.name) then
-					nodepath = "/System/Library/Frameworks/" .. node.name
-					source = "<absolute>"
-					
-				-- All other source files
-				else
-					encoding = " fileEncoding = 4;"
+	function xcode.PBXFileReference(tr)
+		_p('/* Begin PBXFileReference section */')
+		
+		tree.traverse(tr, {
+			onleaf = function(node)
+				-- I'm only listing files here, so ignore anything without a path
+				if not node.path then
+					return
 				end
 				
-				nodename = nodename or node.name
-				nodepath = nodepath or tree.getlocalpath(node)
-				encoding = encoding or ""
-				source   = source or "<group>"
-
-				_p(2,'%s /* %s */ = {isa = PBXFileReference;%s lastKnownFileType = %s; name = %s; path = %s; sourceTree = "%s"; };',
-					node.id, nodename, encoding, xcode.getfiletype(node.name), nodename, nodepath, source)
+				if node.kind == "product" then
+					-- Strangely, targets are specified relative to the project.pbxproj file
+					-- rather than the .xcodeproj directory like the rest of the files.
+					local basepath = path.join(node.cfg.project.solution.location, "project.pbxproj")
+--					local projpath = path.join(node.cfg.project.location, node.cfg.buildtarget.rootdir)
+--					local targpath = path.join(path.getrelative(basepath, projpath), node.cfg.buildtarget.root)
+					local targpath  = path.getrelative(basepath, node.cfg.buildtarget.bundlepath)
+					_p(2,'%s /* %s */ = {isa = PBXFileReference; explicitFileType = %s; includeInIndex = 0; name = %s; path = %s; sourceTree = BUILT_PRODUCTS_DIR; };',
+						node.id, node.name, xcode.gettargettype(node), node.name, targpath)
+				else
+					local pth, src
+					if xcode.isframework(node.path) then
+						-- I need to figure out how to locate frameworks; this is just to get something working
+						pth = "/System/Library/Frameworks/" .. node.path
+						src = "absolute"
+					else
+						-- something else; probably a source code file
+						pth = tree.getlocalpath(node)
+						src = "group"
+					end
+					
+					_p(2,'%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = %s; name = %s; path = %s; sourceTree = "<%s>"; };',
+						node.id, node.name, xcode.getfiletype(node), node.name, pth, src)
+				end
 			end
 		})
-		
-		-- Add entries for each generated target. Strangely, targets are specified relative to the
-		-- project.pbxproj file rather than the .xcodeproj directory like the rest of the files.
-		for _, target in ipairs(ctx.targets) do
-			local cfg = target.cfg
-			local basepath = path.join(cfg.project.solution.location, "project.pbxproj")
-			local projpath = path.join(cfg.project.location, cfg.buildtarget.rootdir)
-			local targpath = path.join(path.getrelative(basepath, projpath), cfg.buildtarget.root)
-
-			_p(2,'%s /* %s */ = {isa = PBXFileReference; explicitFileType = %s; includeInIndex = 0; name = %s; path = %s; sourceTree = BUILT_PRODUCTS_DIR; };',
-				target.fileid, target.name, xcode.gettargettype(target.cfg.kind), target.name, targpath)
-		end
 		
 		_p('/* End PBXFileReference section */')
 		_p('')
 	end
 
 
-	function xcode.PBXFrameworksBuildPhase(ctx)
+	function xcode.PBXFrameworksBuildPhase(tr)
 		_p('/* Begin PBXFrameworksBuildPhase section */')
-		for _, target in ipairs(ctx.targets) do
-			_p(2,'%s /* Frameworks */ = {', target.prjnode.frameworks.stageid)
+		for _, node in ipairs(tr.products.children) do
+			_p(2,'%s /* Frameworks */ = {', node.fxstageid)
 			_p(3,'isa = PBXFrameworksBuildPhase;')
 			_p(3,'buildActionMask = 2147483647;')
 			_p(3,'files = (')
-			for _, framework in ipairs(target.prjnode.frameworks.children) do
-				_p(4,'%s /* %s in Frameworks */,', framework.buildid, framework.name)
+			for _, link in ipairs(node.cfg.links) do
+				local fxnode = tr.frameworks.children[path.getname(link)]
+				_p(4,'%s /* %s in Frameworks */,', fxnode.buildid, fxnode.name)
 			end
 			_p(3,');')
 			_p(3,'runOnlyForDeploymentPostprocessing = 0;')
@@ -433,35 +393,26 @@
 	end
 
 
-	function xcode.PBXGroup(ctx)
+	function xcode.PBXGroup(tr)
 		_p('/* Begin PBXGroup section */')
 
-		tree.traverse(ctx.prjroot, {
-			onbranch = function(node)
-				-- Skip over localization groups (ie. English.lproj); localized files will
-				-- be written as part of the project's Resources group.
-				if xcode.islocalized(node) then return end
+		tree.traverse(tr, {
+			onnode = function(node)
+				-- Skip over anything that isn't a proper group
+				if (node.path and #node.children == 0) or node.kind == "vgroup" then
+					return
+				end
 				
 				_p(2,'%s /* %s */ = {', node.id, node.name)
 				_p(3,'isa = PBXGroup;')
 				_p(3,'children = (')
-				for _, child in ipairs(node.children) do
-					-- Only write files and non-empty groups
-					local show = (#child.children > 0 or child.path ~= nil)
-					
-					-- Only list resources if this is the project's Resources group
-					if xcode.getfilecategory(child.name) == "Resources" then
-						show = (node == ctx.prjroot.resources)
-					end
-					
-					if show then
-						_p(4,'%s /* %s */,', child.id, child.name)
-					end
+				for _, childnode in ipairs(node.children) do
+					_p(4,'%s /* %s */,', childnode.id, childnode.name)
 				end
 				_p(3,');')
 				_p(3,'name = %s;', node.name)
 				if node.path then
-					_p(3,'path = %s;', iif(node.parent.path, node.name, node.path))
+					_p(3,'path = %s;', node.path)
 				end
 				_p(3,'sourceTree = "<group>";')
 				_p(2,'};')
@@ -474,19 +425,45 @@
 	end
 
 
-	function xcode.PBXProject(ctx)
+	function xcode.PBXNativeTarget(tr)
+		_p('/* Begin PBXNativeTarget section */')
+		for _, node in ipairs(tr.products.children) do
+			_p(2,'%s /* %s */ = {', node.targetid, node.name)
+			_p(3,'isa = PBXNativeTarget;')
+			_p(3,'buildConfigurationList = %s /* Build configuration list for PBXNativeTarget "%s" */;', node.cfgsection, node.name)
+			_p(3,'buildPhases = (')
+			_p(4,'%s /* Resources */,', node.resstageid)
+			_p(4,'%s /* Sources */,', node.sourcesid)
+			_p(4,'%s /* Frameworks */,', node.fxstageid)
+			_p(3,');')
+			_p(3,'buildRules = (')
+			_p(3,');')
+			_p(3,'dependencies = (')
+			_p(3,');')
+			_p(3,'name = %s;', node.name)
+			_p(3,'productName = %s;', node.name)
+			_p(3,'productReference = %s /* %s */;', node.id, node.name)
+			_p(3,'productType = "%s";', xcode.getproducttype(node))
+			_p(2,'};')
+		end
+		_p('/* End PBXNativeTarget section */')
+		_p('')
+	end
+
+
+	function xcode.PBXProject(tr)
 		_p('/* Begin PBXProject section */')
 		_p(2,'08FB7793FE84155DC02AAC07 /* Project object */ = {')
 		_p(3,'isa = PBXProject;')
-		_p(3,'buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "%s" */;', ctx.prjroot.name)
+		_p(3,'buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "%s" */;', tr.name)
 		_p(3,'compatibilityVersion = "Xcode 3.1";')
 		_p(3,'hasScannedForEncodings = 1;')
-		_p(3,'mainGroup = %s /* %s */;', ctx.prjroot.id, ctx.prjroot.name)
+		_p(3,'mainGroup = %s /* %s */;', tr.id, tr.name)
 		_p(3,'projectDirPath = "";')
 		_p(3,'projectRoot = "";')
 		_p(3,'targets = (')
-		for _, target in ipairs(ctx.targets) do
-			_p(4,'%s /* %s */,', target.id, target.name)
+		for _, node in ipairs(tr.products.children) do
+			_p(4,'%s /* %s */,', node.targetid, node.name)
 		end
 		_p(3,');')
 		_p(2,'};')
@@ -495,40 +472,84 @@
 	end
 
 
-	function xcode.PBXVariantGroup(ctx)
-		_p('/* Begin PBXVariantGroup section */')
-		for _, prjnode in ipairs(ctx.root.children) do
-			if prjnode.resources then
-				for _, node in ipairs(prjnode.resources.children) do
-					if node.languages then
-						_p(2,'%s /* %s */ = {', node.id, node.name)
-						_p(3,'isa = PBXVariantGroup;')
-						_p(3,'children = (')
-						for lang, file in pairs(node.languages) do
-							_p(4,'%s /* %s */,', file.id, lang)
-						end
-						_p(3,');')
-						_p(3,'name = %s;', node.name)
-						_p(3,'sourceTree = "<group>";')
-						_p(2,'};')
+	function xcode.PBXResourcesBuildPhase(tr)
+		_p('/* Begin PBXResourcesBuildPhase section */')
+		for _, target in ipairs(tr.products.children) do
+			_p(2,'%s /* Resources */ = {', target.resstageid)
+			_p(3,'isa = PBXResourcesBuildPhase;')
+			_p(3,'buildActionMask = 2147483647;')
+			_p(3,'files = (')
+			tree.traverse(target.prjnode, {
+				onnode = function(node)
+					if xcode.getbuildcategory(node) == "Resources" then
+						_p(4,'%s /* %s in Resources */,', node.buildid, node.name)
 					end
 				end
-			end
+			})
+			_p(3,');')
+			_p(3,'runOnlyForDeploymentPostprocessing = 0;')
+			_p(2,'};')
 		end
+		_p('/* End PBXResourcesBuildPhase section */')
+		_p('')
+	end
+
+
+	function xcode.PBXSourcesBuildPhase(tr)
+		_p('/* Begin PBXSourcesBuildPhase section */')
+		for _, target in ipairs(tr.products.children) do
+			_p(2,'%s /* Sources */ = {', target.sourcesid)
+			_p(3,'isa = PBXSourcesBuildPhase;')
+			_p(3,'buildActionMask = 2147483647;')
+			_p(3,'files = (')
+			tree.traverse(target.prjnode, {
+				onleaf = function(node)
+					if xcode.getbuildcategory(node) == "Sources" then
+						_p(4,'%s /* %s in Sources */,', node.buildid, node.name)
+					end
+				end
+			})
+			_p(3,');')
+			_p(3,'runOnlyForDeploymentPostprocessing = 0;')
+			_p(2,'};')
+		end
+		_p('/* End PBXSourcesBuildPhase section */')
+		_p('')
+	end
+
+
+	function xcode.PBXVariantGroup(tr)
+		_p('/* Begin PBXVariantGroup section */')
+		tree.traverse(tr, {
+			onbranch = function(node)
+				if node.kind == "vgroup" then
+					_p(2,'%s /* %s */ = {', node.id, node.name)
+					_p(3,'isa = PBXVariantGroup;')
+					_p(3,'children = (')
+					for _, lang in ipairs(node.children) do
+						_p(4,'%s /* %s */,', lang.id, lang.name)
+					end
+					_p(3,');')
+					_p(3,'name = %s;', node.name)
+					_p(3,'sourceTree = "<group>";')
+					_p(2,'};')
+				end
+			end
+		})
 		_p('/* End PBXVariantGroup section */')
 		_p('')
 	end
 
-	
-	function xcode.XCBuildConfiguration(target, cfg)
+
+	function xcode.XCBuildConfigurationBlock(target, cfg)
 		local prj = target.prjnode.project
 		
-		_p(2,'%s /* %s */ = {', target.cfgids[cfg.name], cfg.name)
+		_p(2,'%s /* %s */ = {', target.configids[cfg.name], cfg.name)
 		_p(3,'isa = XCBuildConfiguration;')
 		_p(3,'buildSettings = {')
 		_p(4,'ALWAYS_SEARCH_USER_PATHS = NO;')
 
-		_p(4,'CONFIGURATION_BUILD_DIR = %s;', xcode.rebase(prj, cfg.buildtarget.rootdir))
+		_p(4,'CONFIGURATION_BUILD_DIR = %s;', xcode.rebase(prj, path.getdirectory(cfg.buildtarget.bundlepath)))
 
 		if cfg.flags.Symbols then
 			_p(4,'COPY_PHASE_STRIP = NO;')
@@ -559,150 +580,98 @@
 		_p(2,'};')
 	end
 	
+	
+	function xcode.XCBuildConfigurationDefault(tr, cfgname)
+		_p(2,'%s /* %s */ = {', tr.configids[cfgname], cfgname)
+		_p(3,'isa = XCBuildConfiguration;')
+		_p(3,'buildSettings = {')
+		_p(4,'ARCHS = "$(ARCHS_STANDARD_32_BIT)";')
+		_p(4,'GCC_C_LANGUAGE_STANDARD = c99;')
+		_p(4,'GCC_WARN_ABOUT_RETURN_TYPE = YES;')
+		_p(4,'GCC_WARN_UNUSED_VARIABLE = YES;')
+		_p(4,'ONLY_ACTIVE_ARCH = YES;')
+		_p(4,'PREBINDING = NO;')
+		_p(4,'SDKROOT = macosx10.5;')
+		-- I don't have any concept of a solution-level objdir; use the first target cfg
+		local target = tr.products.children[1]
+		local prj = target.prjnode.project
+		local cfg = premake.getconfig(prj, cfgname)
+		_p(4,'SYMROOT = %s;', xcode.rebase(prj, cfg.objectsdir))
+		_p(3,'};')
+		_p(3,'name = %s;', cfgname)
+		_p(2,'};')
+	end
 
-	function xcode.footer()
+
+	function xcode.XCBuildConfiguration(tr)
+		_p('/* Begin XCBuildConfiguration section */')
+		for _, target in ipairs(tr.products.children) do
+			for cfg in premake.eachconfig(target.prjnode.project) do
+				xcode.XCBuildConfigurationBlock(target, cfg)
+			end
+		end
+		for _, cfgname in ipairs(tr.solution.configurations) do
+			xcode.XCBuildConfigurationDefault(tr, cfgname)
+		end
+		_p('/* End XCBuildConfiguration section */')
+		_p('')
+	end
+
+
+	function xcode.XCBuildConfigurationList(tr)
+		_p('/* Begin XCConfigurationList section */')
+		for _, target in ipairs(tr.products.children) do
+			_p(2,'%s /* Build configuration list for PBXNativeTarget "%s" */ = {', target.cfgsection, target.name)
+			_p(3,'isa = XCConfigurationList;')
+			_p(3,'buildConfigurations = (')
+			for _, cfgname in ipairs(tr.solution.configurations) do
+				_p(4,'%s /* %s */,', target.configids[cfgname], cfgname)
+			end
+			_p(3,');')
+			_p(3,'defaultConfigurationIsVisible = 0;')
+			_p(3,'defaultConfigurationName = %s;', tr.solution.configurations[1])
+			_p(2,'};')
+		end
+		_p(2,'1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "%s" */ = {', tr.name)
+		_p(3,'isa = XCConfigurationList;')
+		_p(3,'buildConfigurations = (')
+		for _, cfgname in ipairs(tr.solution.configurations) do
+			_p(4,'%s /* %s */,', tr.configids[cfgname], cfgname)
+		end
+		_p(3,');')
+		_p(3,'defaultConfigurationIsVisible = 0;')
+		_p(3,'defaultConfigurationName = %s;', tr.solution.configurations[1])
+		_p(2,'};')
+		_p('/* End XCConfigurationList section */')
+		_p('')
+	end
+	
+
+	function xcode.Footer()
 		_p(1,'};')
 		_p('\trootObject = 08FB7793FE84155DC02AAC07 /* Project object */;')
 		_p('}')
 	end
 
 
---
--- Generate the project.pbxproj file.
---
--- @param sln
---    The target solution.
---
+
+---------------------------------------------------------------------------
+-- Xcode project generator function
+---------------------------------------------------------------------------
 
 	function premake.xcode.pbxproj(sln)
-
-		-- Build a project tree and target list, with Xcode specific metadata attached
-		local ctx = xcode.buildcontext(sln)
-
-		-- Begin file generation --
-		xcode.header()
-		xcode.PBXBuildFile(ctx)
-		xcode.PBXFileReference(ctx)
-		xcode.PBXFrameworksBuildPhase(ctx)
-		xcode.PBXGroup(ctx)
-
-		
-		_p('/* Begin PBXNativeTarget section */')
-		for _, target in ipairs(ctx.targets) do
-			_p(2,'%s /* %s */ = {', target.id, target.name)
-			_p(3,'isa = PBXNativeTarget;')
-			_p(3,'buildConfigurationList = %s /* Build configuration list for PBXNativeTarget "%s" */;', target.cfgsectionid, target.name)
-			_p(3,'buildPhases = (')
-			_p(4,'%s /* Resources */,', target.prjnode.resources.stageid)
-			_p(4,'%s /* Sources */,', target.sourcesid)
-			_p(4,'%s /* Frameworks */,', target.prjnode.frameworks.stageid)
-			_p(3,');')
-			_p(3,'buildRules = (')
-			_p(3,');')
-			_p(3,'dependencies = (')
-			_p(3,');')
-			_p(3,'name = %s;', target.name)
-			_p(3,'productName = %s;', target.name)
-			_p(3,'productReference = %s /* %s */;', target.fileid, target.name)
-			_p(3,'productType = "%s";', xcode.getproducttype(target.cfg.kind))
-			_p(2,'};')
-		end
-		_p('/* End PBXNativeTarget section */')
-		_p('')
-
-		xcode.PBXProject(ctx)
-		
-		_p('/* Begin PBXResourcesBuildPhase section */')
-		for _, target in ipairs(ctx.targets) do
-			_p(2,'%s /* Resources */ = {', target.prjnode.resources.stageid)
-			_p(3,'isa = PBXResourcesBuildPhase;')
-			_p(3,'buildActionMask = 2147483647;')
-			_p(3,'files = (')
-			for _, resource in ipairs(target.prjnode.resources.children) do
-				_p(4,'%s /* %s in Resources */,', resource.buildid, resource.name)
-			end
-			_p(3,');')
-			_p(3,'runOnlyForDeploymentPostprocessing = 0;')
-			_p(2,'};')
-		end
-		_p('/* End PBXResourcesBuildPhase section */')
-		_p('')
-
-		_p('/* Begin PBXSourcesBuildPhase section */')
-		for _, target in ipairs(ctx.targets) do
-			_p(2,'%s /* Sources */ = {', target.sourcesid)
-			_p(3,'isa = PBXSourcesBuildPhase;')
-			_p(3,'buildActionMask = 2147483647;')
-			_p(3,'files = (')
-			tree.traverse(target.prjnode, {
-				onleaf = function(node)
-					if xcode.getfilecategory(node.name) == "Sources" then
-						_p(4,'%s /* %s in Sources */,', node.buildid, node.name)
-					end
-				end
-			})
-			_p(3,');')
-			_p(3,'runOnlyForDeploymentPostprocessing = 0;')
-			_p(2,'};')
-		end
-		_p('/* End PBXSourcesBuildPhase section */')
-		_p('')
-
-		xcode.PBXVariantGroup(ctx)
-		
-		_p('/* Begin XCBuildConfiguration section */')
-		for _, target in ipairs(ctx.targets) do
-			local prj = target.prjnode.project
-			for cfg in premake.eachconfig(prj) do
-				xcode.XCBuildConfiguration(target, cfg)
-			end
-		end
-		for _, cfgname in ipairs(sln.configurations) do
-			_p(2,'%s /* %s */ = {', ctx.root.cfgids[cfgname], cfgname)
-			_p(3,'isa = XCBuildConfiguration;')
-			_p(3,'buildSettings = {')
-			_p(4,'ARCHS = "$(ARCHS_STANDARD_32_BIT)";')
-			_p(4,'GCC_C_LANGUAGE_STANDARD = c99;')
-			_p(4,'GCC_WARN_ABOUT_RETURN_TYPE = YES;')
-			_p(4,'GCC_WARN_UNUSED_VARIABLE = YES;')
-			_p(4,'ONLY_ACTIVE_ARCH = YES;')
-			_p(4,'PREBINDING = NO;')
-			_p(4,'SDKROOT = macosx10.5;')
-			-- I don't have any concept of a solution level objects directory so use the first project
-			local prj1 = premake.getconfig(sln.projects[1])
-			_p(4,'SYMROOT = %s;', xcode.rebase(prj1, prj1.objectsdir))
-			_p(3,'};')
-			_p(3,'name = %s;', cfgname)
-			_p(2,'};')
-		end
-		_p('/* End XCBuildConfiguration section */')
-		_p('')
-		
-		
-		_p('/* Begin XCConfigurationList section */')
-		for _, target in ipairs(ctx.targets) do
-			_p(2,'%s /* Build configuration list for PBXNativeTarget "%s" */ = {', target.cfgsectionid, target.name)
-			_p(3,'isa = XCConfigurationList;')
-			_p(3,'buildConfigurations = (')
-			for _, cfgname in ipairs(sln.configurations) do
-				_p(4,'%s /* %s */,', target.cfgids[cfgname], cfgname)
-			end
-			_p(3,');')
-			_p(3,'defaultConfigurationIsVisible = 0;')
-			_p(3,'defaultConfigurationName = %s;', sln.configurations[1])
-			_p(2,'};')
-		end
-		_p(2,'1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "%s" */ = {', ctx.prjroot.name)
-		_p(3,'isa = XCConfigurationList;')
-		_p(3,'buildConfigurations = (')
-		for _, cfgname in ipairs(sln.configurations) do
-			_p(4,'%s /* %s */,', ctx.root.cfgids[cfgname], cfgname)
-		end
-		_p(3,');')
-		_p(3,'defaultConfigurationIsVisible = 0;')
-		_p(3,'defaultConfigurationName = %s;', sln.configurations[1])
-		_p(2,'};')
-		_p('/* End XCConfigurationList section */')
-
-		xcode.footer()
+		tr = xcode.buildtree(sln)
+		xcode.Header(tr)
+		xcode.PBXBuildFile(tr)
+		xcode.PBXFileReference(tr)
+		xcode.PBXFrameworksBuildPhase(tr)
+		xcode.PBXGroup(tr)
+		xcode.PBXNativeTarget(tr)
+		xcode.PBXProject(tr)
+		xcode.PBXResourcesBuildPhase(tr)
+		xcode.PBXSourcesBuildPhase(tr)
+		xcode.PBXVariantGroup(tr)
+		xcode.XCBuildConfiguration(tr)
+		xcode.XCBuildConfigurationList(tr)
+		xcode.Footer(tr)
 	end

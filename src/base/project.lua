@@ -8,17 +8,21 @@
 	
 
 --
--- Builds and returns a tree from the project file structure.
+-- Create a tree from a project's list of files, representing the filesystem hierarchy.
+--
+-- @param prj
+--    The project containing the files to map.
+-- @returns
+--    A new tree object containing a corresponding filesystem hierarchy. The root node
+--    contains a reference back to the original project: prj = tr.project.
 --
 
 	function premake.project.buildsourcetree(prj)
 		local tr = premake.tree.new(prj.name)
-		tr.project = prj
-		
 		for _, fname in ipairs(prj.files) do
 			local node = premake.tree.add(tr, fname)
 		end
-		
+		tr.project = prj
 		return tr
 	end
 
@@ -458,10 +462,9 @@
 		local field   = iif(direction == "build", "target", "implib")
 		local name    = cfg[field.."name"] or cfg.targetname or cfg.project.name
 		local dir     = cfg[field.."dir"] or cfg.targetdir or path.getrelative(cfg.location, cfg.basedir)
-		local root    = name
-		local rootdir = dir
 		local prefix  = ""
 		local suffix  = ""
+		local bundlepath
 
 		if namestyle == "windows" then
 			if kind == "ConsoleApp" or kind == "WindowedApp" then
@@ -473,8 +476,8 @@
 			end
 		elseif namestyle == "posix" then
 			if kind == "WindowedApp" and system == "macosx" then
-				root = name .. ".app"
-				dir = path.join(dir, root .. "/Contents/MacOS")
+				bundlepath = path.join(dir, name .. ".app")
+				dir = path.join(bundlepath, "Contents/MacOS")
 			elseif kind == "SharedLib" then
 				prefix = "lib"
 				suffix = iif(system == "macosx", ".dylib", ".so")
@@ -496,12 +499,11 @@
 		
 		-- build the results object
 		local result = { }
-		result.basename  = name
-		result.name      = prefix .. name .. suffix
-		result.directory = dir
-		result.root      = root
-		result.rootdir   = rootdir
-		result.fullpath  = path.join(result.directory, result.name)
+		result.basename   = name
+		result.name       = prefix .. name .. suffix
+		result.directory  = dir
+		result.fullpath   = path.join(result.directory, result.name)
+		result.bundlepath = bundlepath or result.fullpath
 		
 		if pathstyle == "windows" then
 			result.directory = path.translate(result.directory, "\\")
