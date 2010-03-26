@@ -40,6 +40,34 @@
 
 
 --
+-- Trigger an action.
+--
+-- @param name
+--    The name of the action to be triggered.
+-- @returns
+--    None.
+--
+
+	function premake.action.call(name)
+		local a = premake.action.list[name]
+		for sln in premake.solution.each() do
+			if a.onsolution then
+				a.onsolution(sln)
+			end
+			for prj in premake.solution.eachproject(sln) do
+				if a.onproject then
+					a.onproject(prj)
+				end
+			end
+		end
+		
+		if a.execute then
+			a.execute()
+		end
+	end
+
+
+--
 -- Retrieve the current action, as determined by _ACTION.
 --
 -- @return
@@ -66,35 +94,6 @@
 
 
 --
--- Trigger an action.
---
--- @param name
---    The name of the action to be triggered.
--- @returns
---    None.
---
-
-	function premake.action.call(name)
-		local a = premake.action.list[name]
-
-		for _,sln in ipairs(_SOLUTIONS) do
-			if a.onsolution then
-				a.onsolution(sln)
-			end
-			for prj in premake.eachproject(sln) do
-				if a.onproject then
-					a.onproject(prj)
-				end
-			end
-		end
-		
-		if a.execute then
-			a.execute()
-		end
-	end
-
-
---
 -- Iterator for the list of actions.
 --
 
@@ -111,4 +110,50 @@
 			i = i + 1
 			return premake.action.list[keys[i]]
 		end
+	end
+
+
+--
+-- Activates a particular action.
+--
+-- @param name
+--    The name of the action to activate.
+--
+
+	function premake.action.set(name)
+		_ACTION = name
+		-- Some actions imply a particular operating system
+		local action = premake.action.get(name)
+		if action then
+			_OS = action.os or _OS
+		end
+	end
+
+
+--
+-- Determines if an action supports a particular language or target type.
+--
+-- @param action
+--    The action to test.
+-- @param feature
+--    The feature to check, either a programming language or a target type.
+-- @returns
+--    True if the feature is supported, false otherwise.
+--
+
+	function premake.action.supports(action, feature)
+		if not action then
+			return false
+		end
+		if action.valid_languages then
+			if table.contains(action.valid_languages, feature) then
+				return true
+			end
+		end
+		if action.valid_kinds then
+			if table.contains(action.valid_kinds, feature) then
+				return true
+			end
+		end
+		return false
 	end

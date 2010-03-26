@@ -48,24 +48,6 @@
 	end
 	
 	
-
---
--- Escape a keyword in preparation for testing against a list of terms.
--- Converts from Premake's simple pattern syntax to Lua's syntax.
---
-
-	function premake.escapekeyword(keyword)
-		keyword = keyword:gsub("([%.%-%^%$%(%)%%])", "%%%1")
-		if keyword:find("**", nil, true) then
-			keyword = keyword:gsub("%*%*", ".*")
-		else
-			keyword = keyword:gsub("%*", "[^/]*")
-		end
-		return keyword:lower()
-	end
-	
-	
-	
 --
 -- Test a single configuration block keyword against a list of terms.
 -- The terms are a mix of key/value pairs. The keyword is tested against
@@ -79,10 +61,10 @@
 			return not premake.iskeywordmatch(keyword:sub(5), terms)
 		end
 		
-		for _, word in ipairs(keyword:explode(" or ")) do
-			local pattern = "^" .. word .. "$"
+		for _, pattern in ipairs(keyword:explode(" or ")) do
+--			local pattern = "^" .. word .. "$"
 			for termkey, term in pairs(terms) do
-				if term:match(pattern) then
+				if term:match(pattern) == term then
 					return termkey
 				end
 			end
@@ -133,7 +115,7 @@
 				if field.kind == "path" then
 					obj[name] = path.getrelative(location, value) 
 				elseif field.kind == "dirlist" or field.kind == "filelist" then
-					for i, p in ipairs(value) do 
+					for i, p in ipairs(value) do
 						value[i] = path.getrelative(location, p) 
 					end
 				end
@@ -158,7 +140,15 @@
 		for field, value in pairs(src) do
 			if not nocopy[field] then
 				if type(value) == "table" then
-					dest[field] = table.join(dest[field] or {}, value)
+					-- merge two lists, removing any duplicates along the way
+					local tbl = dest[field] or { }
+					for _, item in ipairs(value) do
+						if not tbl[item] then
+							table.insert(tbl, item)
+							tbl[item] = item
+						end
+					end
+					dest[field] = tbl
 				else
 					dest[field] = value
 				end
@@ -179,35 +169,41 @@
 -- @param basis
 --    "Root" level settings, from the solution, which act as a starting point for
 --    all of the collapsed settings built during this call.
+-- @param terms
+--    A list of keywords to filter the configuration blocks; only those that
+--    match will be included in the destination.
 -- @param cfgname
 --    The name of the configuration being collapsed. May be nil.
 -- @param pltname
 --    The name of the platform being collapsed. May be nil.
 --
 
-	local function merge(dest, obj, basis, cfgname, pltname)
-		pltname = pltname or "Native"
-		
+	local function merge(dest, obj, basis, terms, cfgname, pltname)
+		-- the configuration key is the merged configuration and platform names
 		local key = cfgname or ""
+		pltname = pltname or "Native"
 		if pltname ~= "Native" then
 			key = key .. pltname
 		end
 		
+		-- add the configuration and platform to the block filter terms
+		terms.config = (cfgname or ""):lower()
+		terms.platform = pltname:lower()
+		
+		-- build the configuration base by merging the solution and project level settings
 		local cfg = {}
 		mergeobject(cfg, basis[key])
 		adjustpaths(obj.location, cfg)
 		mergeobject(cfg, obj)
-
-		local terms = premake.getactiveterms()
-		terms.config = (cfgname or ""):lower()
-		terms.platform = pltname:lower()
 		
+		-- now add in any blocks that match the filter terms
 		for _, blk in ipairs(obj.blocks) do
 			if (premake.iskeywordsmatch(blk.keywords, terms)) then
 				mergeobject(cfg, blk)
 			end
 		end
 		
+		-- package it all up and add it to the result set
 		cfg.name      = cfgname
 		cfg.platform  = pltname
 		cfg.terms     = terms
@@ -237,12 +233,23 @@
 		-- find the solution, which contains the configuration and platform lists
 		local sln = obj.solution or obj
 
-		merge(result, obj, basis)
+		-- build a set of configuration filter terms; only those configuration blocks 
+		-- with a matching set of keywords will be included in the merged results
+		local terms = premake.getactiveterms()
+
+		-- build a project-level configuration. If a target kind is set at this level
+		-- then include it into the filter terms
+		merge(result, obj, basis, terms)
+		if result[""].kind then
+			terms.kind = result[""].kind:lower()
+		end
+
+		-- now build configurations for each build config/platform pair
 		for _, cfgname in ipairs(sln.configurations) do
-			merge(result, obj, basis, cfgname, "Native")
+			merge(result, obj, basis, terms, cfgname, "Native")
 			for _, pltname in ipairs(sln.platforms or {}) do
 				if pltname ~= "Native" then
-					merge(result, obj, basis, cfgname, pltname)
+					merge(result, obj, basis, terms, cfgname, pltname)
 				end
 			end
 		end
@@ -343,7 +350,7 @@
 		local cfg_dirs = {}
 		local hit_counts = {}
 		
-		for _, sln in ipairs(_SOLUTIONS) do
+		for sln in premake.solution.each() do
 			for _, prj in ipairs(sln.projects) do
 				for _, cfg in pairs(prj.__configs) do
 
@@ -368,7 +375,7 @@
 		
 		-- Now assign an object directory to each configuration, skipping those
 		-- that are in use somewhere else in the session
-		for _, sln in ipairs(_SOLUTIONS) do
+		for sln in premake.solution.each() do
 			for _, prj in ipairs(sln.projects) do
 				for _, cfg in pairs(prj.__configs) do
 
@@ -392,7 +399,7 @@
 --
 
 	local function buildtargets()
-		for _, sln in ipairs(_SOLUTIONS) do
+		for sln in premake.solution.each() do
 			for _, prj in ipairs(sln.projects) do
 				for _, cfg in pairs(prj.__configs) do
 					-- determine which conventions the target should follow for this config
@@ -577,7 +584,7 @@
 	function premake.buildconfigs()
 	
 		-- convert project path fields to be relative to project location
-		for _, sln in ipairs(_SOLUTIONS) do
+		for sln in premake.solution.each() do
 			for _, prj in ipairs(sln.projects) do
 				prj.location = prj.location or sln.location or prj.basedir
 				adjustpaths(prj.location, prj)
@@ -590,7 +597,7 @@
 		
 		-- collapse configuration blocks, so that there is only one block per build
 		-- configuration/platform pair, filtered to the current operating environment		
-		for _, sln in ipairs(_SOLUTIONS) do
+		for sln in premake.solution.each() do
 			local basis = collapse(sln)
 			for _, prj in ipairs(sln.projects) do
 				prj.__configs = collapse(prj, basis)

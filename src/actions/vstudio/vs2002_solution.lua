@@ -13,34 +13,34 @@
 		_p('Microsoft Visual Studio Solution File, Format Version 7.00')
 		
 		-- Write out the list of project entries
-		for prj in premake.eachproject(sln) do
+		for prj in premake.solution.eachproject(sln) do
 			local projpath = path.translate(path.getrelative(sln.location, _VS.projectfile(prj)))
 			_p('Project("{%s}") = "%s", "%s", "{%s}"', _VS.tool(prj), prj.name, projpath, prj.uuid)
 			_p('EndProject')
 		end
 
 		_p('Global')
-		_p('\tGlobalSection(SolutionConfiguration) = preSolution')
+		_p(1,'GlobalSection(SolutionConfiguration) = preSolution')
 		for i, cfgname in ipairs(sln.configurations) do
-			_p('\t\tConfigName.%d = %s', i - 1, cfgname)
+			_p(2,'ConfigName.%d = %s', i - 1, cfgname)
 		end
-		_p('\tEndGlobalSection')
+		_p(1,'EndGlobalSection')
 
-		_p('\tGlobalSection(ProjectDependencies) = postSolution')
-		_p('\tEndGlobalSection')
+		_p(1,'GlobalSection(ProjectDependencies) = postSolution')
+		_p(1,'EndGlobalSection')
 		
-		_p('\tGlobalSection(ProjectConfiguration) = postSolution')
-		for prj in premake.eachproject(sln) do
+		_p(1,'GlobalSection(ProjectConfiguration) = postSolution')
+		for prj in premake.solution.eachproject(sln) do
 			for _, cfgname in ipairs(sln.configurations) do
-				_p('\t\t{%s}.%s.ActiveCfg = %s|%s', prj.uuid, cfgname, cfgname, _VS.arch(prj))
-				_p('\t\t{%s}.%s.Build.0 = %s|%s', prj.uuid, cfgname, cfgname, _VS.arch(prj))
+				_p(2,'{%s}.%s.ActiveCfg = %s|%s', prj.uuid, cfgname, cfgname, _VS.arch(prj))
+				_p(2,'{%s}.%s.Build.0 = %s|%s', prj.uuid, cfgname, cfgname, _VS.arch(prj))
 			end
 		end
-		_p('\tEndGlobalSection')
-		_p('\tGlobalSection(ExtensibilityGlobals) = postSolution')
-		_p('\tEndGlobalSection')
-		_p('\tGlobalSection(ExtensibilityAddIns) = postSolution')
-		_p('\tEndGlobalSection')
+		_p(1,'EndGlobalSection')
+		_p(1,'GlobalSection(ExtensibilityGlobals) = postSolution')
+		_p(1,'EndGlobalSection')
+		_p(1,'GlobalSection(ExtensibilityAddIns) = postSolution')
+		_p(1,'EndGlobalSection')
 		
 		_p('EndGlobal')
 	end

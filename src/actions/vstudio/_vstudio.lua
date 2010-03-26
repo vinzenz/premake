@@ -1,11 +1,13 @@
 --
 -- _vstudio.lua
 -- Define the Visual Studio 200x actions.
--- Copyright (c) 2008-2009 Jason Perkins and the Premake project
+-- Copyright (c) 2008-2010 Jason Perkins and the Premake project
 --
 
+	_VS = { }  -- deprecated, will remove eventually
+
 	premake.vstudio = { }
-	_VS = { }
+	local vstudio = premake.vstudio
 
 
 --
@@ -153,16 +155,12 @@
 	end
 	
 	function premake.vstudio.cleanproject(prj)
-		local fext
-		if premake.isdotnetproject(prj) then
-			fext = ".csproj"
-		else
-			fext = ".vcproj"
-		end
-		
-		local fname = premake.project.getfilename(prj, "%%" .. fext)
-		os.remove(fname)
-		os.remove(fname .. ".user")
+		local fext = iif(premake.isdotnetproject(prj), ".csproj", ".vcproj")
+
+		local fname = premake.project.getfilename(prj, "%%")
+		os.remove(fname .. fext)
+		os.remove(fname .. fext .. ".user")
+		os.remove(fname .. ".pidb")
 		
 		local userfiles = os.matchfiles(fname .. ".*.user")
 		for _, fname in ipairs(userfiles) do
@@ -269,23 +267,6 @@
 		return fname..extension
 	end
 	
-	
-
--- 
--- Returns the runtime code for a configuration.
--- (this should probably go in vs200x_vcproj.lua)
---
-
-	function _VS.runtime(cfg)
-		local debugbuild = (_VS.optimization(cfg) == 0)
-		if (cfg.flags.StaticRuntime) then
-			return iif(debugbuild, 1, 0)
-		else
-			return iif(debugbuild, 3, 2)
-		end
-	end
-
-
 
 --
 -- Returns the Visual Studio tool ID for a given project type.
@@ -309,7 +290,7 @@
 	newaction {
 		trigger         = "vs2002",
 		shortname       = "Visual Studio 2002",
-		description     = "Microsoft Visual Studio 2002",
+		description     = "Generate Microsoft Visual Studio 2002 project files",
 		os              = "windows",
 		
 		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
@@ -342,7 +323,7 @@
 	newaction {
 		trigger         = "vs2003",
 		shortname       = "Visual Studio 2003",
-		description     = "Microsoft Visual Studio 2003",
+		description     = "Generate Microsoft Visual Studio 2003 project files",
 		os              = "windows",
 
 		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
@@ -375,7 +356,7 @@
 	newaction {
 		trigger         = "vs2005",
 		shortname       = "Visual Studio 2005",
-		description     = "Microsoft Visual Studio 2005 (SharpDevelop, MonoDevelop)",
+		description     = "Generate Microsoft Visual Studio 2005 project files",
 		os              = "windows",
 
 		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
@@ -408,7 +389,7 @@
 	newaction {
 		trigger         = "vs2008",
 		shortname       = "Visual Studio 2008",
-		description     = "Microsoft Visual Studio 2008",
+		description     = "Generate Microsoft Visual Studio 2008 project files",
 		os              = "windows",
 
 		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },

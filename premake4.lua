@@ -3,19 +3,6 @@
 -- 
 
 --
--- Earlier versions of Visual Studio limit static strings to 1K (IIRC) and choke on
--- the embedded scripts. I'll work around it if people complain.
---
-
-	if (_ACTION == "vs2002" or _ACTION == "vs2003") then
-		error(
-			"\nBecause of compiler limitations, Visual Studio 2002 and 2003 aren't able to\n" ..
-			"build this version of Premake. Use the free Visual Studio Express instead.", 0)
-	end
-
-
-
---
 -- Define the project. Put the release configuration first so it will be the
 -- default when folks build using the makefile. That way they don't have to 
 -- worry about the /scripts argument and all that.
@@ -34,8 +21,7 @@
 
 		files 
 		{
-			"src/**.h", "src/**.c", "src/**.lua",
-			"tests/**.lua"
+			"*.txt", "**.lua", "src/**.h", "src/**.c",
 		}
 
 		excludes
@@ -45,8 +31,7 @@
 			"src/host/lua-5.1.4/src/luac.c",
 			"src/host/lua-5.1.4/src/print.c",
 			"src/host/lua-5.1.4/**.lua",
-			"src/host/lua-5.1.4/etc/*.c",
-            "src/host/lua-ex/**.lua"
+			"src/host/lua-5.1.4/etc/*.c"
 		}
 			
 		configuration "Debug"
@@ -63,16 +48,20 @@
 			defines     { "_CRT_SECURE_NO_WARNINGS" }
 
 		configuration "linux"
-			defines     { "LUA_USE_LINUX" }
+			defines     { "LUA_USE_POSIX", "LUA_USE_DLOPEN" }
 			links       { "m", "dl" } 
-            excludes  { "src/host/lua-ex/w32api/**.c" }
 			
 		configuration "macosx"
 			defines     { "LUA_USE_MACOSX" }
-            excludes  { "src/host/lua-ex/w32api/**.c" }
+			
+		configuration { "macosx", "gmake" }
+			buildoptions { "-isysroot /Developer/SDKs/MacOSX10.5.sdk", "-mmacosx-version-min=10.5" }
 
-        configuration "windows"
-            excludes  { "src/host/lua-ex/posix/**.c" }
+		configuration "not windows"
+			linkoptions { "-rdynamic" }
+
+
+
 --
 -- A more thorough cleanup.
 --

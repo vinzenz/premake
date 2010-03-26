@@ -6,14 +6,14 @@
 
 
 --
--- Performs a sanity check all all of the solutions and projects 
+-- Performs a sanity check of all of the solutions and projects 
 -- in the session to be sure they meet some minimum requirements.
 --
 
 	function premake.checkprojects()
 		local action = premake.action.current()
 		
-		for _, sln in ipairs(_SOLUTIONS) do
+		for sln in premake.solution.each() do
 		
 			-- every solution must have at least one project
 			if (#sln.projects == 0) then
@@ -25,7 +25,7 @@
 				return nil, "solution '" .. sln.name .. "' needs configurations"
 			end
 			
-			for prj in premake.eachproject(sln) do
+			for prj in premake.solution.eachproject(sln) do
 
 				-- every project must have a language
 				if (not prj.language) then
@@ -54,6 +54,12 @@
 					end
 					
 				end
+				
+				-- some actions have custom validation logic
+				if action.oncheckproject then
+					action.oncheckproject(prj)
+				end
+				
 			end
 		end		
 		return true

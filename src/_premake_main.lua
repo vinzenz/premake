@@ -20,7 +20,7 @@
 		if not platform then return true end
 		platform = premake.checkvalue(platform, premake.fields.platforms.allowed)
 		
-		for _, sln in ipairs(_SOLUTIONS) do
+		for sln in premake.solution.each() do
 			local platforms = sln.platforms or { }
 			
 			-- an empty table is equivalent to a native build
@@ -63,13 +63,10 @@
 		end
 		
 
-		-- Some actions imply a particular operating system. Set it early so
-		-- it can be picked up by the scripts.
+		-- Set up the environment for the chosen action early, so side-effects
+		-- can be picked up by the scripts.
 
-		local action = premake.action.current()
-		if action then
-			_OS = action.os or _OS
-		end
+		premake.action.set(_ACTION)
 
 		
 		-- Seed the random number generator so actions don't have to do it themselves

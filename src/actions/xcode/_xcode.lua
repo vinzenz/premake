@@ -10,10 +10,10 @@
 	{
 		trigger         = "xcode3",
 		shortname       = "Xcode 3",
-		description     = "Apple Xcode 3 (experimental)",
+		description     = "Generate Apple Xcode 3 project files (experimental)",
 		os              = "macosx",
 
-		valid_kinds     = { "ConsoleApp", "WindowedApp" },
+		valid_kinds     = { "ConsoleApp", "WindowedApp", "SharedLib", "StaticLib" },
 		
 		valid_languages = { "C", "C++" },
 		
@@ -21,11 +21,38 @@
 			cc     = { "gcc" },
 		},
 
+		valid_platforms = { 
+			Native = "Native", 
+			x32 = "Native 32-bit", 
+			x64 = "Native 64-bit", 
+			Universal32 = "32-bit Universal", 
+			Universal64 = "64-bit Universal", 
+			Universal = "Universal",
+		},
+		
+		default_platform = "Universal",
+		
 		onsolution = function(sln)
-			premake.generate(sln, "%%.xcodeproj/project.pbxproj", premake.xcode.pbxproj)
+			-- Assign IDs needed for inter-project dependencies
+			premake.xcode.preparesolution(sln)
 		end,
 		
-		oncleansolution = function(sln)
-			premake.clean.directory(sln, "%%.xcodeproj")
+		onproject = function(prj)
+			premake.generate(prj, "%%.xcodeproj/project.pbxproj", premake.xcode.project)
+		end,
+		
+		oncleanproject = function(prj)
+			premake.clean.directory(prj, "%%.xcodeproj")
+		end,
+		
+		oncheckproject = function(prj)
+			-- Xcode can't mix target kinds within a project
+			local last
+			for cfg in premake.eachconfig(prj) do
+				if last and last ~= cfg.kind then
+					error("Project '" .. prj.name .. "' uses more than one target kind; not supported by Xcode", 0)
+				end
+				last = cfg.kind
+			end
 		end,
 	}

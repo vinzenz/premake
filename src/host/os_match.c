@@ -106,13 +106,15 @@ int os_matchstart(lua_State* L)
 		m->path = (char*)malloc(split - mask + 1);
 		strncpy(m->path, mask, split - mask);
 		m->path[split - mask] = '\0';
-		m->mask = (char*)(split + 1);
+		m->mask = (char*)malloc(mask + strlen(mask) - split);
+		strcpy(m->mask, split + 1);
 	}
 	else
 	{
 		m->path = (char*)malloc(2);
 		strcpy(m->path, ".");
-		m->mask = (char*)mask;
+		m->mask = (char*)malloc(strlen(mask)+1);
+		strcpy(m->mask, mask);
 	}
 
 	m->handle = opendir(m->path);
@@ -126,6 +128,7 @@ int os_matchdone(lua_State* L)
 	if (m->handle != NULL)
 		closedir(m->handle);
 	free(m->path);
+	free(m->mask);
 	free(m);
 	return 0;
 }
@@ -166,7 +169,7 @@ int os_matchnext(lua_State* L)
 	while (m->entry != NULL)
 	{
 		const char* name = m->entry->d_name;
-		if (strcmp(name, ".") && strcmp(name,"..") && fnmatch(m->mask, name, 0) == 0)
+		if (name[0] != '.' && fnmatch(m->mask, name, 0) == 0)
 		{
 			lua_pushboolean(L, 1);
 			return 1;

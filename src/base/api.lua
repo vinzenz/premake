@@ -49,6 +49,12 @@
 			usagecopy = true,
 		},
 		
+		deployoptions =
+		{
+			kind  = "list",
+			scope = "config",
+		},
+		
 		excludes =
 		{
 			kind  = "filelist",
@@ -69,8 +75,12 @@
 			isflags = true,
 			usagecopy = true,
 			allowed = {
+				"EnableSSE",
+				"EnableSSE2",
 				"ExtraWarnings",
 				"FatalWarnings",
+				"FloatFast",
+				"FloatStrict",
 				"Managed",
 				"NativeWChar",
 				"No64BitChecks",
@@ -79,6 +89,7 @@
 				"NoFramePointer",
 				"NoImportLib",
 				"NoManifest",
+				"NoMinimalRebuild",
 				"NoNativeWChar",
 				"NoPCH",
 				"NoRTTI",
@@ -92,6 +103,26 @@
 				"Unsafe",
 				"WinMain"
 			}
+		},
+		
+		framework =
+		{
+			kind = "string",
+			scope = "container",
+			allowed = {
+				"1.0",
+				"1.1",
+				"2.0",
+				"3.0",
+				"3.5",
+				"4.0"
+			}
+		},
+		
+		imageoptions =
+		{
+			kind  = "list",
+			scope = "config",
 		},
 		
 		implibdir =
@@ -113,6 +144,12 @@
 		},
 		
 		implibprefix =
+		{
+			kind  = "string",
+			scope = "config",
+		},
+		
+		implibsuffix =
 		{
 			kind  = "string",
 			scope = "config",
@@ -261,6 +298,12 @@
 		},
 		
 		targetprefix =
+		{
+			kind  = "string",
+			scope = "config",
+		},
+		
+		targetsuffix =
 		{
 			kind  = "string",
 			scope = "config",
@@ -416,21 +459,23 @@
 	local function domatchedarray(ctype, fieldname, value, matchfunc)
 		local result = { }
 		
-		function makeabsolute(value)
+		function makeabsolute(value, depth)
 			if (type(value) == "table") then
-				for _,item in ipairs(value) do
-					makeabsolute(item)
+				for _, item in ipairs(value) do
+					makeabsolute(item, depth + 1)
 				end
-			else
+			elseif type(value) == "string" then
 				if value:find("*") then
-					makeabsolute(matchfunc(value))
+					makeabsolute(matchfunc(value), depth + 1)
 				else
 					table.insert(result, path.getabsolute(value))
 				end
+			else
+				error("Invalid value in list: expected string, got " .. type(value), depth)
 			end
 		end
 		
-		makeabsolute(value)
+		makeabsolute(value, 3)
 		return premake.setarray(ctype, fieldname, result)
 	end
 	
@@ -518,8 +563,8 @@
 -- Project object constructors.
 --
 
-	function configuration(keywords)
-		if not keywords then
+	function configuration(terms)
+		if not terms then
 			return premake.CurrentConfiguration
 		end
 		
@@ -529,27 +574,18 @@
 		end
 		
 		local cfg = { }
+		cfg.terms = table.flatten({terms})
+		
 		table.insert(container.blocks, cfg)
 		premake.CurrentConfiguration = cfg
 		
-		-- create a keyword list using just the indexed keyword items
+		-- create a keyword list using just the indexed keyword items. This is a little
+		-- confusing: "terms" are what the user specifies in the script, "keywords" are
+		-- the Lua patterns that result. I'll refactor to better names.
 		cfg.keywords = { }
-		for _, word in ipairs(table.join({}, keywords)) do
-			table.insert(cfg.keywords, premake.escapekeyword(word))
+		for _, word in ipairs(cfg.terms) do
+			table.insert(cfg.keywords, path.wildcards(word):lower())
 		end
-		
-		-- if file patterns are specified, convert them to Lua patterns and add them too
-		if keywords.files then
-			for _, pattern in ipairs(table.join({}, keywords.files)) do
-				pattern = pattern:gsub("%.", "%%.")
-				if pattern:find("**", nil, true) then
-					pattern = pattern:gsub("%*%*", ".*")
-				else
-					pattern = pattern:gsub("%*", "[^/]*")
-				end
-				table.insert(cfg.keywords, "^" .. pattern .. "$")
-			end
-		end		
 
 		-- initialize list-type fields to empty tables
 		for name, field in pairs(premake.fields) do
@@ -681,25 +717,9 @@
 			end
 		end
 		
-		premake.CurrentContainer = _SOLUTIONS[name]
+		premake.CurrentContainer = premake.solution.get(name)
 		if (not premake.CurrentContainer) then
-			local sln = { }
-			premake.CurrentContainer = sln
-
-			-- add to master list keyed by both name and index
-			table.insert(_SOLUTIONS, sln)
-			_SOLUTIONS[name] = sln
-			
-			-- attach a type
-			setmetatable(sln, { 
-				__type="solution"
-			})
-
-			sln.name           = name
-			sln.basedir        = os.getcwd()			
-			sln.projects       = { }
-			sln.blocks         = { }
-			sln.configurations = { }
+			premake.CurrentContainer = premake.solution.new(name)
 		end
 
 		-- add an empty, global configuration

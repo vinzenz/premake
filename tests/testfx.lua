@@ -18,7 +18,7 @@
 	
 	function test.capture(expected)
 		local actual = io.endcapture()
-
+		
 		local ait = actual:gfind("(.-)" .. io.eol)
 		local eit = expected:gfind("(.-)\n")
 		
@@ -29,6 +29,7 @@
 			if (etxt ~= atxt) then
 				test.fail("(%d) expected:\n%s\n...but was:\n%s", linenum, etxt, atxt)
 			end
+			
 			linenum = linenum + 1
 			atxt = ait()
 			etxt = eit()
@@ -78,7 +79,7 @@
 	function test.isequal(expected, actual)
 		if (type(expected) == "table") then
 			for k,v in pairs(expected) do
-				if (expected[k] ~= actual[k]) then
+				if not (test.isequal(expected[k], actual[k])) then
 					test.fail("expected %s but was %s", expected, actual)
 				end
 			end
@@ -87,6 +88,7 @@
 				test.fail("expected %s but was %s", expected, actual)
 			end
 		end
+		return true
 	end
 	
 		
@@ -176,7 +178,7 @@
 		_ACTION = "test"
 		_ARGS = { }
 		_OPTIONS = { }
-		_SOLUTIONS = { }
+		premake.solution.list = { }
 
 		-- reset captured I/O values
 		test.value_openedfilename = nil

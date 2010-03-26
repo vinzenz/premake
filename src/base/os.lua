@@ -1,15 +1,25 @@
 --
 -- os.lua
 -- Additions to the OS namespace.
--- Copyright (c) 2002-2008 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2010 Jason Perkins and the Premake project
 --
+
+
+--
+-- Same as os.execute(), but accepts string formatting arguments.
+--
+
+	function os.executef(cmd, ...)
+		cmd = string.format(cmd, unpack(arg))
+		return os.execute(cmd)
+	end
 
 
 --
 -- Scan the well-known system locations for a particular library.
 --
 
-	function os.findlib(libname, paths)
+	function os.findlib(libname)
 		local path, formats
 		
 		-- assemble a search path, depending on the platform
@@ -23,19 +33,19 @@
 			else
 				formats = { "lib%s.so", "%s.so" }
 				path = os.getenv("LD_LIBRARY_PATH") or ""
-		
-				for line in io.lines("/etc/ld.so.conf") do
-					path = path .. ":" .. line
+	
+				io.input("/etc/ld.so.conf")
+				if io.input() then
+					for line in io.lines() do
+						path = path .. ":" .. line
+					end
+					io.input():close()
 				end
 			end
 			
 			table.insert(formats, "%s")	
 			path = (path or "") .. ":/lib:/usr/lib:/usr/local/lib"
 		end
-
-        if paths then
-            path = path .. ":" .. paths
-        end
 		
 		for _, fmt in ipairs(formats) do
 			local name = string.format(fmt, libname)
@@ -43,36 +53,7 @@
 			if result then return result end
 		end
 	end
-
---
--- Scan the well-known locations for a header file.
---
-	function os.findheader(name,paths)
-		local path, incs
-		incs = {}
-		path = os.getenv("PATH")
-
-		if not os.is("windows") then
-			-- Search in 'std' gcc dirs
-			path = (path or "") .. ":/usr/include:/usr/local/include"
-		end
-
-        if paths then
-            table.insert(incs, paths)
-        end
-
-		if path ~= nil then
-			table.insert(incs, path)
-		end
-
-
-		for _, path in ipairs(incs) do
-			local result = os.pathsearch(name, path)
-			if result then return result end
-		end
-
-		-- todo: fall back to just attempting to actully compile it?
-	end
+	
 	
 	
 --
@@ -98,32 +79,61 @@
 --
 -- The os.matchdirs() and os.matchfiles() functions
 --
-
+	
 	local function domatch(result, mask, wantfiles)
-		local basedir = path.getdirectory(mask)
-		if (basedir == ".") then basedir = "" end
-		
-		local m = os.matchstart(mask)
-		while (os.matchnext(m)) do
-			local fname = os.matchname(m)
-			local isfile = os.matchisfile(m)
-			if ((wantfiles and isfile) or (not wantfiles and not isfile)) then
-				table.insert(result, path.join(basedir, fname))
-			end
+		-- strip off any leading directory information to find out
+		-- where the search should take place
+		local basedir = mask
+		local starpos = mask:find("%*")
+		if starpos then
+			basedir = basedir:sub(1, starpos - 1)
 		end
-		os.matchdone(m)
+		basedir = path.getdirectory(basedir)
+		if (basedir == ".") then basedir = "" end
 
-		-- if the mask uses "**", recurse subdirectories
-		if (mask:find("**", nil, true)) then
-			mask = path.getname(mask)			
-			m = os.matchstart(path.join(basedir, "*"))
+		-- need to remove extraneous path info from the mask to ensure a match
+		-- against the paths returned by the OS. Haven't come up with a good 
+		-- way to do it yet, so will handle cases as they come up
+		if mask:startswith("./") then
+			mask = mask:sub(3)
+		end
+		
+		-- recurse into subdirectories?
+		local recurse = mask:find("**", nil, true)
+		
+		-- convert mask to a Lua pattern
+		mask = path.wildcards(mask)
+
+		local function matchwalker(basedir)
+			local wildcard = path.join(basedir, "*")
+			
+			-- retrieve files from OS and test against mask
+			local m = os.matchstart(wildcard)
 			while (os.matchnext(m)) do
-				local dirname = os.matchname(m)
-				local submask = path.join(path.join(basedir, dirname), mask)
-				domatch(result, submask, wantfiles)
+				local isfile = os.matchisfile(m)
+				if ((wantfiles and isfile) or (not wantfiles and not isfile)) then
+					local fname = path.join(basedir, os.matchname(m))
+					if fname:match(mask) == fname then
+						table.insert(result, fname)
+					end
+				end
 			end
 			os.matchdone(m)
+
+			-- check subdirectories
+			if recurse then
+				m = os.matchstart(wildcard)
+				while (os.matchnext(m)) do
+					if not os.matchisfile(m) then
+						local dirname = os.matchname(m)
+						matchwalker(path.join(basedir, dirname))
+					end
+				end
+				os.matchdone(m)
+			end
 		end
+
+		matchwalker(basedir)
 	end
 	
 	function os.matchdirs(...)
@@ -191,17 +201,3 @@
 		builtin_rmdir(p)
 	end
 	
---
--- Capture and return the output of running a command
---
-  function os.capture(cmd, raw)
-    -- Does anything not have io.popen?
-    local f = assert(io.popen(cmd, 'r'))
-    local s = assert(f:read('*a'))
-    f:close()
-    if raw then return s end
-    s = string.gsub(s, '^%s+', '')
-    s = string.gsub(s, '%s+$', '')
-    return s
-  end
-

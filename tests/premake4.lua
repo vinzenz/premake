@@ -1,7 +1,7 @@
 --
 -- tests/premake4.lua
 -- Automated test suite for Premake 4.x
--- Copyright (c) 2008-2009 Jason Perkins and the Premake project
+-- Copyright (c) 2008-2010		Jason Perkins and the Premake project
 --
 
 	dofile("testfx.lua")
@@ -38,29 +38,38 @@
 --
 
 	dofile("test_dofile.lua")
-	dofile("test_os.lua")
-	dofile("test_path.lua")
 	dofile("test_string.lua")
-	dofile("test_table.lua")
 	dofile("test_premake.lua")
 	dofile("test_project.lua")
 	dofile("test_configs.lua")
 	dofile("test_platforms.lua")
-	dofile("test_api.lua")
 	dofile("test_targets.lua")
 	dofile("test_keywords.lua")
 	dofile("test_gcc.lua")
+	dofile("test_gmake_cpp.lua")
+	dofile("test_gmake_cs.lua")
+	dofile("base/test_api.lua")
+	dofile("base/test_action.lua")
+	dofile("base/test_os.lua")
+	dofile("base/test_path.lua")
+	dofile("base/test_table.lua")
+	dofile("base/test_tree.lua")
+	
+	-- Clean tests
+	dofile("actions/test_clean.lua")
+	
+	-- Visual Studio tests
 	dofile("test_vs2002_sln.lua")
 	dofile("test_vs2003_sln.lua")
 	dofile("test_vs2005_sln.lua")
 	dofile("test_vs2008_sln.lua")
-	dofile("test_vs200x_vcproj.lua")
-	dofile("test_gmake_cpp.lua")
-	dofile("test_gmake_cs.lua")
-	dofile("base/test_action.lua")
-	dofile("base/test_tree.lua")
-	dofile("actions/test_clean.lua")
-	dofile("actions/test_xcode.lua")
+	dofile("actions/vstudio/test_vs2005_csproj.lua")
+	dofile("actions/vstudio/test_vs200x_vcproj.lua")
+
+	-- Xcode tests
+	dofile("actions/xcode/test_xcode_common.lua")
+	dofile("actions/xcode/test_xcode_project.lua")
+	dofile("actions/xcode/test_xcode_dependencies.lua")
 
 
 --

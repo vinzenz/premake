@@ -22,6 +22,7 @@
 		for _, fname in ipairs(prj.files) do
 			local node = premake.tree.add(tr, fname)
 		end
+		premake.tree.sort(tr)
 		tr.project = prj
 		return tr
 	end
@@ -70,28 +71,6 @@
 
 
 --
--- Iterator for a solution's projects, or rather project root configurations.
--- These configuration objects include all settings related to the project,
--- regardless of where they were originally specified.
---
-
-	function premake.eachproject(sln)
-		local i = 0
-		return function ()
-			i = i + 1
-			if (i <= #sln.projects) then
-				local prj = sln.projects[i]
-				local cfg = premake.getconfig(prj)
-				cfg.name  = prj.name
-				cfg.blocks = prj.blocks
-				return cfg
-			end
-		end
-	end
-
-
-
---
 -- Apply XML escaping to a value.
 --
 
@@ -123,7 +102,7 @@
 --  { x32 = "Win32", x64 = "x64" }
 --
 -- Only platforms that are listed in both the solution and the map will be
--- included in the results. An option default platform may also be specified;
+-- included in the results. An optional default platform may also be specified;
 -- if the result set would otherwise be empty this platform will be used.
 --
 
@@ -154,10 +133,10 @@
 
 	function premake.findproject(name)
 		name = name:lower()
-		for _, sln in ipairs(_SOLUTIONS) do
-			for _, prj in ipairs(sln.projects) do
+		for sln in premake.solution.each() do
+			for prj in premake.solution.eachproject(sln) do
 				if (prj.name:lower() == name) then
-					return prj
+					return  prj
 				end
 			end
 		end
@@ -286,7 +265,7 @@
 --
 -- Returns a list of link targets. Kind may be one of:
 --   siblings     - linkable sibling projects
---   system       - system (non-subling) libraries
+--   system       - system (non-sibling) libraries
 --   dependencies - all sibling dependencies, including non-linkable
 --   all          - return everything
 --
@@ -433,12 +412,13 @@
 --    shared libraries on Mac OS X use a ".dylib" extension.
 -- @returns
 --    An object with these fields:
---      basename  - the target with no directory or file extension
---      name      - the target name and extension, with no directory
---      directory - relative path to the target, with no file name
---      root      - the root target, primarily for Mac OS X (MyProject.app, etc.)
---      rootdir   - the root target directory, for Mac OS X (MyProject.app, etc.)
---      fullpath  - directory, name, and extension
+--      basename   - the target with no directory or file extension
+--      name       - the target name and extension, with no directory
+--      directory  - relative path to the target, with no file name
+--      prefix     - the file name prefix
+--      suffix     - the file name suffix
+--      fullpath   - directory, name, and extension
+--      bundlepath - the relative path and file name of the bundle
 --
 
 	function premake.gettarget(cfg, direction, pathstyle, namestyle, system)
@@ -464,44 +444,49 @@
 		local dir     = cfg[field.."dir"] or cfg.targetdir or path.getrelative(cfg.location, cfg.basedir)
 		local prefix  = ""
 		local suffix  = ""
-		local bundlepath
+		local ext     = ""
+		local bundlepath, bundlename
 
 		if namestyle == "windows" then
 			if kind == "ConsoleApp" or kind == "WindowedApp" then
-				suffix = ".exe"
+				ext = ".exe"
 			elseif kind == "SharedLib" then
-				suffix = ".dll"
+				ext = ".dll"
 			elseif kind == "StaticLib" then
-				suffix = ".lib"
+				ext = ".lib"
 			end
 		elseif namestyle == "posix" then
 			if kind == "WindowedApp" and system == "macosx" then
-				bundlepath = path.join(dir, name .. ".app")
+				bundlename = name .. ".app"
+				bundlepath = path.join(dir, bundlename)
 				dir = path.join(bundlepath, "Contents/MacOS")
 			elseif kind == "SharedLib" then
 				prefix = "lib"
-				suffix = iif(system == "macosx", ".dylib", ".so")
+				ext = iif(system == "macosx", ".dylib", ".so")
 			elseif kind == "StaticLib" then
 				prefix = "lib"
-				suffix = ".a"
+				ext = ".a"
 			end
 		elseif namestyle == "PS3" then
 			if kind == "ConsoleApp" or kind == "WindowedApp" then
-				suffix = ".elf"
+				ext = ".elf"
 			elseif kind == "StaticLib" then
 				prefix = "lib"
-				suffix = ".a"
+				ext = ".a"
 			end
 		end
 			
 		prefix = cfg[field.."prefix"] or cfg.targetprefix or prefix
-		suffix = cfg[field.."extension"] or cfg.targetextension or suffix
+		suffix = cfg[field.."suffix"] or cfg.targetsuffix or suffix
+		ext    = cfg[field.."extension"] or cfg.targetextension or ext
 		
 		-- build the results object
 		local result = { }
-		result.basename   = name
-		result.name       = prefix .. name .. suffix
+		result.basename   = name .. suffix
+		result.name       = prefix .. name .. suffix .. ext
 		result.directory  = dir
+		result.prefix     = prefix
+		result.suffix     = suffix
 		result.fullpath   = path.join(result.directory, result.name)
 		result.bundlepath = bundlepath or result.fullpath
 		
@@ -541,7 +526,7 @@
 --
 
 	function premake.hascppproject(sln)
-		for prj in premake.eachproject(sln) do
+		for prj in premake.solution.eachproject(sln) do
 			if premake.iscppproject(prj) then
 				return true
 			end
@@ -555,7 +540,7 @@
 --
 
 	function premake.hasdotnetproject(sln)
-		for prj in premake.eachproject(sln) do
+		for prj in premake.solution.eachproject(sln) do
 			if premake.isdotnetproject(prj) then
 				return true
 			end

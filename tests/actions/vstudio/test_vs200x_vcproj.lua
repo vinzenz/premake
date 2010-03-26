@@ -5,6 +5,7 @@
 --
 
 	T.vs200x_vcproj = { }
+	local suite = T.vs200x_vcproj
 
 
 --
@@ -12,7 +13,7 @@
 --
 
 	local sln, prj
-	function T.vs200x_vcproj.setup()
+	function suite.setup()
 		_ACTION = "vs2005"
 
 		sln = solution "MySolution"
@@ -45,7 +46,7 @@
 -- Make sure I've got the basic layout correct
 --
 
-	function T.vs200x_vcproj.BasicLayout()
+	function suite.BasicLayout()
 		prepare()
 		premake.vs200x_vcproj(prj)
 		test.capture [[
@@ -92,12 +93,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				ProgramDataBaseFileName="$(OutDir)\MyProject.pdb"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -170,12 +171,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				ProgramDataBaseFileName="$(OutDir)\MyProject.pdb"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -238,7 +239,7 @@
 -- Test multiple platforms
 --
 
-	function T.vs200x_vcproj.Platforms_OnMultiplePlatforms()
+	function suite.Platforms_OnMultiplePlatforms()
 		platforms { "x32", "x64" }
 		prepare()
 
@@ -256,7 +257,7 @@
 -- Test x64 handling
 --
 
-	function T.vs200x_vcproj.PlatformsList_OnX64()
+	function suite.PlatformsList_OnX64()
 		platforms { "Native", "x64" }
 		prepare()
 		premake.vs200x_vcproj_platforms(prj)
@@ -278,7 +279,7 @@
 -- Test Xbox360 handling
 --
 
-	function T.vs200x_vcproj.PlatformsList_OnXbox360()
+	function suite.PlatformsList_OnXbox360()
 		platforms { "Native", "Xbox360" }
 		prepare()
 		premake.vs200x_vcproj_platforms(prj)
@@ -294,7 +295,7 @@
 		]]		
 	end
 	
-	function T.vs200x_vcproj.CompilerBlock_OnXbox360()
+	function suite.CompilerBlock_OnXbox360()
 		platforms { "Xbox360" }
 		prepare()
 		premake.vs200x_vcproj_VCCLCompilerTool(premake.getconfig(prj, "Debug", "Xbox360"))
@@ -303,12 +304,12 @@
 				Name="VCCLX360CompilerTool"
 				Optimization="0"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				ProgramDataBaseFileName="$(OutDir)\MyProject.pdb"
 				DebugInformationFormat="0"
 			/>
 		]]
@@ -319,7 +320,7 @@
 -- Test PS3 handling
 --
 
-	function T.vs200x_vcproj.PlatformsList_OnPS3()
+	function suite.PlatformsList_OnPS3()
 		platforms { "Native", "PS3" }
 		prepare()
 		premake.vs200x_vcproj_platforms(prj)
@@ -332,7 +333,7 @@
 		]]		
 	end
 	
-	function T.vs200x_vcproj.CompilerBlock_OnPS3()
+	function suite.CompilerBlock_OnPS3()
 		platforms { "PS3" }
 		flags { "Symbols" }
 		includedirs { "include/pkg1", "include/pkg2" }
@@ -345,14 +346,14 @@
 				AdditionalOptions="-g"
 				AdditionalIncludeDirectories="include\pkg1;include\pkg2"
 				PreprocessorDefinitions="DEFINE1;DEFINE2"
-				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				ProgramDataBaseFileName="$(OutDir)\MyProject.pdb"
 				DebugInformationFormat="0"
 				CompileAs="0"
 			/>
 		]]
 	end
 	
-	function T.vs200x_vcproj.LinkerBlock_OnPS3ConsoleApp()
+	function suite.LinkerBlock_OnPS3ConsoleApp()
 		platforms { "PS3" }
 		prepare()
 		premake.vs200x_vcproj_VCLinkerTool_GCC(premake.getconfig(prj, "Debug", "PS3"))
@@ -371,7 +372,7 @@
 		]]
 	end
 
-	function T.vs200x_vcproj.LinkerBlock_OnPS3StaticLib()
+	function suite.LinkerBlock_OnPS3StaticLib()
 		platforms { "PS3" }
 		kind "StaticLib"
 		prepare()
@@ -385,7 +386,7 @@
 		]]
 	end
 
-	function T.vs200x_vcproj.LinkerBlock_OnPS3SharedLink()
+	function suite.LinkerBlock_OnPS3SharedLink()
 		platforms { "PS3" }
 		links { "MyLibrary" }
 		project "MyLibrary"
@@ -415,7 +416,7 @@
 -- Test manifest file handling.
 --
 
-	function T.vs200x_vcproj.VCManifestTool_OnNoManifests()
+	function suite.VCManifestTool_OnNoManifests()
 		files { "hello.c", "goodbye.c" }
 		prepare()
 		premake.vs200x_vcproj_VCManifestTool(premake.getconfig(prj, "Debug"))
@@ -427,7 +428,7 @@
 	end
 
 
-	function T.vs200x_vcproj.VCManifestTool_OnNoManifests()
+	function suite.VCManifestTool_OnNoManifests()
 		files { "hello.c", "project1.manifest", "goodbye.c", "project2.manifest" }
 		prepare()
 		premake.vs200x_vcproj_VCManifestTool(premake.getconfig(prj, "Debug"))
@@ -444,7 +445,29 @@
 -- Test precompiled header handling
 --
 
-	function T.vs200x_vcproj.PCH_OnWindows()
+	function suite.CompilerBlock_OnPCH()
+		pchheader "source/common.h"
+		pchsource "source/common.cpp"
+		prepare()
+		premake.vs200x_vcproj_VCCLCompilerTool(premake.getconfig(prj, "Debug"))
+		test.capture [[
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="common.h"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				ProgramDataBaseFileName="$(OutDir)\MyProject.pdb"
+				DebugInformationFormat="0"
+			/>
+		]]
+	end
+
+	function suite.Files_OnPCH_OnWindows()
 		files { "afxwin.cpp" }
 		pchsource "afxwin.cpp"
 		prepare()
@@ -472,8 +495,8 @@
 			</File>
 		]]
 	end
-
-	function T.vs200x_vcproj.PCH_OnXbox360()
+	
+	function suite.Files_OnPCH_OnXbox360()
 		files { "afxwin.cpp" }
 		pchsource "afxwin.cpp"
 		platforms { "Xbox360" }
@@ -503,4 +526,100 @@
 			</File>
 		]]
 	end
-	
+
+
+--
+-- Floating point flag tests
+--
+
+	function suite.CompilerBlock_OnFpFast()
+		flags { "FloatFast" }
+		prepare()
+		premake.vs200x_vcproj_VCCLCompilerTool(premake.getconfig(prj, "Debug"))
+		test.capture [[
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				ProgramDataBaseFileName="$(OutDir)\MyProject.pdb"
+				DebugInformationFormat="0"
+			/>
+		]]
+	end
+
+	function suite.CompilerBlock_OnFpStrict()
+		flags { "FloatStrict" }
+		prepare()
+		premake.vs200x_vcproj_VCCLCompilerTool(premake.getconfig(prj, "Debug"))
+		test.capture [[
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="1"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				ProgramDataBaseFileName="$(OutDir)\MyProject.pdb"
+				DebugInformationFormat="0"
+			/>
+		]]
+	end
+
+
+--
+-- PDB file naming tests
+--
+
+	function suite.CompilerBlock_OnTargetName()
+		targetname "foob"
+		prepare()
+		premake.vs200x_vcproj_VCCLCompilerTool(premake.getconfig(prj, "Debug"))
+		test.capture [[
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				ProgramDataBaseFileName="$(OutDir)\foob.pdb"
+				DebugInformationFormat="0"
+			/>
+		]]
+	end
+
+
+--
+-- Compilation option tests
+--
+
+	function suite.CompilerBlock_OnNoMinimalRebuild()
+		flags { "Symbols", "NoMinimalRebuild" }
+		prepare()
+		premake.vs200x_vcproj_VCCLCompilerTool(premake.getconfig(prj, "Debug"))
+		test.capture [[
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				ProgramDataBaseFileName="$(OutDir)\MyProject.pdb"
+				DebugInformationFormat="4"
+			/>
+		]]
+	end

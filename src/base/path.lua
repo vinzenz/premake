@@ -1,7 +1,7 @@
 --
 -- path.lua
 -- Path manipulation functions.
--- Copyright (c) 2002-2009 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2010 Jason Perkins and the Premake project
 --
 
 
@@ -124,32 +124,46 @@
 			return "."
 		end
 		
-		-- different drives? Must use absolute path
-		if path.getdrive(src) ~= path.getdrive(dst) then
+		-- dollar macro? Can't tell what the real path is; use absolute
+		-- This enables paths like $(SDK_ROOT)/include to work correctly.
+		if dst:startswith("$") then
 			return dst
 		end
-
+		
 		src = src .. "/"
 		dst = dst .. "/"
-				
-		-- trim off the common directories from the front 
-		local i = src:find("/")
-		while (i) do
-			if (src:sub(1,i) == dst:sub(1,i)) then
-				src = src:sub(i + 1)
-				dst = dst:sub(i + 1)
+
+		-- find the common leading directories
+		local idx = 0
+		while (true) do
+			local tst = src:find("/", idx + 1, true)
+			if tst then
+				if src:sub(1,tst) == dst:sub(1,tst) then
+					idx = tst
+				else
+					break
+				end
 			else
 				break
 			end
-			i = src:find("/")
 		end
-
+		
+		-- if they have nothing in common return absolute path
+		local first = src:find("/", 0, true)
+		if idx <= first then
+			return dst:sub(1, -2)
+		end
+		
+		-- trim off the common directories from the front 
+		src = src:sub(idx + 1)
+		dst = dst:sub(idx + 1)
+		
 		-- back up from dst to get to this common parent
 		local result = ""		
-		i = src:find("/")
-		while (i) do
+		idx = src:find("/")
+		while (idx) do
 			result = result .. "../"
-			i = src:find("/", i + 1)
+			idx = src:find("/", idx + 1)
 		end
 
 		-- tack on the path down to the dst from here
@@ -167,13 +181,13 @@
 --
 
 	function path.iscfile(fname)
-		local extensions = { ".c", ".s" }
+		local extensions = { ".c", ".s", ".m" }
 		local ext = path.getextension(fname):lower()
 		return table.contains(extensions, ext)
 	end
 	
 	function path.iscppfile(fname)
-		local extensions = { ".cc", ".cpp", ".cxx", ".c", ".s" }
+		local extensions = { ".cc", ".cpp", ".cxx", ".c", ".s", ".m", ".mm" }
 		local ext = path.getextension(fname):lower()
 		return table.contains(extensions, ext)
 	end
@@ -256,26 +270,29 @@
 		end
 	end
 
+
 --
--- Expand ~/ or ~foo/ in paths to an absolute path suitable for searching on
+-- Converts from a simple wildcard syntax, where * is "match any"
+-- and ** is "match recursive", to the corresponding Lua pattern.
 --
-	function path.expand(p)
-		-- Windows doesn't know about home dirs, no-op
-		if _OS == "windows" then return p end
-		if not p then return p end
+-- @param pattern
+--    The wildcard pattern to convert.
+-- @returns
+--    The corresponding Lua pattern.
+--
 
-		local user = p:match("^(~[^/]*)/")
-		if not user then return p end
+	function path.wildcards(pattern)
+		-- Escape characters that have special meanings in Lua patterns
+		pattern = pattern:gsub("([%+%.%-%^%$%(%)%%])", "%%%1")
 
-		if user == "~" then
-			local home = os.getenv('HOME')
-			return p:gsub("^~", home)
-		end
-
-		-- else its some users home dir: "~foo/bar"
-		p = p:gsub("\\", "\\\\")
-				 :gsub('"', '\\"')
-				 :gsub(';', '\\')
-
-		return os.capture( ('echo "%s"'):format(p) )
+		-- Replace wildcard patterns with special placeholders so I don't
+		-- have competing star replacements to worry about
+		pattern = pattern:gsub("%*%*", "\001")
+		pattern = pattern:gsub("%*", "\002")
+		
+		-- Replace the placeholders with their Lua patterns
+		pattern = pattern:gsub("\001", ".*")
+		pattern = pattern:gsub("\002", "[^/]*")
+		
+		return pattern
 	end

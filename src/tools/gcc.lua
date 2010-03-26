@@ -23,8 +23,12 @@
 
 	local cflags =
 	{
+		EnableSSE      = "-msse",
+		EnableSSE2     = "-msse2",
 		ExtraWarnings  = "-Wall",
 		FatalWarnings  = "-Werror",
+		FloatFast      = "-ffast-math",
+		FloatStrict    = "-ffloat-store",
 		NoFramePointer = "-fomit-frame-pointer",
 		Optimize       = "-O2",
 		OptimizeSize   = "-Os",
@@ -46,15 +50,15 @@
 	premake.gcc.platforms = 
 	{
 		Native = { 
-			cppflags = "-MMD", 
+			cppflags = "-MMD -MP",
 		},
 		x32 = { 
-			cppflags = "-MMD",	
+			cppflags = "-MMD -MP",	
 			flags    = "-m32",
 			ldflags  = "-L/usr/lib32", 
 		},
 		x64 = { 
-			cppflags = "-MMD",
+			cppflags = "-MMD -MP",
 			flags    = "-m64",
 			ldflags  = "-L/usr/lib64",
 		},
@@ -74,7 +78,7 @@
 			cc         = "ppu-lv2-g++",
 			cxx        = "ppu-lv2-g++",
 			ar         = "ppu-lv2-ar",
-			cppflags   = "-MMD",
+			cppflags   = "-MMD -MP",
 		}
 	}
 
@@ -135,10 +139,8 @@
 			end
 		end
 
-		if cfg.kind == "WindowedApp" then
-			if cfg.system == "windows" then
-				table.insert(result, "-mwindows")
-			end
+		if cfg.kind == "WindowedApp" and cfg.system == "windows" then
+			table.insert(result, "-mwindows")
 		end
 		
 		local platform = platforms[cfg.platform]
@@ -173,7 +175,11 @@
 	function premake.gcc.getlinkflags(cfg)
 		local result = { }
 		for _, value in ipairs(premake.getlinks(cfg, "all", "basename")) do
-			table.insert(result, '-l' .. _MAKE.esc(value))
+			if path.getextension(value) == ".framework" then
+				table.insert(result, '-framework ' .. _MAKE.esc(path.getbasename(value)))
+			else
+				table.insert(result, '-l' .. _MAKE.esc(value))
+			end
 		end
 		return result
 	end

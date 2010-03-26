@@ -248,8 +248,8 @@ int load_builtin_scripts(lua_State* L)
 #if defined(NDEBUG)
 /**
  * When running in release mode, the scripts are loaded from a static data
- * buffer, where they were stored as bytecode by a preprocess. To regenerate
- * the bytecodes, run `premake --compile` and then rebuild.
+ * buffer, where they were stored by a preprocess. To update these embedded
+ * scripts, run `premake4 embed` then rebuild.
  */
 int load_builtin_scripts(lua_State* L)
 {

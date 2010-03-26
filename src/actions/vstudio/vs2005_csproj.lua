@@ -1,13 +1,22 @@
 --
 -- vs2005_csproj.lua
 -- Generate a Visual Studio 2005/2008 C# project.
--- Copyright (c) 2009 Jason Perkins and the Premake project
+-- Copyright (c) 2009-2010 Jason Perkins and the Premake project
 --
 
-	--
-	-- Figure out what elements a particular source code file need in its item
-	-- block, based on its build action and any related files in the project.
-	-- 
+--
+-- Set up namespaces
+--
+
+	premake.vstudio.cs2005 = { }
+	local vstudio = premake.vstudio
+	local cs2005  = premake.vstudio.cs2005
+
+
+--
+-- Figure out what elements a particular source code file need in its item
+-- block, based on its build action and any related files in the project.
+-- 
 	
 	local function getelements(prj, action, fname)
 	
@@ -60,6 +69,36 @@
 		return "None"
 	end
 
+
+--
+-- Write the opening <Project> element and project level <PropertyGroup> block.
+--
+
+	function cs2005.projectelement(prj)
+		_p('<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"%s>', iif(_ACTION == 'vs2005', '', ' ToolsVersion="3.5"'))
+	end
+
+	function cs2005.projectsettings(prj)
+		_p('  <PropertyGroup>')
+		_p('    <Configuration Condition=" \'$(Configuration)\' == \'\' ">%s</Configuration>', premake.esc(prj.solution.configurations[1]))
+		_p('    <Platform Condition=" \'$(Platform)\' == \'\' ">AnyCPU</Platform>')
+		_p('    <ProductVersion>%s</ProductVersion>', iif(_ACTION == "vs2005", "8.0.50727", "9.0.21022"))
+		_p('    <SchemaVersion>2.0</SchemaVersion>')
+		_p('    <ProjectGuid>{%s}</ProjectGuid>', prj.uuid)
+		_p('    <OutputType>%s</OutputType>', premake.dotnet.getkind(prj))
+		_p('    <AppDesignerFolder>Properties</AppDesignerFolder>')
+		_p('    <RootNamespace>%s</RootNamespace>', prj.buildtarget.basename)
+		_p('    <AssemblyName>%s</AssemblyName>', prj.buildtarget.basename)
+		if prj.framework then
+			_p('    <TargetFrameworkVersion>v%s</TargetFrameworkVersion>', prj.framework)
+		end
+		_p('  </PropertyGroup>')
+	end
+
+
+--
+-- The main function: write the project file.
+--
 
 	function premake.vs2005_csproj(prj)
 		io.eol = "\r\n"
